@@ -1,0 +1,121 @@
+<html>
+
+	<head>
+
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<nav class="box" >
+
+	        <ul class="links" >
+	            <li><a href="Homepage.html" class="selected">Search</a>
+	            </li>
+	            <li><a href="Registration.html" class="selected">Logout</a>
+	            </li>
+	            <li><a href="Profile.html" class="selected">About Us</a>
+	            </li>
+	        </ul>
+
+    	</nav>
+    	<br>
+    	<main>
+			<center>
+				<div class="box" style="width:40%;">
+
+						<h1>Meg Thee Stallion</h1>
+						<hr><br>
+						meg@theestallion.com<br><br>
+
+						+1-123-457-2345<br><br>
+
+						1234 GetMoney Ave.<br><br>
+
+						<hr><br>
+						<a onclick="toggleVisible('details')" >Details</a>&nbsp;&nbsp;&nbsp;
+						<a onclick="toggleVisible('social')">Social</a>&nbsp;&nbsp;&nbsp;
+						<a onclick="toggleVisible('stats')">Stats</a>
+
+				</div>
+				<br>
+				<div id="details" >
+					<div style="width:40%;" class="box">
+						<b>QR Code</b><br>
+						<img src="images/frame.png" width="100" height="100">
+					</div><br>
+					<div style="width:40%;" class="box">
+						<b>Tags: </b>
+						<input type="button" class="tag" value="Classy">
+						<input type="button" class="tag" value="Bougie">
+						<input type="button" class="tag" value="Ratchet">
+					</div>
+					
+					
+				</div>
+				<br>
+				<div id="social" >
+					<div style="width:40%;" class="box">
+						<h2>Social Media</h2>
+						<hr>
+						<a href="https://twitter.com/theestallion"><h3>Twitter</h3></a><br>
+						<hr>
+						<a href="https://www.facebook.com/"><h3>Facebook</h3></a>
+						<hr>
+						<a href="https://www.instagram.com/theestallion/?hl=en"><h3>Instagram</h3></a>
+						<hr>
+
+
+					</div>
+				</div>
+				<br>
+				<div id="stats" >
+					<div style="width:40%;" class="box">
+						<h2>Stats</h2>
+						<hr>
+						<div style="text-align:left;">
+							
+							<h3 stlye=""> Card Views:</h3>
+							<span style="color: #29b6f6">1,000,000</span>
+						</div>
+						<hr>
+						<div style="text-align:left;">
+							
+							<h3 stlye="">Details Shown:</h3>
+							<span style="color: #29b6f6">500,000</span>
+						</div>
+						<hr>
+						<div style="text-align:left;">
+							
+							<h3 stlye="">Social Media Views:</h3>
+							<span style="color: #29b6f6">200,000</span>
+						</div>
+					</div>
+				</div>
+			</center>
+		</main>
+	</body>
+
+	
+
+</html>
+<script  src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+<script type="text/javascript">
+		$("#details").hide();
+		$("#social").hide();
+		$("#stats").hide();
+		function toggleVisible(divId)
+		{
+		
+			console.log($("#"+divId).is(":visible"));
+			if($("#"+divId).is(":visible")){
+				
+				$("#"+divId).fadeOut();
+				
+			}else{
+				$("#"+divId).fadeIn();
+			}
+		}
+		
+	
+</script>
+
+
