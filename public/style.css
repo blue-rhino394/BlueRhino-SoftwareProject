@@ -1,7 +1,8 @@
 body
 {
 	background-color:#F5F5F5;
-	margin:5%;
+	margin:50px;
+	margin-top: 25px;
 	font-family: 'Kumbh Sans', sans-serif;
 
 }
@@ -70,6 +71,7 @@ a{
 
 	font-weight: bold;
 	color: #29b6f6;
+	text-decoration: none;
 	 display:inline-block;
 	padding-right: 400px: 
 }

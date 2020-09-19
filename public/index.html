@@ -21,19 +21,19 @@
 
 
     <br>
-    <main class="box">
+    <main>
 
     	<div class="box" style="width:40%;">
-
-					<h1>Login</h1>
+              <div id="invalid"> <div class="box" style="background-color:#ff7563; color:white;"><h3 style="margin:0px;padding:0px;">Invalid username or password!</h3 ></div><br></div>
+					<h2>Login</h2>
 			
-					<input type="text" class = "textbox" placeholder="Username"><br><br>
-					<input type="Password" placeholder="Password" class = "textbox">
+					<input id="username" type="text" class = "textbox" placeholder="Username"><br><br>
+					<input id="password" type="Password" placeholder="Password" class = "textbox">
 					
 					<br><br><br>
-					<a>Login</a>
+					<a onclick="login()">Login</a>
 					<br><br>
-					<a>Register</a>
+					<a href="register.html">Register</a>
 			</div>
 		<br>
 		<div class="box">
@@ -61,3 +61,17 @@
 </body>
 
 </html>
+<script  src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    $("#invalid").hide();
+    function login()
+    {
+
+        if($("#username").val().toLowerCase() == "megthee" && $("#password").val().toLowerCase() == "stallion" ){
+           window.location.href="card.html";
+        }else{
+             $("#invalid").fadeIn();
+        }      
+    }
+</script>
