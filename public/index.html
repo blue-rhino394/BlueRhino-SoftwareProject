@@ -1,22 +1,77 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 
 <head>
+    <title>Blue Rhino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lt IE 9]>
+<![endif]-->
+    <meta charset="utf-8">
+ 
+    <link rel="stylesheet" href="style.css">
 
 </head>
 
-
 <body>
+    <div id="wrapper"></div>
+    <header>
+        <div id="company_logo"></div>
+        <h1>Passport</h1>
+    </header>
 
-	<h1>Team Blue Rhino</h1>
-	<a href="SavedProfiles.html">Test link</a>
-	<p>CSC 394 - Software Projects (replace me!)</p>
 
+    <br>
+    <main>
+
+    	<div class="box" style="width:40%;">
+              <div id="invalid"> <div class="box" style="background-color:#ff7563; color:white;"><h3 style="margin:0px;padding:0px;">Invalid username or password!</h3 ></div><br></div>
+					<h2>Login</h2>
+			
+					<input id="username" type="text" class = "textbox" placeholder="Username"><br><br>
+					<input id="password" type="Password" placeholder="Password" class = "textbox">
+					
+					<br><br><br>
+					<a onclick="login()">Login</a>
+					<br><br>
+					<a href="register.html">Register</a>
+			</div>
+		<br>
+		<div class="box">
+        <h2>Why E-Business Cards?</h2>
+        <div id="profile"></div> 
+             <p>On average each year 8 million trees are cut down just for business cards. That is 10 billion business cards printer each year.
+                 88% of these cards are either thrown away, misplaced, or destroyed.  That means 8.8 billion worth of trees are wasted each year.
+                    We create all these GoGreen programs but cannot stop wasting 7 million trees?</p>
+                    <ul>
+                        <h2>Helping the Enviroment? </h2>
+
+                        <li>Eliminating paper wastage.</li>
+                        <li>Updating and Sychronizing Business Cards. </li>
+                        <li>Accesible to multiple platforms ranging from educational to professional expertise .</li>
+                    </ul>
+         </div>
+
+    </main>
+    <footer>
+        <p>Copyright &copy; 2020 BlueRhinos
+            <br>
+            
+        </p>
+    </footer>
 </body>
 
-
-
-
-
 </html>
+<script  src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    $("#invalid").hide();
+    function login()
+    {
+
+        if($("#username").val().toLowerCase() == "megthee" && $("#password").val().toLowerCase() == "stallion" ){
+           window.location.href="card.html";
+        }else{
+             $("#invalid").fadeIn();
+        }      
+    }
+</script>

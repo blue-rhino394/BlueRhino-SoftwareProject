@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Blue Rhino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lt IE 9]>
+<![endif]-->
+    <meta charset="utf-8">
+    <link href="sample.css" rel="stylesheet">
+</head>
+
+<style>
+    .topBar1
+    {
+        width: 100%
+        min-width: 1300px;
+        text-align: center;
+        display: block;
+    }
+    .topBar2
+    {
+        border: 2px solid grey;
+        border-radius: 10px;
+        background-color: lightblue;
+        text-align: center;
+        display: inline-block;
+        width: 80%;
+        min-width: 1040px;
+        margin: auto;
+        
+    }
+    .subBar1
+    {
+        display: inline-block;
+        width: 100%;
+        min-width: 1000px;
+    }
+    .subBar2
+    {
+        display: inline-block;
+        margin: auto;
+    }
+    .tbLink
+    {
+        float: left;
+        padding: 20px;
+    }
+</style>
+    
+<body>
+    <div id="wrapper"></div>
+    <header>
+        <div class="topBar1">
+            <div class="topBar2">
+                <div class=subBar1>
+                    <div class=subBar2 style="padding-right: 300px">
+                        <span id="company_logo"><img src="BRLogo.png" style="width: 300px; float: left"></span>
+                        <h1 style="float: left; font-size: 70px; padding-left: 50px;">Blue Rhino</h1>
+                    </div>
+                </div>
+                <hr>
+                <div class=subBar1>
+                    <div class=subBar2>
+                        <div class=tbLink><a href="Homepage.html" class="selected">Home</a></div>
+                        <div class=tbLink><a href="Registration.html" class="selected">Registration</a></div>
+                        <div class=tbLink><a href="Profile.html" class="selected">My Profile</a></div>
+                        <div class=tbLink><a href="MyCards.html" class="selected">Memberships</a></div>
+                        <div class=tbLink><a href="SavedProfiles.html" class="selected">Saved Profiles</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <nav class="greedy">
+        <button type="button"> Sign up </button>
+    </nav>
+
+
+    <main>
+        <h2>Saved Profiles:</h2>
+        <p>Here you can see and search all the profiles you have saved.</p>
+        <label for="SearchP">Search Profiles:</label>
+        <input type="text" id="SearchP" name="SearchP">
+        <br>
+        <p>Sort by:</p>
+        <div><input type="radio" id="ProfileName" name="drone" value="ProfileName">
+        <label for="ProfileName">Profile Name</label></div>
+        <div><input type="radio" id="CompanyName" name="drone" value="CompanyName">
+        <label for="CompanyName">Company Name</label></div>
+        <div><input type="radio" id="Email" name="drone" value="Email">
+        <label for="Email">Email</label></div>
+        <br>
+        <div id="profile">--Insert Sample Profiles Here--</div>
+    </main>
+    <footer>
+        <p>Copyright &copy; 2020 BlueRhinos
+            <br>
+            <a href="
+        </p>
+    </footer>
+</body>
+
+</html>

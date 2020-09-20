@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Blue Rhino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--[if lt IE 9]>
+<![endif]-->
+    <meta charset="utf-8">
+    <link href="sample.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+    <header>
+          <h1>Join us!</h1>
+    </header>
+
+    <main>
+      
+
+        <form action="your-form-handling-page" method="POST" id="checkout-form" style ="width:30%" class="basic-grey box" >
+    
+             <div>
+                <label for="phone"><h3>Username<h3></label>
+                <input  class = "textbox"  type="text" name="phone" id="phone">
+            </div>
+      
+              <div>
+                <label for="Name"><h3>Password</h3></label>
+                <input  class = "textbox"  type="text" name="Name" id="Name">
+            </div>
+           
+            <div>
+                <label for="Name"><h3>Full Name</h3></label>
+                <input  class = "textbox"  type="text" name="Name" id="Name">
+            </div>
+            <div>
+                <label for="phone"><h3>Phone number<h3></label>
+                <input  class = "textbox"  type="text" name="phone" id="phone">
+            </div>
+           
+             <div>
+                <label for="Name"><h3>Email</h3></label>
+                <input  class = "textbox"  type="text" name="Name" id="Name">
+            </div>
+            <br>
+           
+            <input type="checkbox" id="" name="expertise" value="Personal" onclick="myFunction()">
+            <label for="expertise"><h3 style="display:inline"> Personal </h3></label><br><br>
+             <input type="checkbox" id="" name="expertise" value="Personal" onclick="myFunction()">
+            <label for="expertise"><h3 style="display:inline"> Professional </h3></label><br>
+        
+            <p id="text" style="display:none">Checkbox is CHECKED!</p>
+            
+            <script>
+                function myFunction()
+                 {
+                    var checkBox = document.getElementById("expertise");
+                    var text = document.getElementById("text");
+                    if (checkBox.checked == true){
+                        text.style.display = "block";
+                        } 
+                        else {
+                            text.style.display = "none";
+                             }
+                }
+            </script>
+    
+    
+    
+                <br>
+            <hr>
+            <center><a href="card.html">Register</a></center>
+    
+        </form>
+    </main>
+    <footer>
+        <p>Copyright &copy; 2020 BlueRhino
+            <br>
+            
+        </p>
+    </footer>
+</body>
+
+</html>
