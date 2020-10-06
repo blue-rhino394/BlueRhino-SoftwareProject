@@ -20,7 +20,7 @@ export function defineUserREST(app: Application) {
 
     // Tells whether ir not a specified slug is already in use
     // within our system.
-    app.post('/api/slug-exist', (req, res) => {
+    app.post('/api/slug-exists', (req, res) => {
 
         // TODO - IMPLEMENT!
 
