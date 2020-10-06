@@ -1,5 +1,6 @@
 ﻿import express, { Application } from "express";
 import { createServer, Server as HTTPServer } from "http";
+import { defineUserREST } from "./userREST";
 const path = require('path');
 
 
@@ -43,7 +44,11 @@ export class backendServer {
 
     // Specifically configure the Express server
     private configureApp(): void {
+        // Publish content in public folder
         this.app.use(express.static(path.join(__dirname, '../public')));
+
+        // Implement User REST API
+        defineUserREST(this.app);
     }
 
 
