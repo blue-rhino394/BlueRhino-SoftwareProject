@@ -4,7 +4,7 @@ const path = require('path');
 
 
 
-export class testServer {
+export class backendServer {
 
     // The express server that this server uses.
     private app: Application;

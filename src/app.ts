@@ -1,4 +1,4 @@
-﻿import { testServer } from './testServer';
+﻿import { backendServer } from './backendServer';
 const commandLineArgs = require('command-line-args');
 
 
@@ -25,7 +25,7 @@ const port = options.port || 30330;
 //  App Execution
 //
 
-const server = new testServer(port);
+const server = new backendServer(port);
 
 server.listen(portUsed => {
     console.log(`Server is listening on port ${portUsed}!`);
