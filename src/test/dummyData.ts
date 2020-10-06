@@ -9,6 +9,8 @@ import { postGetSavedCardsResult } from "../interfaces/post/postGetSavedCardsRes
 import { savedCard } from "../interfaces/savedCard";
 import { postToggleFavoriteResult } from "../interfaces/post/postToggleFavoriteResult";
 import { postToggleSaveResult } from "../interfaces/post/postToggleSaveResult";
+import { postLoginResult } from "../interfaces/post/postLoginResult";
+import { postSlugExistsResult } from "../interfaces/post/postSlugExistsResult";
 
 
 
@@ -143,6 +145,31 @@ export function getDummyPostGetSavedCardsResult(): postGetSavedCardsResult {
     const responseData: postGetSavedCardsResult = {
         error: "",
         savedCards: [getDummyCardSchema()]
+    };
+
+    return responseData;
+}
+
+// Create dummy post data saying that we've logged in correctly
+export function getDummyPostLoginResult(): postLoginResult {
+    const responseData: postLoginResult = {
+        error: "",
+
+        uuid: "566062db-df68-434f-a56f-ef9439b93622",
+        email: "gfreeman@valvesoftware.com",
+        firstName: "Gordon",
+        lastName: "Freeman",
+
+        customURL: "gfreeman",
+        profilePictureURL: ""
+    };
+
+    return responseData;
+}
+
+export function getDummyPostSlugExistsResult(): postSlugExistsResult {
+    const responseData: postSlugExistsResult = {
+        result: false
     };
 
     return responseData;
