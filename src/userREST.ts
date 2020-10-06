@@ -5,7 +5,7 @@ import { postSlugExistsResult } from "./interfaces/post/postSlugExistsResult";
 import { postGenericResult } from "./interfaces/post/postGenericResult";
 import { postLoginResult } from "./interfaces/post/postLoginResult";
 
-export function defineUserREST(app: Application) {
+export function defineUserREST(app: Application): void {
 
     // Tells whether or not a user with the specified email exists
     // within our system.
