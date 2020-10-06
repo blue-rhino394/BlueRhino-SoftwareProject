@@ -3,5 +3,5 @@
     saves: string[];
     favorites: string[];
     memos: string[];
-    social: Map<string, string>;
+    social: Map<string, string[]>;
 }
