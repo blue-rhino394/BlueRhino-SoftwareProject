@@ -1,4 +1,11 @@
 ﻿import express, { Application } from "express";
+import { postGetCardResult } from "./interfaces/post/postGetCardResult";
+import { getDummyPostGetCardResult, getDummyPostGenericResult, getDummyPostGetSavedCardsResult, getDummyPostToggleSaveResult, getDummyPostToggleFavoriteResult, getDummyPostSearchCardResult } from "./test/dummyData";
+import { postGenericResult } from "./interfaces/post/postGenericResult";
+import { postGetSavedCardsResult } from "./interfaces/post/postGetSavedCardsResult";
+import { postToggleSaveResult } from "./interfaces/post/postToggleSaveResult";
+import { postToggleFavoriteResult } from "./interfaces/post/postToggleFavoriteResult";
+import { postSearchCardResult } from "./interfaces/post/postSearchCardResult";
 
 export function defineCardREST(app: Application): void {
 
@@ -7,7 +14,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postGetCardResult = getDummyPostGetCardResult();
         res.send(responseData);
     });
 
@@ -16,7 +23,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postGenericResult = getDummyPostGenericResult();
         res.send(responseData);
     });
 
@@ -25,7 +32,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postGenericResult = getDummyPostGenericResult();
         res.send(responseData);
     });
 
@@ -34,7 +41,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postGetSavedCardsResult = getDummyPostGetSavedCardsResult();
         res.send(responseData);
     });
 
@@ -43,7 +50,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postToggleSaveResult = getDummyPostToggleSaveResult();
         res.send(responseData);
     });
 
@@ -52,7 +59,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postToggleFavoriteResult = getDummyPostToggleFavoriteResult();
         res.send(responseData);
     });
 
@@ -61,7 +68,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postGenericResult = getDummyPostGenericResult();
         res.send(responseData);
     });
 
@@ -70,7 +77,7 @@ export function defineCardREST(app: Application): void {
         // TODO - IMPLEMENT!
 
         // Get dummy data
-        const responseData: any = undefined;
+        const responseData: postSearchCardResult = getDummyPostSearchCardResult();
         res.send(responseData);
     });
 }

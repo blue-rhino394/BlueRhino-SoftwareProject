@@ -11,6 +11,7 @@ import { postToggleFavoriteResult } from "../interfaces/post/postToggleFavoriteR
 import { postToggleSaveResult } from "../interfaces/post/postToggleSaveResult";
 import { postLoginResult } from "../interfaces/post/postLoginResult";
 import { postSlugExistsResult } from "../interfaces/post/postSlugExistsResult";
+import { postSearchCardResult } from "../interfaces/post/postSearchCardResult";
 
 
 
@@ -180,7 +181,7 @@ export function getDummyPostToggleFavoriteResult(): postToggleFavoriteResult {
     const responseData: postToggleFavoriteResult = {
         error: "",
         isFavorited: true
-    }
+    };
 
     return responseData;
 }
@@ -190,7 +191,16 @@ export function getDummyPostToggleSaveResult(): postToggleSaveResult {
     const responseData: postToggleSaveResult = {
         error: "",
         isSaved: true
-    }
+    };
+
+    return responseData;
+}
+
+// Create dummy post data with one search result - Gordon Freeman
+export function getDummyPostSearchCardResult(): postSearchCardResult {
+    const responseData: postSearchCardResult = {
+        cards: [getDummyCardSchema()]
+    };
 
     return responseData;
 }

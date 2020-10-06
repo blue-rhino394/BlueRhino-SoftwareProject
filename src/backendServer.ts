@@ -1,6 +1,7 @@
 ﻿import express, { Application } from "express";
 import { createServer, Server as HTTPServer } from "http";
 import { defineUserREST } from "./userREST";
+import { defineCardREST } from "./cardREST";
 const path = require('path');
 
 
@@ -49,6 +50,9 @@ export class backendServer {
 
         // Implement User REST API
         defineUserREST(this.app);
+
+        // Implement Card REST API
+        defineCardREST(this.app);
     }
 
 
