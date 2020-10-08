@@ -7,11 +7,13 @@ import { cardContent } from "./interfaces/cardContent";
 import { cardSchema } from "./interfaces/cardSchema";
 import { PassThrough } from "stream";
 import { cardStats } from "./interfaces/cardStats";
+import { searchQuery } from "./interfaces/searchQuery";
 
 
 class databaseWrapperClass {
 
-
+    // The number of pages per each search
+    private pageCount: number = 20;
 
 
     //
@@ -361,8 +363,50 @@ class databaseWrapperClass {
     //
 
     // Searches for cards in the database using a query
-    public searchQuery(): void {
+    public async searchQuery(requestedQuery: searchQuery): Promise<string[]> {
 
+        // TODO - Implement isMyCards
+
+        var resultIDs: string[] = [];
+        const cardsPerPage: number = this.pageCount;
+
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+
+            // Search for cards that:
+            //  * have the text provided in requestedQuery.textQuery
+            //  * have the tags provided in requestedQuery.tags
+            const query = {
+                $text: {
+                    $search: requestedQuery.textQuery
+                },
+
+                "content.tags": { $all: requestedQuery.tags }
+            }
+
+            // Restrict the database return results so that:
+            //  * we skip to the page provided in requestedQuery.pageNumber
+            //  * we ONLY get the uuid
+            const options = {
+                skip: requestedQuery.pageNumber * cardsPerPage,
+
+                _id: 0,
+                uuid: 1
+            }
+
+            // Execute search using the above query and options
+            const cursor = cardCollection.find(query, options);
+
+            // Add each UUID to the list
+            cursor.forEach((card) => {
+                resultIDs.push(card.uuid);
+            });
+        });
+
+        return resultIDs;
     }
 
 
