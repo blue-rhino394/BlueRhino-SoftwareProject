@@ -43,7 +43,7 @@ class databaseWrapperClass {
     // Creates a new user in the database
     public async createUser(newAccountSchema: userAccountSchema): Promise<string> {
 
-        var outputError: string = "Unknown Error";
+        var outputUUID: string = "";
 
         // Force new email to lowercase
         newAccountSchema.email = newAccountSchema.email.toLowerCase();
@@ -61,7 +61,6 @@ class databaseWrapperClass {
             if (existingUser) {
 
                 // BAIL OUT!
-                outputError = "User already exists";
             }
             // If there's NOT already a user that fits this description...
             else {
@@ -77,36 +76,142 @@ class databaseWrapperClass {
 
 
                 // Add the new user to the database and get the insertion count
-                var insertCount: number = (await userCollection.insertOne(newUser)).insertedCount;
+                const operationResult = await userCollection.insertOne(newUser);
 
-                if (insertCount != 0) {
-                    outputError = "";
+                if (operationResult.insertedCount != 0) {
+                    outputUUID = newUser.uuid;
                 }
             }
         });
 
-        // If the user was registered correctly, insert count should NOT be zero.
-        return outputError;
+        // Return the final error. If this operation is successful, this string should
+        // be empty.
+        return outputUUID;
     }
 
     // Deletes a user by ID
-    public deleteUser(): void {
+    public async deleteUser(uuidToDelete: string): Promise<string> {
 
+        var outputError: string = "Unknown Error";
+
+        // Run the mongoDB operation
+        await this.runMongoOperation(async function (database) {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Run delete operation
+            const operationResult = await userCollection.deleteOne({ uuid: uuidToDelete });
+
+            // If a document was deleted
+            if (operationResult.deletedCount != 0) {
+                // Woo! We did it! No errors.
+                outputError = "";
+            }
+            else {
+                outputError = "No user by this UUID";
+            }
+        });
+
+
+        return outputError;
     }
 
     // Finds a user in the database by ID
-    public getUser(): void {
+    public async getUser(userUUID: string): Promise<string> {
 
+        var outputResult: string = "";
+
+        // TODO - Make this method check the Cache Manager first!
+
+        // If the Cache Manager doesn't have this user, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Try to get a user with the provided uuid
+            const requestedUser = await userCollection.findOne({ uuid: userUUID });
+
+            // if we actually have the requested user in the database...
+            if (requestedUser) {
+
+                // Add them to the cache for future use...
+
+                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
+                outputResult = requestedUser.uuid;
+            }
+            // Otherwise...
+            else {
+                // This user does not exist...!
+            }
+        });
+
+        return outputResult;
     }
 
     // Finds a user in the database by their slug
-    public getUserBySlug(): void {
+    public async getUserBySlug(userSlug: string): Promise<string> {
+        var outputResult: string = "";
 
+        // TODO - Make this method check the Cache Manager first!
+
+        // If the Cache Manager doesn't have this user, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Try to get a user with the provided slug
+            const requestedUser = await userCollection.findOne({ "userAccount.customURL": userSlug });
+
+            // if we actually have the requested user in the database...
+            if (requestedUser) {
+
+                // Add them to the cache for future use...
+
+                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
+                outputResult = requestedUser.uuid;
+            }
+            // Otherwise...
+            else {
+                // This user does not exist...!
+            }
+        });
+
+        return outputResult;
     }
 
     // Finds a user in the database by their email
-    public getUserByEmail(): void {
+    public async getUserByEmail(userEmail: string): Promise<string> {
+        var outputResult: string = "";
 
+        // TODO - Make this method check the Cache Manager first!
+
+        // If the Cache Manager doesn't have this user, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Try to get a user with the provided email
+            const requestedUser = await userCollection.findOne({ "userAccount.email": userEmail });
+
+            // if we actually have the requested user in the database...
+            if (requestedUser) {
+
+                // Add them to the cache for future use...
+
+                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
+                outputResult = requestedUser.uuid;
+            }
+            // Otherwise...
+            else {
+                // This user does not exist...!
+            }
+        });
+
+        return outputResult;
     }
 
 
