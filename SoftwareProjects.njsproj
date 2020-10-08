@@ -106,6 +106,9 @@
     <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\userCRUDChecks.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\userREST.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
