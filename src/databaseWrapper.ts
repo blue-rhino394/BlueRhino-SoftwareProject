@@ -3,6 +3,10 @@ import { userSchema } from "./interfaces/userSchema";
 import { MongoClient, Db } from "mongodb";
 import { accountStatus } from "./enum/accountStatus";
 import { v4 } from "uuid";
+import { cardContent } from "./interfaces/cardContent";
+import { cardSchema } from "./interfaces/cardSchema";
+import { PassThrough } from "stream";
+import { cardStats } from "./interfaces/cardStats";
 
 
 class databaseWrapperClass {
@@ -75,17 +79,18 @@ class databaseWrapperClass {
                 }
 
 
-                // Add the new user to the database and get the insertion count
+                // Add the new user to the database
                 const operationResult = await userCollection.insertOne(newUser);
 
+                // If the user was actually inserted...
                 if (operationResult.insertedCount != 0) {
                     outputUUID = newUser.uuid;
                 }
             }
         });
 
-        // Return the final error. If this operation is successful, this string should
-        // be empty.
+        // Return the resulting UUID
+        // (CHANGE THIS TO USER CLASS)
         return outputUUID;
     }
 
@@ -222,18 +227,130 @@ class databaseWrapperClass {
     //
 
     // Creates a card in the database
-    public createCard(): void {
+    public async createCard(cardOwnerID: string, newContent: cardContent): Promise<string> {
+        var outputID: string = "";
 
+        // TODO - Add check to see if user already has a card
+
+        // Run the mongoDB operation
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Try to get a user with the provided ID (REPLACE THIS ONCE USER CLASS EXISTS)
+            const requestedUser = await userCollection.findOne({ uuid: cardOwnerID });
+
+            // If there's no user with this ID...
+            if (!requestedUser) {
+                // BAIL!
+            }
+            // If this user already has a card...
+            else if (requestedUser.cardID) {
+                // BAIL!
+            }
+            // Otherwise, let's insert this new card!
+            else {
+
+                // Create new stats
+                const newStats: cardStats = {
+                    cardViews: [],
+                    saves: [],
+                    favorites: [],
+                    memos: [],
+                    social: new Map<string, string[]>()
+                };
+
+                // Create new card schema
+                const newCardSchema: cardSchema = {
+                    cardID: v4(),
+                    ownerID: cardOwnerID,
+
+                    firstName: requestedUser.userAccount.firstName,
+                    lastName: requestedUser.userAccount.lastName,
+
+                    content: newContent,
+                    stats: newStats
+                }
+
+
+                // Add the card to the database
+                const cardInsertOperationResult = await cardCollection.insertOne(newCardSchema);
+
+                // Update the user in the database
+                const userModifyOperationResult = await userCollection.updateOne({ uuid: cardOwnerID }, { cardID: newCardSchema.cardID });
+
+                // If the card was actually added
+                if (cardInsertOperationResult.insertedCount != 0) {
+                    outputID = newCardSchema.cardID;
+                }
+            }
+        });
+
+        // Return the card's ID
+        // (CHANGE THIS TO CARD CLASS)
+        return outputID;
     }
 
     // Deletes a card from the database by ID
-    public deleteCard(): void {
+    public async deleteCard(cardIDToDelete): Promise<string> {
+        var outputError: string = "Unknown Error";
 
+        // Run the mongoDB operation
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Run delete operation
+            const operationResult = await cardCollection.deleteOne({ cardID: cardIDToDelete });
+
+            // If a document was deleted
+            if (operationResult.deletedCount != 0) {
+                // Woo! We did it! No errors.
+                outputError = "";
+            }
+            else {
+                outputError = "No card by this ID";
+            }
+        });
+
+
+        return outputError;
     }
 
     // Finds a card in the database by ID
-    public getCard(): void {
+    public async getCard(requestedCardID: string): Promise<string> {
+        var outputResult: string = "";
 
+        // TODO - Make this method check the Cache Manager first!
+
+        // If the Cache Manager doesn't have this card, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Try to get a card with the provided id
+            const requestedCard = await cardCollection.findOne({ cardID: requestedCardID });
+
+            // if we actually have the requested user in the database...
+            if (requestedCard) {
+
+                // Add it to the cache for future use...
+
+                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
+                outputResult = requestedCard.cardID;
+            }
+            // Otherwise...
+            else {
+                // This user does not exist...!
+            }
+        });
+
+        return outputResult;
     }
 
 
