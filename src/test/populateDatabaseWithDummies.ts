@@ -171,8 +171,8 @@ const dataJSON: string = `[
 // Parse the above string into an anonymous object
 const data = JSON.parse(dataJSON);
 
-// Loop through each object...
-data.forEach(function (userRegistration) {
+for (var i = 0; i < data.length; i++) {
+    var userRegistration = data[i];
 
     // Hash the password!
     const passwordHash = passwordHashLibrary.generate(userRegistration.password);
@@ -190,14 +190,13 @@ data.forEach(function (userRegistration) {
     }
 
     console.log(`Adding user '${registrationForm.firstName} ${registrationForm.lastName}' to database...`);
-    databaseWrapper.createUser(registrationForm).then(function (success) {
+    databaseWrapper.createUser(registrationForm).then(function (err) {
 
-        if (success) {
+        if (!err) {
             console.log(`\t\tAdded user '${registrationForm.firstName} ${registrationForm.lastName}' correctly!!`);
         }
         else {
-            console.log(`\t\tFailed to add user '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+            console.log(`\t\tFailed to add user '${registrationForm.firstName} ${registrationForm.lastName}': ${err}`);
         }
     });
-
-});
+}

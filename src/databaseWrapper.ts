@@ -1,8 +1,8 @@
 ﻿import { userAccountSchema } from "./interfaces/userAccountSchema";
 import { userSchema } from "./interfaces/userSchema";
 import { MongoClient, Db } from "mongodb";
-import { uuid } from 'uuidv4';
 import { accountStatus } from "./enum/accountStatus";
+import { v4 } from "uuid";
 
 
 class databaseWrapperClass {
@@ -41,31 +41,52 @@ class databaseWrapperClass {
     //
 
     // Creates a new user in the database
-    public async createUser(newAccountSchema: userAccountSchema): Promise<boolean> {
-        // todo - add check for existing user
+    public async createUser(newAccountSchema: userAccountSchema): Promise<string> {
 
-        var insertCount: number = 0;
+        var outputError: string = "Unknown Error";
+
+        // Force new email to lowercase
+        newAccountSchema.email = newAccountSchema.email.toLowerCase();
+
+        // Run the mongoDB operation
         await this.runMongoOperation(async function(database) {
-
-            
-            // Create a new userSchema
-            const newUser: userSchema = {
-                uuid: uuid(),                       // Generate a random user ID
-                userAccount: newAccountSchema,      // Insert the new account schema
-                currentAccountStatus: accountStatus.EmailVerification,  // Set the account status to need verification
-                verificationCode: uuid(),           // Generate a random verification code
-                cardID: "",                         // cardID should be empty (they haven't made one yet!)
-                savedCards: []                      // saved cards should be empty (they haven't been able to save any yet!)
-            }
 
             // Get user collection from database
             var userCollection = await database.collection("users");
-            // Add the new user to the database
-            insertCount = (await userCollection.insertOne(newUser)).insertedCount;
+
+            // Try to get a user with the provided email
+            const existingUser = await userCollection.findOne({ "userAccount.email": newAccountSchema.email });
+
+            // If there's already a user that fits this description...
+            if (existingUser) {
+
+                // BAIL OUT!
+                outputError = "User already exists";
+            }
+            // If there's NOT already a user that fits this description...
+            else {
+                // Create a new userSchema
+                const newUser: userSchema = {
+                    uuid: v4(),                       // Generate a random user ID
+                    userAccount: newAccountSchema,      // Insert the new account schema
+                    currentAccountStatus: accountStatus.EmailVerification,  // Set the account status to need verification
+                    verificationCode: v4(),           // Generate a random verification code
+                    cardID: "",                         // cardID should be empty (they haven't made one yet!)
+                    savedCards: []                      // saved cards should be empty (they haven't been able to save any yet!)
+                }
+
+
+                // Add the new user to the database and get the insertion count
+                var insertCount: number = (await userCollection.insertOne(newUser)).insertedCount;
+
+                if (insertCount != 0) {
+                    outputError = "";
+                }
+            }
         });
 
         // If the user was registered correctly, insert count should NOT be zero.
-        return insertCount != 0;
+        return outputError;
     }
 
     // Deletes a user by ID
