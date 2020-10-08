@@ -42,6 +42,9 @@
     <TypeScriptCompile Include="src\cardREST.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\databaseWrapper.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\enum\accountStatus.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -98,6 +101,9 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\backendServer.ts" />
     <TypeScriptCompile Include="src\test\dummyData.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\userREST.ts">

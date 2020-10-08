@@ -2,6 +2,7 @@
 import { createServer, Server as HTTPServer } from "http";
 import { defineUserREST } from "./userREST";
 import { defineCardREST } from "./cardREST";
+import { databaseWrapper } from "./databaseWrapper";
 const path = require('path');
 
 
@@ -31,7 +32,7 @@ export class backendServer {
     // Constructor!
     constructor(port: number) {
         this.initialize();
-
+        
         this.port = port;
     }
 
@@ -39,6 +40,7 @@ export class backendServer {
     private initialize(): void {
         this.app = express();
         this.httpServer = createServer(this.app);
+        databaseWrapper.verifyConnectedToMongoDB().catch(console.dir);
 
         this.configureApp();
     }

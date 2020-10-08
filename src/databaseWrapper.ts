@@ -1,6 +1,11 @@
-﻿
+﻿import { userAccountSchema } from "./interfaces/userAccountSchema";
+const { MongoClient } = require("mongodb");
+
 
 class databaseWrapperClass {
+
+    private mongoClient = new MongoClient(`mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`);
+
 
 
     //
@@ -8,8 +13,33 @@ class databaseWrapperClass {
     //
 
     public constructor() {
-
+        console.log("Starting database wrapper...");
     }
+
+    // Checks to see if we can connected to mongoDB by pinging the users database
+    public async verifyConnectedToMongoDB(): Promise<boolean> {
+        var connectedCorrectly = false;
+
+        try {
+            // Connect to mongoDB
+            await this.mongoClient.connect();
+
+            // Ping mongoDB
+            await this.mongoClient.db("users").command({ ping: 1 });
+            connectedCorrectly = true;
+
+            console.log("Hello mongoDB!");
+        }
+        finally {
+
+            // Once we're done with the above (or even if something went wrong...)
+            // close the client
+            await this.mongoClient.close();
+            return connectedCorrectly;
+        }
+    }
+
+
 
 
 
@@ -19,7 +49,7 @@ class databaseWrapperClass {
     //
 
     // Creates a new user in the database
-    public createUser(): void {
+    public createUser(newAccountSchema: userAccountSchema): void {
 
     }
 
