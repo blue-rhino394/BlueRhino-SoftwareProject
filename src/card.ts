@@ -1,6 +1,8 @@
 ﻿import { cardSchema } from "./interfaces/cardSchema";
-import { cardContent } from "./interfaces/cardContent";
+import { cardContent, cardPropertyArrayToMap, cardPropertyMapToArray } from "./interfaces/cardContent";
 import { databaseWrapper } from "./databaseWrapper";
+import { cardLayout } from "./interfaces/cardLayout";
+import { cardStats, socialArrayToMap, socialMapToArray } from "./interfaces/cardStats";
 
 
 
@@ -13,7 +15,26 @@ enum statType {
 
 export class card {
 
-    private schema: cardSchema;
+    // Card Schema
+    private cardID: string;
+    private ownerID: string;
+    private firstName: string;
+    private lastName: string;
+
+    // Card Content
+    private contentPublished: boolean;
+    private contentTags: string[];
+    private contentSocialMediaLinks: string[];
+    private contentCardProperties: Map<string, string>;
+
+    // Card Layout
+    private layoutBackground: string;
+    private layoutFontColor: string;
+
+    // Card Stats
+    private statMap: Map<statType, string[]>;
+    private statsSocial: Map<string, string[]>;
+
 
 
 
@@ -21,10 +42,48 @@ export class card {
     //  Construction / Initialization
     //
 
-    // Takes in a cardSchema representing this card
-    constructor(thisCardSchema: cardSchema) {
-        this.schema = thisCardSchema;
+    // Takes in a cardSchema representing this card and setup this card class
+    constructor(newCardSchema: cardSchema) {
+        this.initializeInternalCardSchema(newCardSchema);
     }
+
+    // Populate internal variables related to cardSchema
+    private initializeInternalCardSchema(newCardSchema: cardSchema) {
+        this.cardID = newCardSchema.cardID;
+        this.ownerID = newCardSchema.ownerID;
+        this.firstName = newCardSchema.firstName;
+        this.lastName = newCardSchema.lastName;
+
+        this.initializeInternalCardContent(newCardSchema.content);
+        this.initializeInternalCardStats(newCardSchema.stats);
+    }
+
+    // Populate internal variables related to cardContent
+    private initializeInternalCardContent(newCardContent: cardContent) {
+        this.contentTags = newCardContent.tags;
+        this.contentSocialMediaLinks = newCardContent.socialMediaLinks;
+        this.contentCardProperties = cardPropertyArrayToMap(newCardContent.cardProperties);
+
+        this.initializeInternalCardLayout(newCardContent.layout);
+    }
+
+    // Populate internal variables related to cardLayout
+    private initializeInternalCardLayout(newCardLayout: cardLayout) {
+        this.layoutBackground = newCardLayout.background;
+        this.layoutFontColor = newCardLayout.fontColor;
+    }
+
+    // Populate internal variables related to cardStats
+    private initializeInternalCardStats(newCardStats: cardStats) {
+        this.statMap = new Map<statType, string[]>();
+        this.statMap.set(statType.cardViews, newCardStats.cardViews);
+        this.statMap.set(statType.saves, newCardStats.saves);
+        this.statMap.set(statType.favorites, newCardStats.favorites);
+        this.statMap.set(statType.memos, newCardStats.memos);
+        this.statsSocial = socialArrayToMap(newCardStats.social);
+    }
+
+
 
 
 
@@ -35,22 +94,64 @@ export class card {
 
     // Returns the ID of this card
     public getID(): string {
-        return this.schema.cardID;
+        return this.cardID;
     }
 
     // Returns the UUID of the owner of this card
     public getOwnerUUID(): string {
-        return this.schema.ownerID;
+        return this.ownerID;
     }
 
-    // Returns the cardSchema representing this card
+    // Generate and return a cardSchema representing this card
     public getCardSchema(): cardSchema {
-        return this.schema;
+        const output: cardSchema = {
+            cardID: this.cardID,
+            ownerID: this.ownerID,
+            firstName: this.firstName,
+            lastName: this.lastName,
+
+            content: this.getCardContent(),
+            stats: this.getCardStats()
+        }
+
+        return output;
     }
 
-    // Returns the content found within this card
+    // Generate and return the content found within this card
     public getCardContent(): cardContent {
-        return this.schema.content;
+        const output: cardContent = {
+            published: this.contentPublished,
+            tags: this.contentTags,
+            socialMediaLinks: this.contentSocialMediaLinks,
+            cardProperties: cardPropertyMapToArray(this.contentCardProperties),
+
+            layout: this.getCardLayout()
+        }
+
+        return output;
+    }
+
+    // Generate and return the layout for this card
+    public getCardLayout(): cardLayout {
+        const output: cardLayout = {
+            background: this.layoutBackground,
+            fontColor: this.layoutFontColor
+        }
+
+        return output;
+    }
+
+    // Generate and return the stats about this card
+    public getCardStats(): cardStats {
+        const output: cardStats = {
+            cardViews: this.statMap.get(statType.cardViews),
+            saves: this.statMap.get(statType.saves),
+            favorites: this.statMap.get(statType.favorites),
+            memos: this.statMap.get(statType.memos),
+            social: socialMapToArray(this.statsSocial)
+        }
+
+        return output;
     }
 
 
@@ -62,7 +163,7 @@ export class card {
     public setCardContent(contentUpdate: cardContent): void {
 
         // Update the card in memory
-        this.schema.content = contentUpdate;
+        this.updateInternalCardContent(contentUpdate);
 
         // Update the card in the database
         databaseWrapper.runMongoOperation(async (database) => {
@@ -79,7 +180,7 @@ export class card {
             // Create the update data, saying that we want to set content to the var contentUpdate
             const updateData = {
                 $set: {
-                    content: contentUpdate
+                    content: this.createJsonContentUpdateData(contentUpdate)
                 }
             };
 
@@ -149,7 +250,7 @@ export class card {
     private addStat(type: statType, uuidToAdd: string): void {
 
         // Get the correct stat property from this card schema.stats
-        var statArray: string[] = this.schema.stats[type.toString()];
+        var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has already been logged...
         if (uuidToAdd in statArray) {
@@ -192,7 +293,7 @@ export class card {
     private removeStat(type: statType, uuidToRemove: string): void {
 
         // Get the correct stat property from this card schema.stats
-        var statArray: string[] = this.schema.stats[type.toString()];
+        var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has NOT already been logged...
         if (!(uuidToRemove in statArray)) {
@@ -203,7 +304,7 @@ export class card {
         // Otherwise...
 
         // Remove from the stat array in memory
-        this.schema.stats[type.toString()] = statArray.filter(function (value, index, arr) { return value != uuidToRemove});
+        this.statMap.set(type, statArray.filter(function (value, index, arr) { return value != uuidToRemove }));
 
         // Remove from the stat array in the database
         databaseWrapper.runMongoOperation(async (database) => {
@@ -234,7 +335,6 @@ export class card {
     // HELPER METHOD - create update data to be used in a mongoDB operation
     // involving cardStats 
     private getStatUpdateData(type: statType, uuid: string): any {
-
         switch (type) {
             case statType.cardViews:
                 return {
@@ -262,4 +362,111 @@ export class card {
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+    //
+    //  Utility Methods
+    //
+
+
+    //
+    //  Internal Update Methods
+    //
+
+    // Update the internal card content variables using a provided cardContent interface.
+    // If properties of the interface are explicitly null, they will be ignored!
+    private updateInternalCardContent(updateContent: cardContent): void {
+
+        if (updateContent.published != null) {
+            this.contentPublished = updateContent.published;
+        }
+
+        if (updateContent.tags != null) {
+            this.contentTags = updateContent.tags;
+        }
+
+        if (updateContent.socialMediaLinks != null) {
+            this.contentSocialMediaLinks = updateContent.socialMediaLinks;
+        }
+
+        if (updateContent.cardProperties != null) {
+            this.contentCardProperties = cardPropertyArrayToMap(updateContent.cardProperties);
+        }
+
+        if (updateContent.layout != null) {
+            this.updateInternalCardLayout(updateContent.layout);
+        }
+    }
+
+    // Update the internal card layout variables using a provided cardLayout interface.
+    // If properties of the interface are explicitly null, they will be ignored!
+    private updateInternalCardLayout(updateLayout: cardLayout): void {
+        if (updateLayout.background != null) {
+            this.layoutBackground = updateLayout.background;
+        }
+
+        if (updateLayout.fontColor != null) {
+            this.layoutFontColor = updateLayout.fontColor;
+        }
+    }
+
+
+
+    //
+    //  Create Anonymous JSON Methods
+    //
+
+    // Takes in a cardContent interface and converts it to a typeless JSON object.
+    // If properties of the interface are explicitly null, they will be ignored!
+    private createJsonContentUpdateData(contentUpdate: cardContent): any {
+        var output: Record<string, any> = {};
+
+        if (contentUpdate.published != null) {
+            output.published = contentUpdate.published;
+        }
+
+        if (contentUpdate.tags != null) {
+            output.tags = contentUpdate.tags;
+        }
+
+        if (contentUpdate.socialMediaLinks != null) {
+            output.socialMediaLinks = contentUpdate.socialMediaLinks;
+        }
+
+        if (contentUpdate.cardProperties != null) {
+            output.cardProperties = contentUpdate.cardProperties;
+        }
+
+        if (contentUpdate.layout != null) {
+            output.layout = this.createJsonLayoutUpdateData(contentUpdate.layout);
+        }
+
+
+        return output;
+    }
+
+    // Takes in a cardContent interface and converts it to a typeless JSON object.
+    // If properties of the interface are explicitly null, they will be ignored!
+    private createJsonLayoutUpdateData(layoutUpdate: cardLayout): any {
+        var output: Record<string, any> = {};
+
+        if (layoutUpdate.background != null) {
+            output.background = layoutUpdate.background;
+        }
+
+        if (layoutUpdate.fontColor != null) {
+            output.fontColor = layoutUpdate.fontColor;
+        }
+
+        return output;
+    }
 }
