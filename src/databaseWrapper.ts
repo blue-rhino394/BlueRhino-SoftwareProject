@@ -262,7 +262,7 @@ class databaseWrapperClass {
                     saves: [],
                     favorites: [],
                     memos: [],
-                    social: new Map<string, string[]>()
+                    social: []
                 };
 
                 // Create new card schema
