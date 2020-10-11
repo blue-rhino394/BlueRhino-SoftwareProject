@@ -2,8 +2,8 @@
 import { postGenericResult } from "../interfaces/post/postGenericResult";
 import { postGetCardResult } from "../interfaces/post/postGetCardResult";
 import { cardSchema } from "../interfaces/cardSchema";
-import { cardContent } from "../interfaces/cardContent";
-import { cardStats } from "../interfaces/cardStats";
+import { cardContent, cardPropertyMapToArray } from "../interfaces/cardContent";
+import { cardStats, socialMapToArray } from "../interfaces/cardStats";
 import { cardLayout } from "../interfaces/cardLayout";
 import { postGetSavedCardsResult } from "../interfaces/post/postGetSavedCardsResult";
 import { savedCard } from "../interfaces/savedCard";
@@ -58,7 +58,7 @@ export function getDummyCardContent(): cardContent {
         published: true,
         tags: ["Theoretical Physics", "Crowbar Expert"],
         socialMediaLinks: ["https://twitter.com/valvesoftware"],
-        cardProperties: getDummyCardProperties(),
+        cardProperties: cardPropertyMapToArray(getDummyCardProperties()),
         layout: getDummyCardLayout()
     };
 
@@ -94,7 +94,7 @@ export function getDummyCardStats(): cardStats {
         saves: ["dummyID0", "dummyID1", "dummyID2", "dummyID3"],
         favorites: ["dummyID0", "dummyID1"],
         memos: ["dummyID0", "dummyID1"],
-        social: socialStats
+        social: socialMapToArray(socialStats)
     };
 
     return stats;
