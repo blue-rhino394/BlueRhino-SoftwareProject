@@ -420,7 +420,9 @@ class databaseWrapperClass {
     //  MongoDB Methods
     //
 
-    private async runMongoOperation(operation: (db: Db) => Promise<void>): Promise<void> {
+    // Connects to the database, runs a callback providing the database, then closes the connection
+    // (used for generic database operations)
+    public async runMongoOperation(operation: (db: Db) => Promise<void>): Promise<void> {
         // Construct mongoDB connection URL
         const connectionString: string = `mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`;
 
