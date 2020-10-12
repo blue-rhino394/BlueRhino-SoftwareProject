@@ -48,8 +48,19 @@ export class backendServer {
     // Specifically configure the Express server
     private configureApp(): void {
         // Publish content in public folder
+
         this.app.use(express.static(path.join(__dirname, '../public')));
 
+        this.app.use(express.static(path.join(__dirname, '../frontend')));
+
+        this.app.get('*', (request, response) => {
+            response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
+        });
+
+
+     
+
+       
         // Implement User REST API
         defineUserREST(this.app);
 
