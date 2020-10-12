@@ -8,6 +8,8 @@ import { cardSchema } from "./interfaces/cardSchema";
 import { PassThrough } from "stream";
 import { cardStats } from "./interfaces/cardStats";
 import { searchQuery } from "./interfaces/searchQuery";
+import { user } from "./user";
+import { card } from "./card";
 
 
 class databaseWrapperClass {
@@ -47,9 +49,10 @@ class databaseWrapperClass {
     //
 
     // Creates a new user in the database
-    public async createUser(newAccountSchema: userAccountSchema): Promise<string> {
+    public async createUser(newAccountSchema: userAccountSchema): Promise<user> {
 
         var outputUUID: string = "";
+        var outputUserSchema: userSchema;
 
         // Force new email to lowercase
         newAccountSchema.email = newAccountSchema.email.toLowerCase();
@@ -80,6 +83,7 @@ class databaseWrapperClass {
                     savedCards: []                      // saved cards should be empty (they haven't been able to save any yet!)
                 }
 
+                outputUserSchema = newUser;
 
                 // Add the new user to the database
                 const operationResult = await userCollection.insertOne(newUser);
@@ -91,9 +95,12 @@ class databaseWrapperClass {
             }
         });
 
-        // Return the resulting UUID
-        // (CHANGE THIS TO USER CLASS)
-        return outputUUID;
+        if (!outputUserSchema) {
+            return null;
+        }
+
+        const outputUser: user = new user(outputUserSchema);
+        return outputUser;
     }
 
     // Deletes a user by ID
@@ -125,9 +132,9 @@ class databaseWrapperClass {
     }
 
     // Finds a user in the database by ID
-    public async getUser(userUUID: string): Promise<string> {
+    public async getUser(userUUID: string): Promise<user> {
 
-        var outputResult: string = "";
+        var outputUserSchema: userSchema;
 
         // TODO - Make this method check the Cache Manager first!
 
@@ -145,8 +152,8 @@ class databaseWrapperClass {
 
                 // Add them to the cache for future use...
 
-                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
-                outputResult = requestedUser.uuid;
+                // Store the retrieved data!
+                outputUserSchema = requestedUser;
             }
             // Otherwise...
             else {
@@ -154,12 +161,18 @@ class databaseWrapperClass {
             }
         });
 
-        return outputResult;
+        // If we couldn't get a user...
+        if (!outputUserSchema) {
+            return null;
+        }
+
+        const outputUser: user = new user(outputUserSchema);
+        return outputUser;
     }
 
     // Finds a user in the database by their slug
-    public async getUserBySlug(userSlug: string): Promise<string> {
-        var outputResult: string = "";
+    public async getUserBySlug(userSlug: string): Promise<user> {
+        var outputUserSchema: userSchema;
 
         // TODO - Make this method check the Cache Manager first!
 
@@ -177,8 +190,8 @@ class databaseWrapperClass {
 
                 // Add them to the cache for future use...
 
-                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
-                outputResult = requestedUser.uuid;
+                // Store the retrieved data!
+                outputUserSchema = requestedUser;
             }
             // Otherwise...
             else {
@@ -186,12 +199,18 @@ class databaseWrapperClass {
             }
         });
 
-        return outputResult;
+        // If we couldn't get a user...
+        if (!outputUserSchema) {
+            return null;
+        }
+
+        const outputUser: user = new user(outputUserSchema);
+        return outputUser;
     }
 
     // Finds a user in the database by their email
-    public async getUserByEmail(userEmail: string): Promise<string> {
-        var outputResult: string = "";
+    public async getUserByEmail(userEmail: string): Promise<user> {
+        var outputUserSchema: userSchema;
 
         // TODO - Make this method check the Cache Manager first!
 
@@ -209,8 +228,8 @@ class databaseWrapperClass {
 
                 // Add them to the cache for future use...
 
-                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
-                outputResult = requestedUser.uuid;
+                // Store the retrieved data!
+                outputUserSchema = requestedUser;
             }
             // Otherwise...
             else {
@@ -218,7 +237,13 @@ class databaseWrapperClass {
             }
         });
 
-        return outputResult;
+        // If we couldn't get a user...
+        if (!outputUserSchema) {
+            return null;
+        }
+
+        const outputUser: user = new user(outputUserSchema);
+        return outputUser;
     }
 
 
@@ -229,8 +254,8 @@ class databaseWrapperClass {
     //
 
     // Creates a card in the database
-    public async createCard(cardOwnerID: string, newContent: cardContent): Promise<string> {
-        var outputID: string = "";
+    public async createCard(cardOwnerID: string, newContent: cardContent): Promise<card> {
+        var outputCardSchema: cardSchema;
 
         // TODO - Add check to see if user already has a card
 
@@ -278,6 +303,7 @@ class databaseWrapperClass {
                 }
 
 
+
                 // Add the card to the database
                 const cardInsertOperationResult = await cardCollection.insertOne(newCardSchema);
 
@@ -286,14 +312,17 @@ class databaseWrapperClass {
 
                 // If the card was actually added
                 if (cardInsertOperationResult.insertedCount != 0) {
-                    outputID = newCardSchema.cardID;
+                    outputCardSchema = newCardSchema;
                 }
             }
         });
 
-        // Return the card's ID
-        // (CHANGE THIS TO CARD CLASS)
-        return outputID;
+        if (!outputCardSchema) {
+            return null;
+        }
+
+        const outputCard: card = new card(outputCardSchema);
+        return outputCard;
     }
 
     // Deletes a card from the database by ID
@@ -324,8 +353,8 @@ class databaseWrapperClass {
     }
 
     // Finds a card in the database by ID
-    public async getCard(requestedCardID: string): Promise<string> {
-        var outputResult: string = "";
+    public async getCard(requestedCardID: string): Promise<card> {
+        var outputCardSchema: cardSchema;
 
         // TODO - Make this method check the Cache Manager first!
 
@@ -343,8 +372,8 @@ class databaseWrapperClass {
 
                 // Add it to the cache for future use...
 
-                // And set the output to true! (CHANGE THIS WHEN WE MAKE USER A CLASS!)
-                outputResult = requestedCard.cardID;
+                // Save the data!
+                outputCardSchema = requestedCard;
             }
             // Otherwise...
             else {
@@ -352,7 +381,13 @@ class databaseWrapperClass {
             }
         });
 
-        return outputResult;
+        if (!outputCardSchema) {
+            return null;
+        }
+
+
+        const outputCard: card = new card(outputCardSchema);
+        return outputCard;
     }
 
 
