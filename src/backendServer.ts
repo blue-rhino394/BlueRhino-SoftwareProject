@@ -1,10 +1,13 @@
 ﻿import express, { Application } from "express";
 import { createServer, Server as HTTPServer } from "http";
+import { defineUserREST } from "./userREST";
+import { defineCardREST } from "./cardREST";
+import { databaseWrapper } from "./databaseWrapper";
 const path = require('path');
 
 
 
-export class testServer {
+export class backendServer {
 
     // The express server that this server uses.
     private app: Application;
@@ -29,7 +32,7 @@ export class testServer {
     // Constructor!
     constructor(port: number) {
         this.initialize();
-
+        
         this.port = port;
     }
 
@@ -37,13 +40,32 @@ export class testServer {
     private initialize(): void {
         this.app = express();
         this.httpServer = createServer(this.app);
+        databaseWrapper.verifyConnectedToMongoDB().catch(console.dir);
 
         this.configureApp();
     }
 
     // Specifically configure the Express server
     private configureApp(): void {
+        // Publish content in public folder
+
         this.app.use(express.static(path.join(__dirname, '../public')));
+
+        this.app.use(express.static(path.join(__dirname, '../frontend')));
+
+        this.app.get('*', (request, response) => {
+            response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
+        });
+
+
+     
+
+       
+        // Implement User REST API
+        defineUserREST(this.app);
+
+        // Implement Card REST API
+        defineCardREST(this.app);
     }
 
 
