@@ -1,15 +1,33 @@
 class View {
 
-	render(){
-		$("#content").html(this.getView());
+	async render(){
+
+		//<link rel="import" href="http://example.com/elements.html">
+		//$("#head").append('<link rel="import" href="/components/test.html">');
+		
+		this.data = await this.getData();
+		let view = await this.loadImport(this.getView());
+		$("#content").html(view);
+		
 		for (let [key, component] of Object.entries(this.getComponents())) {
 
-  			component.render(key); 
+			component.render(key); 
 		}
+		
+		
+	}
+
+	
+	async loadImport(name){
+		return new Promise(resolve => {
+    		$.get(`/templates/${name}.html`, (data)=> resolve(data));
+  		});
 	}
 
 	getComponents(){}
 	getView(){}
+	async getData(){}
+	getTemplates(){}
 
 
 }
@@ -17,31 +35,39 @@ class View {
 class HomeView extends View{
 
 	getView(){
-		return $("<div/>")
-            	.attr("id", "mainPanel");
+		return "home";
+	}
+
+	async getData(){
+		return new Promise(resolve => {
+    		$.post(`/api/get-card`, (data) => resolve(data.card));
+  		});
 	}
 
 	getComponents(){
+
 		return {
-			"mainPanel" : new TestComponent(1)
+			"main" : new Card(this.data)
 		}
 	}
 
 
 }
 
-class HomeView2 extends View{
+class LoginView extends View{
 
 	getView(){
-		return $("<div/>")
-            	.attr("id", "mainPanel");
+		return "login";
 	}
 
 	getComponents(){
+
 		return {
-			"mainPanel" : new TestComponent(2)
+			"side" : new Login(),
+			"main" : new Search(true),
 		}
 	}
+
 
 
 }

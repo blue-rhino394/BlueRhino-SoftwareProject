@@ -2,50 +2,49 @@
 
 
 window.onload = function() {
- 	page = new CPigeon(); 
+    page = new CPigeon(); 
 };
 
 
 window.onpopstate = function () {
-	page.navigate(page.getUrl(), false);
+    page.navigate(page.getUrl(), false);
 }
 
 
 
 class CPigeon {
 
-	constructor() {
-		this.user = {
-			name : "",
-			url: "",
-			profilePictureUrl: "",		
-		};
-		this.pageMap = this.getPageMaps();
-		
-		
-		this.navigate(this.getUrl(), false);
-  	}
-
- 
+    constructor() {
+        this.user = false;
+    //this.pageMap = this.getPageMaps(); 
 
 
-  	navigate(page, pushState=true){
-  		if(pushState)window.history.pushState("", "", page);
-  		this.pageMap[page].render();
-
-  	}
+        this.navigate(this.getUrl(), false);
+    }
 
 
 
-  	getUrl(){
-  		return window.location.pathname;
-  	}
+    navigate(page, pushState=true){
+        
+        if(pushState)window.history.pushState("", "", page);
 
-  	getPageMaps(){
-  		return {
-  			"/":new HomeView(),
-  			"/next":new HomeView2()
-  		}
-  	}
+        $("#content").fadeOut(500, () => {
+            this.getPageMaps()[page].render();
+            $("#content").fadeIn(500);
+        });
+
+    }
+
+
+
+    getUrl(){
+        return window.location.pathname;
+    }
+
+    getPageMaps(){
+        return {
+            "/": (this.user != false) ? new HomeView() : new LoginView(),
+        }
+    }
 
 }
