@@ -18,7 +18,7 @@ test("gets the Card Stats", () =>{
     expect(card.getCardStats).toHaveReturned();
 })
 test("sets Card Contents", () =>{
-    expect(card.getCardStats).toHaveReturned();
+    expect(card.setCardStats).toHaveReturned();
 })
 
 
