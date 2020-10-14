@@ -39,6 +39,8 @@ class Login extends Component{
 	}
 
 
+
+
 	getContent(){
 		//create login div
 		let content = $("<div/>", {"class" : "box"});
@@ -155,24 +157,34 @@ class Card extends Component{
 		this.light = light;
 	}
 
-	
+	//shamelessly copied from https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+	stringToColour(str) {
+	    var hash = 0;
+	    for (var i = 0; i < str.length; i++) {
+	        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	    }
+	    var colour = '#';
+	    for (var i = 0; i < 3; i++) {
+	        var value = (hash >> (i * 8)) & 0xFF;
+	        colour += ('00' + value.toString(16)).substr(-2);
+	    }
+	    return colour;
+	}
+
+
 
 	getContent(){
 
 		//create card div
-		let content = $("<div/>", {
-			"class" : "box",
-		});
+		let content = $("<div/>").css({"float":"left"});
 
-		//determine if heading will  be h3 or h2 babsed 
+		//determine if heading will  be h3 or h2 based on light
 		let heading = (this.light) ? "h3" : "h2";
-
-		if(this.light)content.append($("<hr>").css({}));
 
 		//add first and last name to card
 		content.append($(`<${heading}/>`, {
-			text: `${this.card.firstName} ${this.card.lastName}`,
-		}));
+			text: `${this.card.firstName} ${this.card.lastName}`
+		}))
 
 		//add card properties
 		for(const property of this.card.content.cardProperties){
@@ -181,7 +193,7 @@ class Card extends Component{
 			content.append(`${key}: ${value}<br><br>`);
 		}
 
-		//add details, social and stats buttons 
+		//add details social and stats butts if not light, add view and save if light 
 		if(!this.light){
 			content.append($("<a/>", {text: "Details"}));
 			content.append($("<a/>", {text: "Social"}));
@@ -190,10 +202,28 @@ class Card extends Component{
 		}else{
 			content.append($("<a/>", {text: "View"}));
 			content.append($("<a/>", {text: "Save"}));
-			content.removeAttr("class");
-
 		}
+		content.append($("<br><br>"));
 		
+		let color = this.stringToColour(`${this.card.firstName}+${this.card.lastName}`);
+
+		//create profile picture 
+		let img = $("<img>",
+		{
+			src: `https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${this.card.firstName}+${this.card.lastName}&size=300`,
+			width: "50px",
+			height: "50px",
+			css: {float:"left", marginRight: "10px"}
+		});
+
+		//wrap content in div and put profile picture before it
+		let contentList = [img, content, $("<div/>").css({"clear":"both"})]
+		if(this.light)contentList.push($("<hr>"));
+		content = $("<div/>").html(contentList);
+
+
+		//wrap in box if it's not a light card
+		if(!this.light)	content.attr("class","box");
 
 
 		return content;
