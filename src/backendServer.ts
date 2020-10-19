@@ -3,6 +3,7 @@ import { createServer, Server as HTTPServer } from "http";
 import { defineUserREST } from "./userREST";
 import { defineCardREST } from "./cardREST";
 import { databaseWrapper } from "./databaseWrapper";
+import { defineExpressRoutes } from "./expressRoutes";
 const path = require('path');
 
 
@@ -47,19 +48,9 @@ export class backendServer {
 
     // Specifically configure the Express server
     private configureApp(): void {
-        // Publish content in public folder
-
-        this.app.use(express.static(path.join(__dirname, '../public')));
-
-        this.app.use(express.static(path.join(__dirname, '../frontend')));
-
-        this.app.get('*', (request, response) => {
-            response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
-        });
-
-
-     
-
+        
+        // Implement express GET Routes
+        defineExpressRoutes(this.app);
        
         // Implement User REST API
         defineUserREST(this.app);
