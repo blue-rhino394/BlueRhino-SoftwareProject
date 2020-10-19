@@ -38,9 +38,14 @@ export class databaseCacheManager {
         return this.userCacheManager.getValue(uuid);
     }
 
+    // Get an iterator of all cached users
+    public getUsers(): IterableIterator<user> {
+        return this.userCacheManager.getAllValues();
+    }
+
     // Add the specified user to the cache.
-    public addUser(userToAdd: user): boolean {
-        return this.userCacheManager.addValue(userToAdd.getUUID(), userToAdd);
+    public addUser(userToAdd: user): void {
+        this.userCacheManager.setValue(userToAdd.getUUID(), userToAdd);
     }
 
     // Removes the specified user from the cache.
@@ -68,9 +73,14 @@ export class databaseCacheManager {
         return this.cardCacheManager.getValue(cardID);
     }
 
+    // Get an iterator of all cached cards
+    public getCards(): IterableIterator<card> {
+        return this.cardCacheManager.getAllValues();
+    }
+
     // Add the specified card to the cache.
-    public addCard(cardToAdd: card): boolean {
-        return this.cardCacheManager.addValue(cardToAdd.getID(), cardToAdd);
+    public addCard(cardToAdd: card): void {
+        this.cardCacheManager.setValue(cardToAdd.getID(), cardToAdd);
     }
 
     // Removes the specified card from the cache.

@@ -10,12 +10,21 @@ import { cardStats } from "./interfaces/cardStats";
 import { searchQuery } from "./interfaces/searchQuery";
 import { user } from "./user";
 import { card } from "./card";
+import { databaseCacheManager } from "./databaseCacheManager";
 
 
 class databaseWrapperClass {
 
+    // Settings
+
     // The number of pages per each search
     private pageCount: number = 20;
+
+
+    // Data Structures
+
+    // The cache holding memory user and card objects
+    private cache: databaseCacheManager;
 
 
     //
@@ -24,6 +33,7 @@ class databaseWrapperClass {
 
     public constructor() {
         console.log("Starting database wrapper...");
+        this.cache = new databaseCacheManager();
     }
 
     // Checks to see if we can connected to mongoDB by pinging the users database
@@ -99,7 +109,12 @@ class databaseWrapperClass {
             return null;
         }
 
+        // Create a user using this schema
         const outputUser: user = new user(outputUserSchema);
+
+        // Add them to the cache manager
+        this.cache.addUser(outputUser);
+
         return outputUser;
     }
 
@@ -109,7 +124,7 @@ class databaseWrapperClass {
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
-        await this.runMongoOperation(async function (database) {
+        await this.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");
@@ -121,6 +136,9 @@ class databaseWrapperClass {
             if (operationResult.deletedCount != 0) {
                 // Woo! We did it! No errors.
                 outputError = "";
+
+                // Remove from the cache
+                this.cache.removeUser(uuidToDelete);
             }
             else {
                 outputError = "No user by this UUID";
@@ -133,10 +151,18 @@ class databaseWrapperClass {
 
     // Finds a user in the database by ID
     public async getUser(userUUID: string): Promise<user> {
+        // CHECK THE CACHE FIRST!
+        // If this user exists in the cache manager,
+        // return them!!
+        //
+        // (Saves a database call!)
+        if (this.cache.userExists(userUUID)) {
+            return this.cache.getUser(userUUID);
+        }
 
+
+        // OTHERWISE...
         var outputUserSchema: userSchema;
-
-        // TODO - Make this method check the Cache Manager first!
 
         // If the Cache Manager doesn't have this user, let's look in the database!
         await this.runMongoOperation(async function (database) {
@@ -166,15 +192,35 @@ class databaseWrapperClass {
             return null;
         }
 
+        // Create a new user object using the schema in the database
         const outputUser: user = new user(outputUserSchema);
+
+        // Cache this user for future use!
+        this.cache.addUser(outputUser);
+
+        // Return the user.
         return outputUser;
     }
 
     // Finds a user in the database by their slug
     public async getUserBySlug(userSlug: string): Promise<user> {
-        var outputUserSchema: userSchema;
+        // CHECK THE CACHE FIRST!
+        // Loop through all of the users in the cache (A pain, I know)
+        // and if one has the slug we want, return it!
+        //
+        // (Saves a database call)
+        for (const tempUser of this.cache.getUsers()) {
+            const userAccount = tempUser.getAccountSchema();
 
-        // TODO - Make this method check the Cache Manager first!
+            // If this user's customURL matches the slug we're using...
+            if (userAccount.customURL == userSlug) {
+                // Return them!
+                return tempUser;
+            }
+        }
+
+        // OTHERWISE...
+        var outputUserSchema: userSchema;
 
         // If the Cache Manager doesn't have this user, let's look in the database!
         await this.runMongoOperation(async function (database) {
@@ -204,15 +250,35 @@ class databaseWrapperClass {
             return null;
         }
 
+        // Create a new user object using the schema in the database
         const outputUser: user = new user(outputUserSchema);
+
+        // Cache this user for future use!
+        this.cache.addUser(outputUser);
+
+        // Return the user.
         return outputUser;
     }
 
     // Finds a user in the database by their email
     public async getUserByEmail(userEmail: string): Promise<user> {
-        var outputUserSchema: userSchema;
+        // CHECK THE CACHE FIRST!
+        // Loop through all of the users in the cache (A pain, I know)
+        // and if one has the email we want, return it!
+        //
+        // (Saves a database call)
+        for (const tempUser of this.cache.getUsers()) {
+            const userAccount = tempUser.getAccountSchema();
 
-        // TODO - Make this method check the Cache Manager first!
+            // If this user's email matches the email we're using...
+            if (userAccount.email == userEmail) {
+                // Return them!
+                return tempUser;
+            }
+        }
+
+        // OTHERWISE...
+        var outputUserSchema: userSchema;
 
         // If the Cache Manager doesn't have this user, let's look in the database!
         await this.runMongoOperation(async function (database) {
@@ -242,7 +308,13 @@ class databaseWrapperClass {
             return null;
         }
 
+        // Create a new user object using the schema in the database
         const outputUser: user = new user(outputUserSchema);
+
+        // Cache this user for future use!
+        this.cache.addUser(outputUser);
+
+        // Return the user.
         return outputUser;
     }
 
@@ -257,71 +329,79 @@ class databaseWrapperClass {
     public async createCard(cardOwnerID: string, newContent: cardContent): Promise<card> {
         var outputCardSchema: cardSchema;
 
-        // TODO - Add check to see if user already has a card
+        // Get the owner of this card
+        const cardOwner: user = await this.getUser(cardOwnerID);
+
+        // If there's no user with this ID...
+        if (!cardOwner) {
+            // Bail out!
+            return null;
+        }
+
+        // If this user ALREADY HAS a card...
+        if (cardOwner.getCardID()) {
+            // Bail out!
+            return null;
+        }
+
 
         // Run the mongoDB operation
         await this.runMongoOperation(async function (database) {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
-            // Get user collection from database
-            var userCollection = await database.collection("users");
 
-            // Try to get a user with the provided ID (REPLACE THIS ONCE USER CLASS EXISTS)
-            const requestedUser = await userCollection.findOne({ uuid: cardOwnerID });
 
-            // If there's no user with this ID...
-            if (!requestedUser) {
-                // BAIL!
+            // Create new stats
+            const newStats: cardStats = {
+                cardViews: [],
+                saves: [],
+                favorites: [],
+                memos: [],
+                social: []
+            };
+
+            const cardOwnerAccount = cardOwner.getAccountSchema();
+
+            // Create new card schema
+            const newCardSchema: cardSchema = {
+                cardID: v4(),
+                ownerID: cardOwnerID,
+
+                firstName: cardOwnerAccount.firstName,
+                lastName: cardOwnerAccount.lastName,
+
+                content: newContent,
+                stats: newStats
             }
-            // If this user already has a card...
-            else if (requestedUser.cardID) {
-                // BAIL!
-            }
-            // Otherwise, let's insert this new card!
-            else {
-
-                // Create new stats
-                const newStats: cardStats = {
-                    cardViews: [],
-                    saves: [],
-                    favorites: [],
-                    memos: [],
-                    social: []
-                };
-
-                // Create new card schema
-                const newCardSchema: cardSchema = {
-                    cardID: v4(),
-                    ownerID: cardOwnerID,
-
-                    firstName: requestedUser.userAccount.firstName,
-                    lastName: requestedUser.userAccount.lastName,
-
-                    content: newContent,
-                    stats: newStats
-                }
 
 
 
-                // Add the card to the database
-                const cardInsertOperationResult = await cardCollection.insertOne(newCardSchema);
+            // Add the card to the database
+            const cardInsertOperationResult = await cardCollection.insertOne(newCardSchema);
 
-                // Update the user in the database
-                const userModifyOperationResult = await userCollection.updateOne({ uuid: cardOwnerID }, { cardID: newCardSchema.cardID });
+            // Update the user's card ID
+            cardOwner.setCardID(newCardSchema.cardID);
 
-                // If the card was actually added
-                if (cardInsertOperationResult.insertedCount != 0) {
-                    outputCardSchema = newCardSchema;
-                }
+            // If the card was actually added
+            if (cardInsertOperationResult.insertedCount != 0) {
+                outputCardSchema = newCardSchema;
             }
         });
 
+
+        // If we couldn't get a card...
         if (!outputCardSchema) {
             return null;
         }
 
+        // Create a new card object using the schema in the database
         const outputCard: card = new card(outputCardSchema);
+
+        // Cache this card for future use!
+        this.cache.addCard(outputCard);
+
+        // Return the user.
         return outputCard;
     }
 
@@ -330,7 +410,7 @@ class databaseWrapperClass {
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
-        await this.runMongoOperation(async function (database) {
+        await this.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -342,6 +422,9 @@ class databaseWrapperClass {
             if (operationResult.deletedCount != 0) {
                 // Woo! We did it! No errors.
                 outputError = "";
+
+                // Delete from cache
+                this.cache.removeCard(cardIDToDelete);
             }
             else {
                 outputError = "No card by this ID";
@@ -354,9 +437,17 @@ class databaseWrapperClass {
 
     // Finds a card in the database by ID
     public async getCard(requestedCardID: string): Promise<card> {
-        var outputCardSchema: cardSchema;
+        // CHECK THE CACHE FIRST!
+        // If this card exists in the cache manager,
+        // return it!!
+        //
+        // (Saves a database call!)
+        if (this.cache.cardExists(requestedCardID)) {
+            return this.cache.getCard(requestedCardID);
+        }
 
-        // TODO - Make this method check the Cache Manager first!
+        // OTHERWISE...
+        var outputCardSchema: cardSchema;
 
         // If the Cache Manager doesn't have this card, let's look in the database!
         await this.runMongoOperation(async function (database) {
@@ -377,16 +468,22 @@ class databaseWrapperClass {
             }
             // Otherwise...
             else {
-                // This user does not exist...!
+                // This card does not exist...!
             }
         });
 
+        // If we couldn't get a card...
         if (!outputCardSchema) {
             return null;
         }
 
-
+        // Create a new card object using the schema in the database
         const outputCard: card = new card(outputCardSchema);
+
+        // Cache this card for future use!
+        this.cache.addCard(outputCard);
+
+        // Return the user.
         return outputCard;
     }
 
