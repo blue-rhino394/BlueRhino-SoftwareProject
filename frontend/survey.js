@@ -58,7 +58,7 @@ class Survey {
 						if(e.which === 13 && !this.animating) this.selected($(e.target).val());
 					}
 				}
-			}),
+			}).attr("autocomplete", "off"),
 			password: $("<input/>", {
 				"class": "surveryQuestion", 
 				type: "password",
@@ -74,12 +74,13 @@ class Survey {
 	}
 
 	setContent(){
-
+		let input = this.getInput(this.currentPage.type);
 		$("#content").html([
 			$("<h1/>").text(this.currentPage.question),
 			$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
-			this.getInput(this.currentPage.type),
+			input
 		]);
+		input.focus();
 	}
 
 	getPages(){
