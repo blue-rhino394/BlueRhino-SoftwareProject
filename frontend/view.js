@@ -2,18 +2,26 @@ class View {
 
 	async render(){
 
-		//<link rel="import" href="http://example.com/elements.html">
-		//$("#head").append('<link rel="import" href="/components/test.html">');
-		
+	
 		this.data = await this.getData();
+
 		let view = await this.loadImport(this.getView());
+		page.components = [];
+
 		$("#content").html(view);
 		
-		for (let [key, component] of Object.entries(this.getComponents())) {
 
-			component.render(key); 
-		}
 		
+		for (let [key, component] of Object.entries(this.getComponents())) {
+			try{
+				page.components.push(component);
+				component.render(key); 
+			}catch(err){
+				console.error(err);
+				new ErrorComponent(err).render(key);
+			}
+		}
+	
 		
 	}
 
@@ -34,20 +42,27 @@ class View {
 
 class HomeView extends View{
 
+	constructor(slug=""){
+		super();
+		this.slug = slug
+	}
+
 	getView(){
 		return "home";
 	}
 
+/*
 	async getData(){
 		return new Promise(resolve => {
-    		$.post(`/api/get-card`, (data) => resolve(data.card));
+    		$.post(`/api/get-card`, {"":""},(data) => resolve(data.card));
   		});
-	}
+	}*/
 
 	getComponents(){
 
 		return {
-			"main" : new Card(this.data)
+			"side" : new Search("Saved Cards", "favorite"),
+			"main" : new CardViewer(this.slug)
 		}
 	}
 
@@ -64,7 +79,7 @@ class LoginView extends View{
 
 		return {
 			"side" : new Login(),
-			"main" : new Search(true),
+			"main" : new Search("Discover Passport", "light"),
 		}
 	}
 
