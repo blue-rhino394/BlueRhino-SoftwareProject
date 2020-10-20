@@ -1,13 +1,25 @@
 class Component {
 
-	render(location){
-		let content = this.getContent();
-		content.css(this.getStyle());
-		this.element = content.appendTo($("#"+location));
-		this.onRender();
+	render(locationId){
+		let content =  undefined;
+		
+		try{
+
+				
+			let location = $("#"+locationId);
+			content = this.getContent();
+			content.css(this.getStyle());
+			
+			
+			this.element = content.appendTo(location);
+			this.onRender();
+		}catch(err){
+			console.error(err);
+			new ErrorComponent(err).render(locationId);
+		}
+	
 		return content;
 	}
-
 
 	deRender(){
 		this.element.remove();
@@ -43,17 +55,17 @@ class Login extends Component{
 	}
 
 	signUp(){
-		alert("no signup survey :'(")
+		window.location.href = "registersurvey.html";
 	}
 
 
 	getContent(){
 		//create login div
 		let content = $("<div/>", {"class" : "box"});
-
+		//console.log(wfew);
 		//create login text
 		content.append($("<h2/>", {text: `Login`}));
-
+		//console.log(lalala);
 		//create email textbox
 		content.append($("<input>", {
 			"class": "textbox",
@@ -87,10 +99,26 @@ class Login extends Component{
 	}
 }
 
+//if the error component has an error, the website will crash- no one fuck with the error component
+class ErrorComponent extends Component{
+
+	constructor(error){
+		super();
+		this.error = error;
+	}
+
+	getContent(){
+		let content = $("<div/>").attr("class", "box");
+		content.append($("<h1/>").html("<span style='color: #29b6f6'>Oopsie</span> Woopsie Uwu we made a fucky wucky!!!"));
+		content.append($("<h2/>").text(this.error));
+		return content;
+	}
+
+}
+
 class CardViewer extends Component{
 	
 	constructor(slug){
-
 		super();
 		this.slug = slug;
 	}
@@ -114,8 +142,24 @@ class CardViewer extends Component{
 	}
 
 	async view(slug){
+		let display = $("#cardDisplay");
 		let cardData = await this.getCardData(slug);
-		$("#cardDisplay").html();
+		//display.empty();
+		if(display.length > 0){
+			display.fadeOut(500, ()=>{
+				display.empty();
+				this.showCard(cardData);
+				display.fadeIn(500);
+			});
+		}else{
+			display.hide();
+			showCard(cardData);
+			display.fadeIn(500);
+		}
+
+	}
+
+	showCard(cardData){
 		let card = new Card(cardData)
 		card.render("cardDisplay");
 
@@ -124,11 +168,10 @@ class CardViewer extends Component{
 		$("#cardHeading").html(headingText);
 
 		if(card.myCard){
-			card.toggleAction("Details");
-			card.toggleAction("Social");
-			card.toggleAction("Stats");
+			card.toggleAction("Social", true);
+			card.toggleAction("Stats", true);
+			card.toggleAction("Details", true);
 		}
-
 	}
 
 }
@@ -316,30 +359,41 @@ class Card extends Component{
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
-		//console.log(this.card);
+		console.log(this.card);
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.firstName, this.card.content.socialMediaLinks),
-			"Stats": new CardStats(this.card.stats)
+			"Stats": new CardStats(this.card.stats),
+			"View": ()=>{this.viewCard()}
 		} 
+		
 	}
 
 	
 	getButtons(){
-		//details : QR Code, Tags
+		//details : Tags
 		//Social : social media links
 		//Stats: card stats
 		return (!this.light) ? ["Details", "Social", "Stats"] : ["View", "Save"]
 	}
 
-	toggleAction(action){
-		
-		if(!($("#"+action).length)){
-			this.actions[action].render("actions");
+	viewCard(){
+		//page.getCardViewer().view(this.card);
+		this.card.customURL="gfreezy";
+		page.navigate("/"+this.card.customURL);
+	}
+
+	toggleAction(actionName, forceRender=false){
+		let action = this.actions[actionName];
+		if(action instanceof Component){
+			if(!($("#"+actionName).length) || forceRender){
+				action.render("actions");
+			}else{
+				action.deRender();
+			}
 		}else{
-			this.actions[action].deRender();
+			action();
 		}
-		
 	}
 
 	getContent(){
@@ -382,7 +436,8 @@ class Card extends Component{
 		//if this is a full/non-light card, wrap it in a div, and add another div to hold the card actions (details, social, etc)
 		if(!this.light)	{
 			let oldContent = content.attr("class", "box card");
-			content = $("<div/>").html(oldContent);
+			//TODO: add divs so order stays the same 
+			content = $("<div/>").html([oldContent]);
 			content.append($("<br>"));
 			content.append($("<div/>").attr("id", "actions"));
 		}

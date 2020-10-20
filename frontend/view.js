@@ -2,18 +2,26 @@ class View {
 
 	async render(){
 
-		//<link rel="import" href="http://example.com/elements.html">
-		//$("#head").append('<link rel="import" href="/components/test.html">');
-		
+	
 		this.data = await this.getData();
+
 		let view = await this.loadImport(this.getView());
+		page.components = [];
+
 		$("#content").html(view);
 		
-		for (let [key, component] of Object.entries(this.getComponents())) {
 
-			component.render(key); 
-		}
 		
+		for (let [key, component] of Object.entries(this.getComponents())) {
+			try{
+				page.components.push(component);
+				component.render(key); 
+			}catch(err){
+				console.error(err);
+				new ErrorComponent(err).render(key);
+			}
+		}
+	
 		
 	}
 
@@ -34,6 +42,11 @@ class View {
 
 class HomeView extends View{
 
+	constructor(slug=""){
+		super();
+		this.slug = slug
+	}
+
 	getView(){
 		return "home";
 	}
@@ -49,7 +62,7 @@ class HomeView extends View{
 
 		return {
 			"side" : new Search("Saved Cards", "favorite"),
-			"main" : new CardViewer("")
+			"main" : new CardViewer(this.slug)
 		}
 	}
 
