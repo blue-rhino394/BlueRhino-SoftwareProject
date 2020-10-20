@@ -2,7 +2,6 @@
 import * as SMTPTransport from "nodemailer-smtp-transport";
 import { google } from "googleapis";
 import { OAuth2Client } from "googleapis-common";
-import { Transporter } from "google-auth-library/build/src/transporters";
 const OAuth2 = google.auth.OAuth2;
 
 
