@@ -51,6 +51,7 @@
     <TypeScriptCompile Include="src\databaseWrapper.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\emailWrapper.ts" />
     <TypeScriptCompile Include="src\enum\accountStatus.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -121,6 +122,7 @@
     <TypeScriptCompile Include="src\test\dummyData.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\emailWrapperTest.ts" />
     <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
