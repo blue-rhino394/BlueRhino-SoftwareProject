@@ -17,7 +17,7 @@ test("gets Account Status", () => {
     expect(user.getAccountStatus).toHaveReturned();
 })
 
-test('sets Card ID", () => {
+test('sets Card ID', () => {
     expect(user.setCardID).toHaveReturned();
 })
 test("sets Account Status", () => {

@@ -7,6 +7,6 @@ test('Checking if the DB is connecting',()=>
 )
 test('Creating a new User', ()=>
 
-    expect(dbWrapper.createUser(newAccountSchema))
+    expect(dbWrapper.createUser(newAccountSchema));
  
-}
+})
