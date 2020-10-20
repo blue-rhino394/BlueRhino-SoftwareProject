@@ -50,7 +50,7 @@ class emailWrapperClass {
     // Creates and sets up a Nodemailer transporter
     private createEmailTransport(): nodemailer.Transporter {
 
-        // Create the Nodemailer transporter
+        // Create the Nodemailer transporter using the provided options
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 465,
