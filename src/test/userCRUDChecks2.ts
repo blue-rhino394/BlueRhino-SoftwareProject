@@ -27,71 +27,15 @@ async function runChecks() {
     }
 
     console.log("\nCreating new user...");
-    var newUser: user = await databaseWrapper.createUser(testAccountSchema);
-    const uuid = newUser.getUUID();
-    const slug = newUser.getAccountSchema().customURL;
-    const email = newUser.getAccountSchema().email;
+    const newUser: user = await databaseWrapper.createUser(testAccountSchema);
+
 
     console.log("Setting account status...");
     newUser.setAccountStatus(accountStatus.Active);
 
 
 
-
-
-    console.log("Attempting to get user again by ID...")
-    newUser = await databaseWrapper.getUser(uuid);
-
-    if (newUser) {
-        console.log("Got user again by ID!");
-    }
-    else {
-        console.log("Strange... could not get the user again by id...?");
-    }
-
-
-
-
-    console.log("Attempting to get user again by slug...")
-    newUser = await databaseWrapper.getUserBySlug(slug);
-
-    if (newUser) {
-        console.log("Got user again by slug!");
-    }
-    else {
-        console.log("Strange... could not get the user again by slug...?");
-    }
-
-
-
-
-    console.log("Attempting to get user again by email...")
-    newUser = await databaseWrapper.getUserByEmail(email);
-
-    if (newUser) {
-        console.log("Got user again by email!");
-    }
-    else {
-        console.log("Strange... could not get the user again by email...?");
-    }
-
-
-    await new Promise(r => setTimeout(r, 6 * 1000));
-
-
-    console.log("Attempting to get user again after cache decay by ID...")
-    newUser = await databaseWrapper.getUser(uuid);
-
-    if (newUser) {
-        console.log("Got user again by ID!");
-    }
-    else {
-        console.log("Strange... could not get the user again by id...?");
-    }
-
-
-
-    console.log("Removing new user...");
+    //console.log("Removing new user...");
     //await databaseWrapper.deleteUser(newUser.getUUID());
 
     console.log("Done!");
