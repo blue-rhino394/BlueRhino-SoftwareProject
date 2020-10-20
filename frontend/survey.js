@@ -51,7 +51,7 @@ class Survey {
 			question: $("<input/>", {
 				"class": "surveryQuestion", 
 				type: "text",
-				
+
 				placeholder: "Type your answer and press enter",
 				on: {
 					keypress: (e) => {
@@ -154,7 +154,7 @@ class RegisterSurvey extends Survey{
 			},
 
 			{
-				question: "Repeat your password.",
+				question: "Ok, but do you remember it?",
 				answer: "",
 				type: "password",
 				validate: async (answer) => {
