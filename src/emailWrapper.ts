@@ -1,5 +1,4 @@
 ﻿import nodemailer from "nodemailer";
-import * as SMTPTransport from "nodemailer-smtp-transport";
 import { google } from "googleapis";
 import { OAuth2Client } from "googleapis-common";
 const OAuth2 = google.auth.OAuth2;
@@ -51,8 +50,8 @@ class emailWrapperClass {
     // Creates and sets up a Nodemailer transporter
     private createEmailTransport(): nodemailer.Transporter {
 
-        // Setup options for the mail transporter
-        const transporterOptions: SMTPTransport.SmtpOptions = {
+        // Create the Nodemailer transporter
+        const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 465,
             secure: true,
@@ -63,10 +62,7 @@ class emailWrapperClass {
                 clientSecret: this.clientSecret,
                 refreshToken: this.clientRefreshToken
             }
-        };
-
-        // Create the Nodemailer transporter
-        const transporter = nodemailer.createTransport(transporterOptions);
+        });
 
 
         return transporter;
