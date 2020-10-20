@@ -38,16 +38,18 @@ class HomeView extends View{
 		return "home";
 	}
 
+/*
 	async getData(){
 		return new Promise(resolve => {
-    		$.post(`/api/get-card`, (data) => resolve(data.card));
+    		$.post(`/api/get-card`, {"":""},(data) => resolve(data.card));
   		});
-	}
+	}*/
 
 	getComponents(){
 
 		return {
-			"main" : new Card(this.data)
+			"side" : new Search("Saved Cards", "favorite"),
+			"main" : new CardViewer("")
 		}
 	}
 
@@ -64,7 +66,7 @@ class LoginView extends View{
 
 		return {
 			"side" : new Login(),
-			"main" : new Search(true),
+			"main" : new Search("Discover Passport", "light"),
 		}
 	}
 
