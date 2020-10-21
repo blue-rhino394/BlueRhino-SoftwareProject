@@ -61,6 +61,9 @@
     <TypeScriptCompile Include="src\cacheManager.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\expressSessions.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\interfaces\cardContent.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -124,6 +127,9 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\emailWrapperTest.ts" />
     <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\setupDBIndexes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\userCRUDChecks.ts">
