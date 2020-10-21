@@ -78,18 +78,12 @@ export function defineCardREST(app: Application): void {
     app.post('/api/search-card', async (req, res) => {
 
         // Cram the body into a query interface
-        const query: searchQuery = req.body;
+        var query: searchQuery = req.body;
 
         // Stays true unless
         //      textQuery is undefined
-        //      tags is undefined
-        //      isMyCards is undefined
-        //      pageNumber is undefined
         var properlyFormattedRequest = true;
         properlyFormattedRequest = properlyFormattedRequest && query.textQuery != undefined;    
-        properlyFormattedRequest = properlyFormattedRequest && query.tags != undefined;
-        properlyFormattedRequest = properlyFormattedRequest && query.isMyCards != undefined;
-        properlyFormattedRequest = properlyFormattedRequest && query.pageNumber != undefined;
 
         // If the request is not properly formatted...
         if (!properlyFormattedRequest) {
@@ -101,6 +95,23 @@ export function defineCardREST(app: Application): void {
             res.send(responseData);
             return;
         }
+
+        // If tags aren't sent, fix the interface to use an empty array
+        if (query.tags == undefined) {
+            query.tags = [];
+        }
+
+        // If isMyCards isn't specified, default to false
+        if (query.isMyCards == undefined) {
+            query.isMyCards = false;
+        }
+
+        // If pageNumber isn't specified, default to zero
+        if (query.pageNumber == undefined) {
+            query.pageNumber = 0;
+        }
+
+
 
         // Search the database for cards using this query
         const foundCardIDs = await databaseWrapper.searchQuery(query);
