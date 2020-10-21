@@ -1,4 +1,7 @@
 ﻿import express, { Application } from "express";
+import { databaseWrapper } from "./databaseWrapper";
+import { user } from "./user";
+import { accountStatus } from "./enum/accountStatus";
 const path = require('path');
 
 export function defineExpressRoutes(app: Application): void {
@@ -35,10 +38,12 @@ export function defineExpressRoutes(app: Application): void {
     // Email Verification
     // Attempt to verify the user's account
     // (this URL will be sent via email)
-    app.get('/email-verify', (request, response) => {
+    app.get('/email-verify', async (request, response) => {
 
-        // If there's no verification token parameter set...
-        if (!request.query.verificationToken) {
+        // If there's no verification token parameter set
+        //      OR
+        // If there's no uuid parameter set...
+        if (!request.query.verificationToken || !request.query.uuid) {
             // Bounce and just redirect to the base site!
             response.redirect("/");
             return;
@@ -47,9 +52,35 @@ export function defineExpressRoutes(app: Application): void {
         // Get the verification token passed in with this GET request
         const verificationToken: string = request.query.verificationToken.toString();
 
-        // TODO - ... Actually verify the user
-        // Placeholder - in the meantime, just redirect the URL using the token.
-        response.redirect(verificationToken);
+        // Get the UUID passed in with this GET request
+        const uuid: string = request.query.uuid.toString();
+
+
+
+        // Get the user with this ID
+        const requestedUser: user = await databaseWrapper.getUser(uuid);
+
+        // If there's no user with this ID...
+        if (!requestedUser) {
+            // Bounce!
+            response.redirect("/");
+            return;
+        }
+
+        // OTHERWISE... We've got the user we want to verify. Let's verify them!
+
+        // If the user is NOT waiting for their account to be verified...
+        if (requestedUser.getAccountStatus() != accountStatus.EmailVerification) {
+            // Bounce!
+            response.redirect("/");
+            return;
+        }
+
+        // Verify the user's email :D
+        requestedUser.setAccountStatus(accountStatus.Active);
+
+        // Redirect to the base site!
+        response.redirect("/");
     });
 
 

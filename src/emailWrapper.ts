@@ -1,6 +1,8 @@
 ﻿import nodemailer from "nodemailer";
 import { google } from "googleapis";
 import { OAuth2Client } from "googleapis-common";
+import { user } from "./user";
+import util from "util";
 const OAuth2 = google.auth.OAuth2;
 
 
@@ -76,7 +78,7 @@ class emailWrapperClass {
     //  Public Functions
     //
 
-    public sendEmail(recipientEmail: string, subject: string, content: string, callback: (err: Error, result: any) => void): void {
+    public async sendEmail(recipientEmail: string, subject: string, content: string): Promise<boolean> {
 
         // Construct the mail options
         const mailOptions: nodemailer.SendMailOptions = {
@@ -86,10 +88,31 @@ class emailWrapperClass {
             html: content
         }
 
-        // Actully send the mail
-        this.emailTransport.sendMail(mailOptions, (err, result) => {
-            callback(err, result);
+        // Create send mail promise
+        const sendMailPromise = util.promisify(this.emailTransport.sendMail);
+
+        // Actually send the mail
+        var sentEmail = true;
+        await sendMailPromise(mailOptions).catch(err => {
+            sentEmail = false;
         });
+
+        return sentEmail;
+    }
+
+    public async sendAccountVerificationEmail(userToSendTo: user, baseURL: string): Promise<boolean> {
+
+        // Construct the link that'll get sent to actually verify the user's account
+        const verifyLink = `${baseURL}/api/verify-email?verificationToken=${userToSendTo.getVerificationCode()}&uuid=${userToSendTo.getUUID()}`;
+
+        var emailContents = "<h1>Welcome to Passport!</h1>";
+        emailContents += "<p>Click the link below to verify your email.</p>";
+        emailContents += `<a href="${verifyLink}">Verify Email</a>`
+
+        const email = userToSendTo.getAccountSchema().email;
+
+
+        return await this.sendEmail(email, "Passport Email Verification", emailContents);
     }
 }
 
