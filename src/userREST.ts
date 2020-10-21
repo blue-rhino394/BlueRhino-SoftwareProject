@@ -40,6 +40,7 @@ export function defineUserREST(app: Application): void {
     });
 
     // Logs in a user and configures their session object on success.
+    // (if session is already logged in, send back login result even if no params are sent in query)
     app.post('/api/login', (req, res) => {
 
         // TODO - IMPLEMENT!
