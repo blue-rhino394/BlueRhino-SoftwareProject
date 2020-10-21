@@ -141,7 +141,7 @@ img {
  	display: flex;
  	justify-content: center;
 
-	overflow: visible;
+	overflow: hidden;
 
 
 }
@@ -151,13 +151,13 @@ img {
 	width: 50%;
 	border-left: 0px dashed transparent;
 	position: relative;
-	overflow: visible;
+	overflow: none;
 }
 
 
 .surveyContentHolder{
 
-	overflow: visible;
+	overflow: none;
 	width: 60%;
 }
 

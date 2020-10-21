@@ -6,7 +6,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = this.pages.length-1;
+		this.pageIndex = 0;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 	}
@@ -59,6 +59,7 @@ class Survey {
 			this.setContent(false);
 
 			content.css("left", `${content.width()*2}px`);
+			
 			content.animate({ "left": "0px" }, 1000, "easeOutCubic", () => {
 				this.animating = false;
 			});
@@ -75,7 +76,10 @@ class Survey {
 				$("#passwordText").val(answer);
 			},
 		} 
-		return inputs[inputType];
+		let result = inputs[inputType];
+		//if theres nothing in the refill for it, return nothign 
+		if(result==undefined) return ()=>{};
+		return result;
 	}
 
 	getInput(inputType){
@@ -104,6 +108,34 @@ class Survey {
 						if(e.which === 13 && !this.animating) this.selected($(e.target).val());
 					}
 				}
+			}),
+
+			welcomeText: $("<div/>", {
+				id: "welcomeText",
+				text: "Press Enter to begin registering",
+				css:{
+   					opacity: 0.7,
+   					outline: "none"
+				},
+				tabindex:-1,
+				on: {
+					keypress: (e) => {
+						if(e.which === 13 && !this.animating) {
+							//$(e.target).removeAttr("tabindex");
+							this.selected();
+						}
+					},
+					click: (e)=>{
+						//this.selected();
+						$("body").scrollLeft(0);
+					},
+					//prevent div from ever losing focus so enter can always be pressed
+					focusout:(e) => {
+
+						$(e.target).focus();
+					},
+					
+				}
 			})
 		}
 		return inputs[inputType];
@@ -119,6 +151,8 @@ class Survey {
 				input
 			]);
 			input.focus();
+			console.log(input);
+			input.data("css", {"color":"red"});
 			this.getRefill(this.currentPage.type)(this.currentPage.answer);
 		}else{
 			$("#content").html([
@@ -199,7 +233,7 @@ class RegisterSurvey extends Survey{
 
 				}, 1000);
 			}else{
-				$("#finalMessage").text("Something went wrong when loggin you in :'( "+loginResults.error);
+				$("#finalMessage").text("Something went wrong when logging you in :'( "+loginResults.error);
 			}
 		}
 	}
@@ -207,7 +241,7 @@ class RegisterSurvey extends Survey{
 	
 
 	getCompletedMessage(){
-		return `Calm down ${this.nameify(this.pages[0].answer)}, we're making your account look pretty`;
+		return `Calm down ${this.nameify(this.pages[1].answer)}, we're making your account look pretty`;
 	}
 
 
@@ -225,6 +259,12 @@ class RegisterSurvey extends Survey{
 
 	getPages(){
 		return [
+			{
+				question: "Welcome to Passport!",
+				answer: "",
+				type: "welcomeText",
+				validate: async (answer) => true
+			},
 			{
 				question: "What's your first name?",
 				answer: "",
@@ -318,3 +358,8 @@ window.onpopstate = function () {
 	}
     survey.lastPage();
 }
+
+//lock scrollbar into place since tabindex:0 don't know how to act right
+$(document).bind('scroll',function () { 
+       window.scrollTo(0,0); 
+  });
