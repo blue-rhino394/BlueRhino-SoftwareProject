@@ -160,13 +160,13 @@ export class card {
     //
 
     // Updates the content of this card using the parameters defined in contentUpdate
-    public setCardContent(contentUpdate: cardContent): void {
+    public async setCardContent(contentUpdate: cardContent): Promise<void> {
 
         // Update the card in memory
         this.updateInternalCardContent(contentUpdate);
 
         // Update the card in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
