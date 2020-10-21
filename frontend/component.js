@@ -55,7 +55,7 @@ class Login extends Component{
 	}
 
 	signUp(){
-		window.location.href = "registersurvey.html";
+		window.location.href = "/register";
 	}
 
 
@@ -87,7 +87,7 @@ class Login extends Component{
 		content.append("<br><br>");
 
 		//create login button
-		content.append($("<a/>", {text:"Login", click: this.login}).css({marginLeft:"5px",marginRight:"10px"}));
+		content.append($("<a/>", {text:"Login", click: this.login}).css({marginLeft:"5px", marginRight:"10px"}));
 
 		//create login button
 		content.append($("<a/>", {text:"Sign Up", click: this.signUp}));

@@ -5,7 +5,7 @@
  
 		<title>Registration Survey</title>
 	</head>
-	<body class="survey" >
+	<body id="body" class="survey" >
 			<div class="surveyContent" id="contentHolder">
 				<div class="surveyContentHolder" id="content"></div>
 			</div>
@@ -14,4 +14,8 @@
 	<script  src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/survey.js"></script>
+	<script  type="text/javascript" >
+		$("#body").hide();
+		$("#body").fadeIn(2000);
+	</script>
 </html>

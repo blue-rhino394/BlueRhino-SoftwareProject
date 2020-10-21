@@ -1,3 +1,7 @@
+
+
+
+
 class Survey {
 
 	constructor(){
@@ -8,7 +12,7 @@ class Survey {
 	}
 
 	start(){
-		this.setContent();
+		this.setContent(false);
 	}
 
 	async selected(result){
@@ -46,12 +50,41 @@ class Survey {
 
 	}
 
+	lastPage(){
+		this.pageIndex -= 1;
+		this.currentPage = this.pages[this.pageIndex];
+		let content = $("#contentHolder");
+		this.animating = true;
+		content.animate({ "left": "-="+((content.width())) }, 1000, "easeInCubic", () => {
+			this.setContent(false);
+
+			content.css("left", `${content.width()*2}px`);
+			content.animate({ "left": "0px" }, 1000, "easeOutCubic", () => {
+				this.animating = false;
+			});
+		});
+	}
+
+	//this method returns a method that fills the answer of current question with your previously supplied answer when 
+	getRefill(inputType){
+		let inputs = {
+			question : (answer) => {
+				$("#questionText").val(answer);
+			},
+			password : (answer) => {
+				$("#passwordText").val(answer);
+			},
+		} 
+		return inputs[inputType];
+	}
+
 	getInput(inputType){
 		let inputs = {
+
 			question: $("<input/>", {
 				"class": "surveryQuestion", 
 				type: "text",
-
+				id: "questionText",
 				placeholder: "Type your answer and press enter",
 				on: {
 					keypress: (e) => {
@@ -59,9 +92,12 @@ class Survey {
 					}
 				}
 			}).attr("autocomplete", "off"),
+
+
 			password: $("<input/>", {
 				"class": "surveryQuestion", 
 				type: "password",
+				id: "passwordText",
 				placeholder: "Type your answer and press enter",
 				on: {
 					keypress: (e) => {
@@ -73,7 +109,8 @@ class Survey {
 		return inputs[inputType];
 	}
 
-	setContent(){
+	setContent(pushState=true){
+		if(pushState)window.history.pushState("", "", "");
 		let input = this.getInput(this.currentPage.type);
 		$("#content").html([
 			$("<h1/>").text(this.currentPage.question),
@@ -81,6 +118,7 @@ class Survey {
 			input
 		]);
 		input.focus();
+		this.getRefill(this.currentPage.type)(this.currentPage.answer);
 	}
 
 	getPages(){
@@ -181,4 +219,14 @@ class RegisterSurvey extends Survey{
 
 }
 
-new RegisterSurvey().start();
+var survey = new RegisterSurvey()
+survey.start();
+
+
+window.onpopstate = function () {
+	if(survey.pageIndex == 0){
+		window.history.back();
+		return;
+	}
+    survey.lastPage();
+}
