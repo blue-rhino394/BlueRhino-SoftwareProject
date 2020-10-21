@@ -4,6 +4,8 @@ import { defineUserREST } from "./userREST";
 import { defineCardREST } from "./cardREST";
 import { databaseWrapper } from "./databaseWrapper";
 import { defineExpressRoutes } from "./expressRoutes";
+import { defineExpressSessions } from "./expressSessions";
+
 const path = require('path');
 
 
@@ -33,7 +35,6 @@ export class backendServer {
     // Constructor!
     constructor(port: number) {
         this.initialize();
-        
         this.port = port;
     }
 
@@ -48,7 +49,10 @@ export class backendServer {
 
     // Specifically configure the Express server
     private configureApp(): void {
-        
+
+        // Implement Express Session Store
+        defineExpressSessions(this.app);
+
         // Implement express GET Routes
         defineExpressRoutes(this.app);
        
