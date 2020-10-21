@@ -171,7 +171,7 @@ class RegisterSurvey extends Survey{
 				validate: async (answer) => {
 					let request = await this.post("slug-exists", {slug: answer});
 					
-					if(request.result)return "This URL is taken";
+					if(request.result)return "This URL is taken!";
 					return true;
 				}
 			},
