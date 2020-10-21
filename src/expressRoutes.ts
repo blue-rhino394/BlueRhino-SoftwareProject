@@ -123,6 +123,11 @@ export function defineExpressRoutes(app: Application): void {
         response.sendFile(path.join(__dirname, '../frontend/registersurvey.html'));
     });
 
+    // Publish the 'Register Survey' page under a cleaner name
+    app.get('/register', (request, response) => {
+        response.sendFile(path.join(__dirname, '../frontend/registersurvey.html'));
+    });
+
 
 
 
