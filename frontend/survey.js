@@ -6,7 +6,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 0;
+		this.pageIndex = this.pages.length-1;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 	}
@@ -110,22 +110,53 @@ class Survey {
 	}
 
 	setContent(pushState=true){
-		if(pushState)window.history.pushState("", "", "");
-		let input = this.getInput(this.currentPage.type);
-		$("#content").html([
-			$("<h1/>").text(this.currentPage.question),
-			$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
-			input
-		]);
-		input.focus();
-		this.getRefill(this.currentPage.type)(this.currentPage.answer);
+		if(this.pageIndex!=this.pages.length){
+			if(pushState)window.history.pushState("", "", "");
+			let input = this.getInput(this.currentPage.type);
+			$("#content").html([
+				$("<h1/>").text(this.currentPage.question),
+				$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
+				input
+			]);
+			input.focus();
+			this.getRefill(this.currentPage.type)(this.currentPage.answer);
+		}else{
+			$("#content").html([
+				$("<h1/>").attr("id", "finalMessage").text(this.getCompletedMessage()),
+				$("<span/>").attr("id", "waitBubble").css("color","white").css("opacity", 0.5)
+			]);
+			this.onCompleted();
+		}
+	}
+
+	getSurveyResults(){
+		let results = {};
+		for(let page of this.pages){
+			if(page.key != undefined){
+				let answer = page.answer;
+				if(page.nameify) answer = this.nameify(answer);
+				results[page.key] = answer;
+			}
+		}
+		return results;
 	}
 
 	getPages(){
 		
 	}
 
+	completedMessage(){
 
+	}
+
+	onCompleted(){
+
+	}
+
+	nameify(name){
+		name = name.toLowerCase();
+		return name.charAt(0).toUpperCase() + name.slice(1);
+	}
 
 }
 
@@ -142,6 +173,55 @@ class RegisterSurvey extends Survey{
 
 	}
 
+	//Register user !!!
+	async onCompleted(){
+		let surveyResults = this.getSurveyResults();
+		surveyResults["profilePictureURL"] = "#29b6f6"
+		console.log("registering...");
+		let postResults = await this.post("register", surveyResults);
+		
+		if(postResults.error!=""){
+			$("#finalMessage").text("Something went wrong when creating your account :'( "+postResults.error);
+			console.log("An error occoured when registering "+postResults.error);
+		}else{
+			console.log("registered!");
+			let loginData = {email: surveyResults.email, password: surveyResults.password};
+			console.log("logging in...")
+			console.log(loginData);
+			let loginResults = await this.post("login", loginData);
+			if(loginResults.error==""){
+				console.log("logged in! Redirecting...");
+				this.countdown = 0;
+				window.setInterval(() => {
+					this.countdown+=1;
+					if(this.countdown==5)window.location.href = "/";
+					$("#finalMessage").append(".");
+
+				}, 1000);
+			}else{
+				$("#finalMessage").text("Something went wrong when loggin you in :'( "+loginResults.error);
+			}
+		}
+	}
+
+	
+
+	getCompletedMessage(){
+		return `Calm down ${this.nameify(this.pages[0].answer)}, we're making your account look pretty`;
+	}
+
+
+
+	/*
+
+		Interface userAccountSchema
+		email: string
+		passwordHash: string
+		firstName: string
+		lastName: string
+		customURL: string
+		profilePictureURL: string	
+	*/
 
 	getPages(){
 		return [
@@ -149,6 +229,8 @@ class RegisterSurvey extends Survey{
 				question: "What's your first name?",
 				answer: "",
 				type: "question",
+				nameify: true,
+				key: "firstName",
 				validate: async (answer) => {
 					
 					if(answer.length < 3){
@@ -162,7 +244,9 @@ class RegisterSurvey extends Survey{
 				question: "What's your last name?",
 				answer: "",
 				type: "question",
-				validate: async (answer) => {
+				key: "lastName",
+				nameify: true,
+				validate: async (answer) => { 
 					if(answer.length < 3){
 						return "Your last name must be at least 3 characters!";
 					}
@@ -174,6 +258,7 @@ class RegisterSurvey extends Survey{
 				question: "What's your email?",
 				answer: "",
 				type: "question",
+				key: "email",
 				validate: async (answer) => {
 					if(!(this.validEmail(answer))){
 						return "You must supply a valid email!";
@@ -186,7 +271,9 @@ class RegisterSurvey extends Survey{
 				question: "What's your password?",
 				answer: "",
 				type: "password",
+				key: "password",
 				validate: async (answer) => {
+					if(answer.length < 5)return "Your password must be at least 3 characters!";
 					
 					return true;
 				}
@@ -206,9 +293,10 @@ class RegisterSurvey extends Survey{
 				question: "What URL will your profile be located at?",
 				answer: "",
 				type: "question",
+				key: "customURL",
 				validate: async (answer) => {
+					if(answer.length<4)return "This URL is too short!"
 					let request = await this.post("slug-exists", {slug: answer});
-					
 					if(request.result)return "This URL is taken!";
 					return true;
 				}
