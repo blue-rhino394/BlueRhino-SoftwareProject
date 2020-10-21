@@ -368,6 +368,7 @@ class databaseWrapperClass {
                 cardID: v4(),
                 ownerID: cardOwnerID,
 
+                slug: cardOwnerAccount.customURL,
                 firstName: cardOwnerAccount.firstName,
                 lastName: cardOwnerAccount.lastName,
 
@@ -511,12 +512,33 @@ class databaseWrapperClass {
             // Search for cards that:
             //  * have the text provided in requestedQuery.textQuery
             //  * have the tags provided in requestedQuery.tags
-            const query = {
-                $text: {
-                    $search: requestedQuery.textQuery
-                },
+            var query = undefined;
 
-                "content.tags": { $all: requestedQuery.tags }
+            if (requestedQuery.tags.length > 0) {
+                query = {
+                    $text: {
+                        $search: requestedQuery.textQuery,
+                        $caseSensitive: false,
+                    },
+
+                    "content.tags": { $all: requestedQuery.tags }
+                }
+            }
+            else {
+                query = {
+                    $text: {
+                        $search: requestedQuery.textQuery,
+                        $caseSensitive: false,
+                    }
+                }
+            }
+
+            
+
+
+            const projection = {
+                _id: 0,
+                uuid: 1
             }
 
             // Restrict the database return results so that:
@@ -524,17 +546,19 @@ class databaseWrapperClass {
             //  * we ONLY get the uuid
             const options = {
                 skip: requestedQuery.pageNumber * cardsPerPage,
+                limit: cardsPerPage,
 
-                _id: 0,
-                uuid: 1
+                projection: projection
             }
 
             // Execute search using the above query and options
-            const cursor = cardCollection.find(query, options);
+            //const cursor = await cardCollection.find(query, options);
+            const cursor = cardCollection.find(query);
+
 
             // Add each UUID to the list
-            cursor.forEach((card) => {
-                resultIDs.push(card.uuid);
+            await cursor.forEach((card) => {
+                resultIDs.push(card.cardID);
             });
         });
 
@@ -568,8 +592,11 @@ class databaseWrapperClass {
             await mongoClient.connect();
             var dbPassport: Db = await mongoClient.db("passport");
 
+            
             // Run and wait for the operation callback to finish
-            await operation(dbPassport);
+            await operation(dbPassport).catch(err => console.log(`Error while executing mongo operation: ${err}`));
+            
+
         }
         // Disconnect from the database
         finally {

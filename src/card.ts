@@ -18,6 +18,7 @@ export class card {
     // Card Schema
     private cardID: string;
     private ownerID: string;
+    private slug: string;
     private firstName: string;
     private lastName: string;
 
@@ -107,6 +108,7 @@ export class card {
         const output: cardSchema = {
             cardID: this.cardID,
             ownerID: this.ownerID,
+            slug: this.slug,
             firstName: this.firstName,
             lastName: this.lastName,
 

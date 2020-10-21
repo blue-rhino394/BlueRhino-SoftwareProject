@@ -42,6 +42,7 @@ export function getDummyCardSchema(): cardSchema {
         cardID: "b9fab74d-51e0-4d5e-9e76-92fb6379ff18",
         ownerID: "566062db-df68-434f-a56f-ef9439b93622",
 
+        slug: "gfreezy",
         firstName: "Gordon",
         lastName: "Freeman",
 

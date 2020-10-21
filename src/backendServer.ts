@@ -1,4 +1,5 @@
 ﻿import express, { Application } from "express";
+import bodyParser from "body-parser";
 import { createServer, Server as HTTPServer } from "http";
 import { defineUserREST } from "./userREST";
 import { defineCardREST } from "./cardREST";
@@ -49,6 +50,12 @@ export class backendServer {
 
     // Specifically configure the Express server
     private configureApp(): void {
+
+        // Implement body-parser to parse application/x-www-form-urlencoded
+        this.app.use(bodyParser.urlencoded({ extended: false }))
+
+        // Implement body-parser to parse application/json
+        this.app.use(bodyParser.json());
 
         // Implement Express Session Store
         defineExpressSessions(this.app);

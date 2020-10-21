@@ -6,6 +6,9 @@ import { postGetSavedCardsResult } from "./interfaces/post/postGetSavedCardsResu
 import { postToggleSaveResult } from "./interfaces/post/postToggleSaveResult";
 import { postToggleFavoriteResult } from "./interfaces/post/postToggleFavoriteResult";
 import { postSearchCardResult } from "./interfaces/post/postSearchCardResult";
+import { searchQuery } from "./interfaces/searchQuery";
+import { databaseWrapper } from "./databaseWrapper";
+import { cardSchema } from "./interfaces/cardSchema";
 
 export function defineCardREST(app: Application): void {
 
@@ -72,12 +75,57 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    app.post('/api/search-card', (req, res) => {
+    app.post('/api/search-card', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // Cram the body into a query interface
+        const query: searchQuery = req.body;
 
-        // Get dummy data
-        const responseData: postSearchCardResult = getDummyPostSearchCardResult();
+        // Stays true unless
+        //      textQuery is undefined
+        //      tags is undefined
+        //      isMyCards is undefined
+        //      pageNumber is undefined
+        var properlyFormattedRequest = true;
+        properlyFormattedRequest = properlyFormattedRequest && query.textQuery != undefined;    
+        properlyFormattedRequest = properlyFormattedRequest && query.tags != undefined;
+        properlyFormattedRequest = properlyFormattedRequest && query.isMyCards != undefined;
+        properlyFormattedRequest = properlyFormattedRequest && query.pageNumber != undefined;
+
+        // If the request is not properly formatted...
+        if (!properlyFormattedRequest) {
+
+            // Return an empty array and bounce!
+            const responseData: postSearchCardResult = {
+                cards: []
+            };
+            res.send(responseData);
+            return;
+        }
+
+        // Search the database for cards using this query
+        const foundCardIDs = await databaseWrapper.searchQuery(query);
+
+
+        // Create array to hold schemas in
+        var foundCards: cardSchema[] = [];
+
+        // Loop through the found card ID's and pack the cards into 
+        // the foundCards array
+        for (const cardID of foundCardIDs) {
+            const foundCard = await databaseWrapper.getCard(cardID);
+
+            // If the card exists and was retrieved correctly...
+            if (foundCard) {
+                // Add it to the foundCards array!
+                foundCards.push(foundCard.getCardSchema());
+            }
+        }
+
+
+        // Pack response data using the cards we've retrieved!
+        const responseData: postSearchCardResult = {
+            cards: foundCards
+        };
         res.send(responseData);
     });
 }

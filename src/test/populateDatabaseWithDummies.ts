@@ -1,7 +1,10 @@
 ﻿import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { databaseWrapper } from "../databaseWrapper";
-
-const passwordHashLibrary = require('password-hash');
+import { user } from "../user";
+import bcrypt from "bcrypt";
+import { cardContent, cardPropertyMapToArray } from "../interfaces/cardContent";
+import { cardLayout } from "../interfaces/cardLayout";
+import { card } from "../card";
 
 
 
@@ -170,12 +173,19 @@ const dataJSON: string = `[
 
 // Parse the above string into an anonymous object
 const data = JSON.parse(dataJSON);
+addDummies(data);
 
-for (var i = 0; i < data.length; i++) {
-    var userRegistration = data[i];
 
+
+async function addDummies(data: any): Promise<void> {
+    for (var i = 0; i < data.length; i++) {
+        await addDummy(data[i]);
+    }
+}
+
+async function addDummy(userRegistration: any): Promise<void> {
     // Hash the password!
-    const passwordHash = passwordHashLibrary.generate(userRegistration.password);
+    const passwordHash: string = await bcrypt.hash(userRegistration.password, 10);
 
     // Cram all of the required variables into an interface...
     const registrationForm: userAccountSchema = {
@@ -189,14 +199,55 @@ for (var i = 0; i < data.length; i++) {
         profilePictureURL: userRegistration.profilePictureURL
     }
 
-    console.log(`Adding user '${registrationForm.firstName} ${registrationForm.lastName}' to database...`);
-    databaseWrapper.createUser(registrationForm).then(function (err) {
+    console.log(`\nChecking for existing user '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+    const oldUser: user = await databaseWrapper.getUserByEmail(registrationForm.email);
 
-        if (!err) {
-            console.log(`\t\tAdded user '${registrationForm.firstName} ${registrationForm.lastName}' correctly!!`);
-        }
-        else {
-            console.log(`\t\tFailed to add user '${registrationForm.firstName} ${registrationForm.lastName}': ${err}`);
-        }
-    });
+    // If there's already a user with this email, remove them
+    if (oldUser) {
+        console.log(`Removing existing user '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+        await databaseWrapper.deleteUser(oldUser.getUUID());
+    }
+
+
+    console.log(`Adding user '${registrationForm.firstName} ${registrationForm.lastName}' to database...`);
+    const newUser: user = await databaseWrapper.createUser(registrationForm);
+
+    if (!newUser) {
+        console.log(`\t\tFailed to add user '${registrationForm.firstName} ${registrationForm.lastName}'`);
+        return;
+    }
+
+
+    console.log(`\nChecking for existing card for '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+    const oldCard: card = await databaseWrapper.getCard(newUser.getCardID());
+
+    if (oldCard) {
+        console.log(`Removing existing card for '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+        await databaseWrapper.deleteCard(oldCard.getID());
+    }
+
+
+    const newCardLayout: cardLayout = {
+        background: "#FFFFFF",
+        fontColor: "#000000"
+    }
+
+    var cardProps = new Map<string, string>();
+    cardProps.set("Placeholder Card Status", "100%");
+
+
+    const newCardData: cardContent = {
+        published: true,
+        tags: ["Placeholder", "Testing"],
+        socialMediaLinks: [],
+        cardProperties: cardPropertyMapToArray(cardProps),
+        layout: newCardLayout
+    }
+
+    const newCard: card = await databaseWrapper.createCard(newUser.getUUID(), newCardData);
+
+    if (!newCard) {
+        console.log(`\t\tFailed to add card for '${registrationForm.firstName} ${registrationForm.lastName}'`);
+        return
+    }
 }
