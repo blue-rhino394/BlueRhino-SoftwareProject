@@ -137,13 +137,14 @@ class CardViewer extends Component{
 
 	async getCardData(cardUrl){
 		return new Promise(resolve => {
-    		$.post(`/api/get-card`, {"slug": cardUrl}, (data) => resolve(data.card));
+    		$.post(`/api/get-card-by-slug`, {"slug": cardUrl}, (data) => {console.log(data); resolve(data.card)});
   		});
 	}
 
 	async view(slug){
 		let display = $("#cardDisplay");
 		let cardData = await this.getCardData(slug);
+		console.log(cardData);
 		//display.empty();
 		if(display.length > 0){
 			display.fadeOut(500, ()=>{
@@ -162,8 +163,7 @@ class CardViewer extends Component{
 	showCard(cardData){
 		let card = new Card(cardData)
 		card.render("cardDisplay");
-
-		let headingText = `${cardData.firstName}'s Card`
+		let headingText = `${card.user.firstName}'s Card`
 		if(card.myCard)headingText = "Your Card";
 		$("#cardHeading").html(headingText);
 
@@ -364,11 +364,13 @@ class Card extends Component{
 	constructor(card, light = false){
 		super();
 		this.card = card;
+		this.user = this.card.ownerInfo;
 		this.light = light;
+		console.log(this.card);
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
-		console.log(this.card);
+		
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.firstName, this.card.content.socialMediaLinks),
@@ -412,7 +414,7 @@ class Card extends Component{
 
 		//add profile pic to card
 		let color = "29b6f6";
-		let nameQuery = `${this.card.firstName}+${this.card.lastName}`;
+		let nameQuery = `${this.user.firstName}+${this.user.lastName}`;
 		let prfoilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`;
 		content.append($("<div>", {
 			"class": "profilePic",
@@ -422,11 +424,14 @@ class Card extends Component{
 		//add first and last name heading to card
 		content.append($("<div/>", {
 			"class": "name",
-			html: $(`<${heading}/>`).text(`${this.card.firstName} ${this.card.lastName}`)	
+			html: $(`<${heading}/>`).text(`${this.user.firstName} ${this.user.lastName}`)	
 		}));
 
 		//add card properties
 		let props = $("<div/>").attr("class", "properties");
+		console.log(this.card.content.cardProperties);
+		this.card.content.cardProperties.push({key: "Another", value: "one"})
+		//this.card.content.cardProperties.push({key: "next", value: "to"})
 		for(const property of this.card.content.cardProperties){
 			let key = property.key;
 			let value = property.value;
