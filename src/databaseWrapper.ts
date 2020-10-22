@@ -27,13 +27,52 @@ class databaseWrapperClass {
     private cache: databaseCacheManager;
 
 
+    // Mongo Variables
+
+    // The driver for connecting to mongoDB
+    private mongoClient: MongoClient;
+
+
+
+
     //
     //  Constructor and Initialization
     //
 
     public constructor() {
-        console.log("Starting database wrapper...");
+        console.log("Constructing Database Wrapper...");
         this.cache = new databaseCacheManager();
+        this.initialize();
+    }
+
+    private async initialize(): Promise<void> {
+        await this.connectToMongo();
+        await this.verifyConnectedToMongoDB();
+        console.log("Database Wrapper Initialized!");
+    }
+
+    // Connect the database wrapper to mongoDB and cache
+    // any necessary variables
+    private async connectToMongo(): Promise<void> {
+
+        // If for some reason mongoClient already exists
+        //      AND
+        // it's connected...
+        if (this.mongoClient && this.mongoClient.isConnected()) {
+            // Bounce!
+            return;
+        }
+
+
+        // Construct mongoDB connection URL
+        const connectionString: string = `mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`;
+
+        // Create mongoDB client for the database
+        this.mongoClient = new MongoClient(connectionString, {
+            useUnifiedTopology: true
+        });
+
+        await this.mongoClient.connect();
     }
 
     // Checks to see if we can connected to mongoDB by pinging the users database
@@ -538,7 +577,8 @@ class databaseWrapperClass {
 
             const projection = {
                 _id: 0,
-                uuid: 1
+                cardID: 1,
+
             }
 
             // Restrict the database return results so that:
@@ -552,8 +592,8 @@ class databaseWrapperClass {
             }
 
             // Execute search using the above query and options
-            //const cursor = await cardCollection.find(query, options);
-            const cursor = cardCollection.find(query);
+            const cursor = cardCollection.find(query, options);
+            //const cursor = cardCollection.find(query);
 
 
             // Add each UUID to the list
@@ -579,29 +619,19 @@ class databaseWrapperClass {
     // Connects to the database, runs a callback providing the database, then closes the connection
     // (used for generic database operations)
     public async runMongoOperation(operation: (db: Db) => Promise<void>): Promise<void> {
-        // Construct mongoDB connection URL
-        const connectionString: string = `mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`;
 
-        // Create mongoDB client for this operation
-        var mongoClient = new MongoClient(connectionString, {
-            useUnifiedTopology: true
-        });
-
-        // Connect to the database and attempt to run the operation
-        try {
-            await mongoClient.connect();
-            var dbPassport: Db = await mongoClient.db("passport");
-
-            
-            // Run and wait for the operation callback to finish
-            await operation(dbPassport).catch(err => console.log(`Error while executing mongo operation: ${err}`));
-            
-
+        // If for some reason the mongoDB connection isn't defined
+        //      OR
+        // If the mongoDB connection is closed...
+        if (!this.mongoClient || !this.mongoClient.isConnected) {
+            // Try to start it!
+            await this.initialize();
         }
-        // Disconnect from the database
-        finally {
-            await mongoClient.close();
-        }
+
+        var dbPassport: Db = this.mongoClient.db("passport");
+
+        // Run and wait for the operation callback to finish
+        await operation(dbPassport).catch(err => console.log(`Error while executing mongo operation: ${err}`))
     }
 }
 
