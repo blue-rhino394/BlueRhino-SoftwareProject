@@ -48,6 +48,16 @@ export function defineCardREST(app: Application): void {
             return;
         }
 
+
+        // Generate the card schema from the requested card
+        const cardSchema = requestedCard.getCardSchema();
+
+        // If a user is currently logged in and this is NOT their card...
+        if (req.session.uuid && req.session.uuid != requestedCard.getOwnerUUID()) {
+            // Remove the stats from cardSchema
+            cardSchema.stats = undefined;
+        }
+
         // Construct response data
         const responseData: postGetCardResult = {
             card: requestedCard.getCardSchema(),
@@ -92,6 +102,17 @@ export function defineCardREST(app: Application): void {
             // Send, and bounce!
             res.send(responseData);
             return;
+        }
+
+
+
+        // Generate the card schema from the requested card
+        const cardSchema = requestedCard.getCardSchema();
+
+        // If a user is currently logged in and this is NOT their card...
+        if (req.session.uuid && req.session.uuid != requestedCard.getOwnerUUID()) {
+            // Remove the stats from cardSchema
+            cardSchema.stats = undefined;
         }
 
         // Construct response data

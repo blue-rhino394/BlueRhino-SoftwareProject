@@ -342,6 +342,7 @@ export function defineUserREST(app: Application): void {
         res.send(responseData);
     });
 
+    // Logs out a user
     app.post('/api/logout', (req, res) => {
 
         // If the user is NOT logged in...
@@ -367,8 +368,6 @@ export function defineUserREST(app: Application): void {
         }
         res.send(responseData);
     });
-
-
 
     // Updates the account settings for a user.
     app.post('/api/update-account-settings', async (req, res) => {
