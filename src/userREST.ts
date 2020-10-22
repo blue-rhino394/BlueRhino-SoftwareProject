@@ -342,6 +342,32 @@ export function defineUserREST(app: Application): void {
         res.send(responseData);
     });
 
+    app.post('/api/logout', (req, res) => {
+
+        // If the user is NOT logged in...
+        if (!req.session.uuid) {
+            // Pack response data
+            const responseData: postGenericResult = {
+                error: "Not logged in"
+            }
+
+            // Send and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // The user is logged in. Let's log em out!
+        req.session.uuid = undefined;
+
+        // Pack response data
+        const responseData: postGenericResult = {
+            error: ""
+        }
+        res.send(responseData);
+    });
+
 
 
     // Updates the account settings for a user.
