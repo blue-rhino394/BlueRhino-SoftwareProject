@@ -330,7 +330,7 @@ export class user {
             // Create the update data, saying that we want to update user account data
             const updateData = {
                 $set: {
-                    userAccount: this.createJsonAccountUpdateData(accountSchemaUpdate)
+                    userAccount: this.getAccountSchema()
                 }
             };
 
@@ -341,6 +341,19 @@ export class user {
             // If we wanted to check if it actually updated something at this point,
             // we would check to see if updateResult.modifiedCount is greater than zero!
         });
+
+        // If we're modifying the public account info...
+        if (accountSchemaUpdate.public) {
+
+            const ourCard = await databaseWrapper.getCard(this.getCardID());
+
+            // If we actually have a card...
+            if (ourCard) {
+
+                // Update it's known info!
+                await ourCard.setOwnerInfo(accountSchemaUpdate.public);
+            }
+        }
     }
 
 
@@ -385,48 +398,5 @@ export class user {
         if (accountPublicSchemaUpdate.profilePictureURL != null) {
             this.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
         }
-    }
-
-
-
-
-    private createJsonAccountUpdateData(accountSchemaUpdate: userAccountSchema): any {
-        var output: Record<string, any> = {};
-
-        if (accountSchemaUpdate.email != null) {
-            output.email = accountSchemaUpdate.email;
-        }
-
-        if (accountSchemaUpdate.passwordHash != null) {
-            output.passwordHash = accountSchemaUpdate.passwordHash;
-        }
-
-        if (accountSchemaUpdate.public != null) {
-            output.public = this.createJsonAccountPublicUpdateData(accountSchemaUpdate.public);
-        }
-
-        return output;
-    }
-
-    private createJsonAccountPublicUpdateData(accountPublicSchemaUpdate: userAccountPublicSchema): any {
-        var output: Record<string, any> = {};
-
-        if (accountPublicSchemaUpdate.firstName != null) {
-            output.firstName = accountPublicSchemaUpdate.firstName;
-        }
-
-        if (accountPublicSchemaUpdate.lastName != null) {
-            output.lastName = accountPublicSchemaUpdate.lastName;
-        }
-
-        if (accountPublicSchemaUpdate.customURL != null) {
-            output.customURL = accountPublicSchemaUpdate.customURL;
-        }
-
-        if (accountPublicSchemaUpdate.profilePictureURL != null) {
-            output.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
-        }
-
-        return output;
     }
 }
