@@ -82,7 +82,7 @@ class Survey {
 		return result;
 	}
 
-	getInput(inputType){
+	getInput(inputTypes){
 		let inputs = {
 
 			question: $("<input/>", {
@@ -110,49 +110,70 @@ class Survey {
 				}
 			}),
 
-			welcomeText: $("<div/>", {
+			justText: $("<div/>", {
 				id: "welcomeText",
-				text: "Press Enter to begin registering",
 				css:{
    					opacity: 0.7,
    					outline: "none"
 				},
-				tabindex:-1,
+				tabindex:0,
 				on: {
 					keypress: (e) => {
-						if(e.which === 13 && !this.animating) {
-							//$(e.target).removeAttr("tabindex");
-							this.selected();
-						}
-					},
-					click: (e)=>{
-						//this.selected();
-						$("body").scrollLeft(0);
+						if(e.which === 13 && !this.animating)this.selected();
 					},
 					//prevent div from ever losing focus so enter can always be pressed
-					focusout:(e) => {
-
-						$(e.target).focus();
-					},
-					
+					focusout:(e) => {$(e.target).focus();},
 				}
 			})
 		}
-		return inputs[inputType];
+
+
+		let results = [];
+		if(!Array.isArray(inputTypes)) inputTypes = [inputTypes];
+		for(let input of inputTypes){
+			results.push(inputs[input]);
+		}
+
+		return results;
+		
 	}
 
 	setContent(pushState=true){
 		if(this.pageIndex!=this.pages.length){
 			if(pushState)window.history.pushState("", "", "");
-			let input = this.getInput(this.currentPage.type);
-			$("#content").html([
+
+			let inputs = this.getInput(this.currentPage.type);
+
+			
+
+			let elements = [
 				$("<h1/>").text(this.currentPage.question),
 				$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
-				input
-			]);
-			input.focus();
-			console.log(input);
-			input.data("css", {"color":"red"});
+			];
+
+			elements = elements.concat(inputs);
+
+
+			$("#content").html(elements);
+
+			for(let input of elements){
+				input.focus();
+			}
+
+			//this dynamically calls the items in the data array  
+			if(!(this.currentPage.data==undefined)){
+				let index = 2;
+				for(let dataItem of this.currentPage.data){
+					for(var key in dataItem){
+						if (dataItem.hasOwnProperty(key)) {
+							let value = dataItem[key];
+							elements[index][key](value);
+						}
+					}
+					index+=1;
+				}
+			}
+
 			this.getRefill(this.currentPage.type)(this.currentPage.answer);
 		}else{
 			$("#content").html([
@@ -194,161 +215,8 @@ class Survey {
 
 }
 
-class RegisterSurvey extends Survey{
-
-	constructor(){
-		super();
-	}
-
-	validEmail(email) 
-	{
-		let mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-		return email.match(mailformat);
-
-	}
-
-	//Register user !!!
-	async onCompleted(){
-		let surveyResults = this.getSurveyResults();
-		surveyResults["profilePictureURL"] = "#29b6f6"
-		console.log("registering...");
-		let postResults = await this.post("register", surveyResults);
-		
-		if(postResults.error!=""){
-			$("#finalMessage").text("Something went wrong when creating your account :'( "+postResults.error);
-			console.log("An error occoured when registering "+postResults.error);
-		}else{
-			console.log("registered!");
-			let loginData = {email: surveyResults.email, password: surveyResults.password};
-			console.log("logging in...")
-			console.log(loginData);
-			let loginResults = await this.post("login", loginData);
-			if(loginResults.error==""){
-				console.log("logged in! Redirecting...");
-				this.countdown = 0;
-				window.setInterval(() => {
-					this.countdown+=1;
-					if(this.countdown==5)window.location.href = "/";
-					$("#finalMessage").append(".");
-
-				}, 1000);
-			}else{
-				$("#finalMessage").text("Something went wrong when logging you in :'( "+loginResults.error);
-			}
-		}
-	}
-
-	
-
-	getCompletedMessage(){
-		return `Calm down ${this.nameify(this.pages[1].answer)}, we're making your account look pretty`;
-	}
 
 
-
-	/*
-
-		Interface userAccountSchema
-		email: string
-		passwordHash: string
-		firstName: string
-		lastName: string
-		customURL: string
-		profilePictureURL: string	
-	*/
-
-	getPages(){
-		return [
-			{
-				question: "Welcome to Passport!",
-				answer: "",
-				type: "welcomeText",
-				validate: async (answer) => true
-			},
-			{
-				question: "What's your first name?",
-				answer: "",
-				type: "question",
-				nameify: true,
-				key: "firstName",
-				validate: async (answer) => {
-					
-					if(answer.length < 3){
-						return "Your first name must be at least 3 characters!";
-					}
-					return true;
-				}
-			},
-
-			{
-				question: "What's your last name?",
-				answer: "",
-				type: "question",
-				key: "lastName",
-				nameify: true,
-				validate: async (answer) => { 
-					if(answer.length < 3){
-						return "Your last name must be at least 3 characters!";
-					}
-					return true;
-				}
-			},
-
-			{
-				question: "What's your email?",
-				answer: "",
-				type: "question",
-				key: "email",
-				validate: async (answer) => {
-					if(!(this.validEmail(answer))){
-						return "You must supply a valid email!";
-					}
-					return true;
-				}
-			},
-
-			{
-				question: "What's your password?",
-				answer: "",
-				type: "password",
-				key: "password",
-				validate: async (answer) => {
-					if(answer.length < 5)return "Your password must be at least 3 characters!";
-					
-					return true;
-				}
-			},
-
-			{
-				question: "Ok, but do you remember it?",
-				answer: "",
-				type: "password",
-				validate: async (answer) => {
-					if(this.pages[this.pageIndex-1].answer != answer)return "Passwords must match!";
-					return true;
-				}
-			},
-
-			{
-				question: "What URL will your profile be located at?",
-				answer: "",
-				type: "question",
-				key: "customURL",
-				validate: async (answer) => {
-					if(answer.length<4)return "This URL is too short!"
-					let request = await this.post("slug-exists", {slug: answer});
-					if(request.result)return "This URL is taken!";
-					return true;
-				}
-			},
-
-		]
-	}
-
-}
-
-var survey = new RegisterSurvey()
-survey.start();
 
 
 window.onpopstate = function () {
