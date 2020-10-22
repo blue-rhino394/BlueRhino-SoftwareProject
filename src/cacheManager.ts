@@ -7,7 +7,7 @@ export class cacheManager<K, V> {
 
     // The max amount of time an object can exist within the cache
     // without updates before it gets removed.
-    private cacheDecayTime: number = 5 * 1000;
+    private cacheDecayTime: number = 7200 * 1000;   // 2 hours
 
 
 

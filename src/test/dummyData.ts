@@ -12,10 +12,36 @@ import { postToggleSaveResult } from "../interfaces/post/postToggleSaveResult";
 import { postLoginResult } from "../interfaces/post/postLoginResult";
 import { postSlugExistsResult } from "../interfaces/post/postSlugExistsResult";
 import { postSearchCardResult } from "../interfaces/post/postSearchCardResult";
+import { userAccountSchema } from "../interfaces/userAccountSchema";
+import { userAccountPublicSchema } from "../interfaces/userAccountPublicSchema";
 
 
 
+//
+//      USER DATA
+//
 
+export function getDummyUserAccountSchema(): userAccountSchema {
+    const userAccount: userAccountSchema = {
+        email: "gfreeman@valvesoftware.com",
+        passwordHash: "bla",
+        public: getDummyUserAccountPublicSchema()
+    }
+
+    return userAccount;
+}
+
+export function getDummyUserAccountPublicSchema(): userAccountPublicSchema {
+    const userAccountPublic: userAccountPublicSchema = {
+        firstName: "Gordon",
+        lastName: "Freeman",
+
+        customURL: "gfreezy",
+        profilePictureURL: "https://ui-avatars.com/api/?name=Gordon+Freeman"
+    }
+
+    return userAccountPublic;
+}
 
 
 //
@@ -41,10 +67,7 @@ export function getDummyCardSchema(): cardSchema {
     const card: cardSchema = {
         cardID: "b9fab74d-51e0-4d5e-9e76-92fb6379ff18",
         ownerID: "566062db-df68-434f-a56f-ef9439b93622",
-
-        slug: "gfreezy",
-        firstName: "Gordon",
-        lastName: "Freeman",
+        ownerInfo: getDummyUserAccountPublicSchema(),
 
         content: getDummyCardContent(),
         stats: getDummyCardStats()
@@ -136,7 +159,7 @@ export function getDummyPostGenericResult(): postGenericResult {
 export function getDummyPostGetCardResult(): postGetCardResult {
     const responseData: postGetCardResult = {
         error: "",
-        card: getDummyCardSchema()
+        card: getDummyCardSchema(),
     };
 
     return responseData;
@@ -162,7 +185,7 @@ export function getDummyPostLoginResult(): postLoginResult {
         firstName: "Gordon",
         lastName: "Freeman",
 
-        customURL: "gfreeman",
+        customURL: "gfreezy",
         profilePictureURL: ""
     };
 

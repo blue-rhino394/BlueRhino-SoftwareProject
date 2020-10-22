@@ -35,16 +35,15 @@ export class backendServer {
 
     // Constructor!
     constructor(port: number) {
-        this.initialize();
+        this.setup();
         this.port = port;
     }
 
     // Create and configure any objects for this class
-    private initialize(): void {
+    private setup(): void {
         this.app = express();
         this.httpServer = createServer(this.app);
-        databaseWrapper.verifyConnectedToMongoDB().catch(console.dir);
-
+        
         this.configureApp();
     }
 
@@ -83,7 +82,7 @@ export class backendServer {
     // via the constructor.
     //
     // Executes callback when the server has begun listening
-    public listen(callback: (port: number) => void): void {
+    public async listen(callback: (port: number) => void): Promise<void> {
 
         // Start listening on the httpServer...
         this.httpServer.listen(this.port, () => {

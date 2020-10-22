@@ -7,11 +7,13 @@ const testAccountSchema: userAccountSchema = {
     email: "test@test.cool",
     passwordHash: "bonk",
 
-    firstName: "Testy",
-    lastName: "McTest",
+    public: {
+        firstName: "Testy",
+        lastName: "McTest",
 
-    customURL: "test-slug",
-    profilePictureURL: "https://ui-avatars.com/api/?name=Testy+McTest"
+        customURL: "test-slug",
+        profilePictureURL: "https://ui-avatars.com/api/?name=Testy+McTest"
+    }
 }
 
 
@@ -29,7 +31,7 @@ async function runChecks() {
     console.log("\nCreating new user...");
     var newUser: user = await databaseWrapper.createUser(testAccountSchema);
     const uuid = newUser.getUUID();
-    const slug = newUser.getAccountSchema().customURL;
+    const slug = newUser.getAccountSchema().public.customURL;
     const email = newUser.getAccountSchema().email;
 
     console.log("Setting account status...");

@@ -115,6 +115,9 @@
     <TypeScriptCompile Include="src\interfaces\socialMapElement.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\interfaces\userAccountPublicSchema.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\interfaces\userAccountSchema.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
