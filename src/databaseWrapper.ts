@@ -427,7 +427,7 @@ class databaseWrapperClass {
         });
 
 
-        // If we couldn't get a card...
+        // If we couldn't create a card...
         if (!outputCardSchema) {
             return null;
         }

@@ -9,10 +9,17 @@ import { postSearchCardResult } from "./interfaces/post/postSearchCardResult";
 import { searchQuery } from "./interfaces/searchQuery";
 import { databaseWrapper } from "./databaseWrapper";
 import { cardSchema } from "./interfaces/cardSchema";
+import { user } from "./user";
+import { card } from "./card";
+import { cardContent } from "./interfaces/cardContent";
+import { defineExpressRoutes } from "./expressRoutes";
 
 export function defineCardREST(app: Application): void {
 
-    // TODO - omit stats if session doesn't relate to this card
+    // Gets a card from the database using a cardID
+    //
+    // If the card requested doesn't belong to the currently signed in
+    // user, then it's stats are ommitted.
     app.post('/api/get-card', async (req, res) => {
 
         // If the's no cardID parameter...
@@ -68,7 +75,10 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    // TODO - omit stats if session doesn't relate to this card
+    // Gets a card from the database using a slug
+    //
+    // If the card requested doesn't belong to the currently signed in
+    // user, then it's stats are ommitted.
     app.post('/api/get-card-by-slug', async (req, res) => {
 
         // If the's no slug parameter...
@@ -125,13 +135,167 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    app.post('/api/set-card', (req, res) => {
+    // Sets properties on a card
+    app.post('/api/set-card', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // If the user is not logged in...
+        if (!req.session.uuid) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Not logged in"
+            }
 
-        // Get dummy data
-        const responseData: postGenericResult = getDummyPostGenericResult();
-        res.send(responseData);
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // Get the user from the database
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // We have a valid user. Lets see if they have a card...
+        // Get the user's card ID
+        const cardID: string = requestedUser.getCardID();
+
+        // If the user doesn't have a card ID then...
+        //
+        //      CREATE NEW CARD FOR THIS USER
+        // 
+        if (!cardID) {
+
+            // Pack the body of the request into a creation form
+            const creationForm: cardContent = req.body;
+
+            var errorMessage: string = undefined;
+
+            // If we're missing the published parameter...
+            if (creationForm.published == undefined) {
+                errorMessage = "No published sent";
+            }
+            // If we're missing the tags parameter...
+            else if (creationForm.tags == undefined) {
+                errorMessage = "No tags sent";
+            }
+            // If we're missing the socialMediaLinks parameter...
+            else if (creationForm.socialMediaLinks == undefined) {
+                errorMessage = "No socialMediaLinks sent";
+            }
+            // If we're missing the cardProperties parameter...
+            else if (creationForm.cardProperties == undefined) {
+                errorMessage = "No cardProperties sent";
+            }
+            // Otherwise...
+            else {
+
+                // If we're missing the layout parameter...
+                if (creationForm.layout == undefined) {
+                    errorMessage = "No layout sent";
+                }
+                // If we HAVE the layout parameter...
+                else {
+                    // If we're missing the layout.background parameter...
+                    if (creationForm.layout.background == undefined) {
+                        errorMessage = "No layout.background sent";
+                    }
+                    // If we're missing the layout.fontColor parameter...
+                    else if (creationForm.layout.fontColor == undefined) {
+                        errorMessage = "No layout.fontColor sent";
+                    }
+                }
+            }
+
+
+            // If there's been an error in the above if-statement
+            if (errorMessage) {
+                // Create error data
+                const responseData: postGenericResult = {
+                    error: errorMessage
+                }
+
+                // Send, and bounce!
+                res.send(responseData);
+                return;
+            }
+
+
+
+
+            // OTHERWISE
+            // If we've hit this point, then the creation form
+            // is valid so...
+            // Let's create this new card!
+
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(requestedUser.getUUID(), creationForm);
+
+            // If somehow there was an error creating this card...
+            if (!newCard) {
+                // Create error data
+                const responseData: postGenericResult = {
+                    error: "Database error when creating new card"
+                }
+
+                // Send, and bounce!
+                res.send(responseData);
+                return;
+            }
+
+            // Assign this card to the user!
+            await requestedUser.setCardID(newCard.getID());
+
+            // Construct response data and send!
+            const responseData: postGenericResult = {
+                error: ""
+            };
+            res.send(responseData);
+        }
+        // Otherwise, this user has a card...
+        // 
+        //      UPDATE CARD FOR THIS USER
+        //
+        else {
+
+            // Get the card from the database
+            const requestedCard: card = await databaseWrapper.getCard(requestedUser.getCardID());
+
+            // If somehow there was an error getting this user's card...
+            if (!requestedCard) {
+                // Create error data
+                const responseData: postGenericResult = {
+                    error: "User has invalid cardID"
+                }
+
+                // Send, and bounce!
+                res.send(responseData);
+                return;
+            }
+
+            // Pack the body of the request into an update form
+            const updateForm: cardContent = req.body;
+
+            // Update the card!
+            await requestedCard.setCardContent(updateForm);
+
+            // Construct response data and send!
+            const responseData: postGenericResult = {
+                error: ""
+            };
+            res.send(responseData);
+        }
     });
 
     app.post('/api/delete-card', (req, res) => {
