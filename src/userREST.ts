@@ -89,6 +89,8 @@ export function defineUserREST(app: Application): void {
         console.log(req.body);
         console.log("[/api/register]: Here's the interface version of what we're getting");
         console.log(registrationForm);
+        console.log("[/api/register]: Here's the stringification");
+        console.log(JSON.stringify(req.body));
 
         // Create an empty error message string
         // If there's any missing parameters below, we'll fill this in.
