@@ -67,6 +67,7 @@ export function getDummyCardSchema(): cardSchema {
     const card: cardSchema = {
         cardID: "b9fab74d-51e0-4d5e-9e76-92fb6379ff18",
         ownerID: "566062db-df68-434f-a56f-ef9439b93622",
+        ownerInfo: getDummyUserAccountPublicSchema(),
 
         content: getDummyCardContent(),
         stats: getDummyCardStats()
@@ -159,7 +160,6 @@ export function getDummyPostGetCardResult(): postGetCardResult {
     const responseData: postGetCardResult = {
         error: "",
         card: getDummyCardSchema(),
-        user: getDummyUserAccountPublicSchema()
     };
 
     return responseData;

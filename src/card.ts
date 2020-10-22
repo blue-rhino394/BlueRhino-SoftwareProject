@@ -3,6 +3,7 @@ import { cardContent, cardPropertyArrayToMap, cardPropertyMapToArray } from "./i
 import { databaseWrapper } from "./databaseWrapper";
 import { cardLayout } from "./interfaces/cardLayout";
 import { cardStats, socialArrayToMap, socialMapToArray } from "./interfaces/cardStats";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 
 
@@ -18,6 +19,9 @@ export class card {
     // Card Schema
     private cardID: string;
     private ownerID: string;
+
+    // Owner Information
+    private ownerInfo: userAccountPublicSchema;
 
     // Card Content
     private contentPublished: boolean;
@@ -49,6 +53,7 @@ export class card {
     private initializeInternalCardSchema(newCardSchema: cardSchema) {
         this.cardID = newCardSchema.cardID;
         this.ownerID = newCardSchema.ownerID;
+        this.ownerInfo = newCardSchema.ownerInfo;
 
         this.initializeInternalCardContent(newCardSchema.content);
         this.initializeInternalCardStats(newCardSchema.stats);
@@ -103,6 +108,7 @@ export class card {
         const output: cardSchema = {
             cardID: this.cardID,
             ownerID: this.ownerID,
+            ownerInfo: this.ownerInfo,
 
             content: this.getCardContent(),
             stats: this.getCardStats()

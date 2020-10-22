@@ -403,6 +403,7 @@ class databaseWrapperClass {
             const newCardSchema: cardSchema = {
                 cardID: v4(),
                 ownerID: cardOwnerID,
+                ownerInfo: cardOwner.getAccountSchema().public,
 
                 content: newContent,
                 stats: newStats

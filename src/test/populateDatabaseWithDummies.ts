@@ -204,10 +204,13 @@ async function addDummy(userRegistration: any): Promise<void> {
 
     console.log(`\nChecking for existing user '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
     const oldUser: user = await databaseWrapper.getUserByEmail(registrationForm.email);
+    var oldCardID: string = "";
 
     // If there's already a user with this email, remove them
     if (oldUser) {
         console.log(`Removing existing user '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
+
+        oldCardID = oldUser.getCardID();
         await databaseWrapper.deleteUser(oldUser.getUUID());
     }
 
@@ -221,13 +224,16 @@ async function addDummy(userRegistration: any): Promise<void> {
     }
 
 
-    console.log(`Checking for existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
-    const oldCard: card = await databaseWrapper.getCard(newUser.getCardID());
+    if (oldCardID) {
+        console.log(`Checking for existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
+        const oldCard: card = await databaseWrapper.getCard(oldCardID);
 
-    if (oldCard) {
-        console.log(`Removing existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
-        await databaseWrapper.deleteCard(oldCard.getID());
+        if (oldCard) {
+            console.log(`Removing existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
+            await databaseWrapper.deleteCard(oldCard.getID());
+        }
     }
+    
 
 
     const newCardLayout: cardLayout = {
