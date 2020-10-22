@@ -298,12 +298,68 @@ export function defineCardREST(app: Application): void {
         }
     });
 
-    app.post('/api/delete-card', (req, res) => {
+    app.post('/api/delete-card', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // If the user is not logged in...
+        if (!req.session.uuid) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Not logged in"
+            }
 
-        // Get dummy data
-        const responseData: postGenericResult = getDummyPostGenericResult();
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // Get the user from the database
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // We have a valid user. Lets see if they have a card...
+        // Get the user's card ID
+        const cardID: string = requestedUser.getCardID();
+
+        // If this user doesn't have a card...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Actually remove the card!
+        //
+
+        // Remove the card from the user
+        await requestedUser.setCardID("");
+
+        // Remove the card in the database and store any errors
+        const deleteCardError: string = await databaseWrapper.deleteCard(cardID);
+        
+
+        // Pack response data
+        const responseData: postGenericResult = {
+            error: deleteCardError
+        };
         res.send(responseData);
     });
 
