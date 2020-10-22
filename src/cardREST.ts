@@ -12,12 +12,95 @@ import { cardSchema } from "./interfaces/cardSchema";
 
 export function defineCardREST(app: Application): void {
 
-    app.post('/api/get-card', (req, res) => {
+    // TODO - omit stats if session doesn't relate to this card
+    app.post('/api/get-card', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // If the's no cardID parameter...
+        if (!req.body.cardID) {
+            // Create error data
+            const responseData: postGetCardResult = {
+                error: "No cardID sent",
+                card: undefined
+            }
 
-        // Get dummy data
-        const responseData: postGetCardResult = getDummyPostGetCardResult();
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the cardID from the post request
+        const cardID: string = req.body.cardID;
+
+        // Get the card from the database
+        const requestedCard = await databaseWrapper.getCard(cardID);
+
+        // If there's no card by this ID in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postGetCardResult = {
+                error: "Card not found",
+                card: undefined
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // Construct response data
+        const responseData: postGetCardResult = {
+            card: requestedCard.getCardSchema(),
+            error: ""
+        }
+
+        // Send!
+        res.send(responseData);
+    });
+
+    // TODO - omit stats if session doesn't relate to this card
+    app.post('/api/get-card-by-slug', async (req, res) => {
+
+        // If the's no slug parameter...
+        if (!req.body.slug) {
+            // Create error data
+            const responseData: postGetCardResult = {
+                error: "No slug sent",
+                card: undefined
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the slug from the post request
+        const slug: string = req.body.slug;
+
+        // Get the card from the database
+        const requestedCard = await databaseWrapper.getCardBySlug(slug);
+
+        // If there's no card by this slug in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postGetCardResult = {
+                error: "Card not found",
+                card: undefined
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // Construct response data
+        const responseData: postGetCardResult = {
+            card: requestedCard.getCardSchema(),
+            error: ""
+        }
+
+        // Send!
         res.send(responseData);
     });
 

@@ -521,6 +521,64 @@ class databaseWrapperClass {
         return outputCard;
     }
 
+    // Finds a card in the database by slug
+    public async getCardBySlug(requestedCardSlug: string): Promise<card> {
+        // CHECK THE CACHE FIRST!
+        // If this card exists in the cache manager,
+        // return it!!
+        //
+        // (Saves a database call!)
+        for (const tempCard of this.cache.getCards()) {
+            const ownerInfo = tempCard.getCardSchema().ownerInfo;
+
+            // If this user's customURL matches the slug we're using...
+            if (ownerInfo.customURL == requestedCardSlug) {
+                // Return them!
+                return tempCard;
+            }
+        }
+
+        // OTHERWISE...
+        var outputCardSchema: cardSchema;
+
+        // If the Cache Manager doesn't have this card, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Try to get a card with the provided slug
+            const requestedCard = await cardCollection.findOne({ "ownerInfo.customURL": requestedCardSlug });
+
+            // if we actually have the requested user in the database...
+            if (requestedCard) {
+
+                // Add it to the cache for future use...
+
+                // Save the data!
+                outputCardSchema = requestedCard;
+            }
+            // Otherwise...
+            else {
+                // This card does not exist...!
+            }
+        });
+
+        // If we couldn't get a card...
+        if (!outputCardSchema) {
+            return null;
+        }
+
+        // Create a new card object using the schema in the database
+        const outputCard: card = new card(outputCardSchema);
+
+        // Cache this card for future use!
+        this.cache.addCard(outputCard);
+
+        // Return the user.
+        return outputCard;
+    }
+
 
 
 
