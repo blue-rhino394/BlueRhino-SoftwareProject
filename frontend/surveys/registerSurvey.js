@@ -3,6 +3,10 @@ class RegisterSurvey extends Survey{
 
 	constructor(){
 		super();
+
+
+
+
 	}
 
 	validEmail(email) 
@@ -11,6 +15,11 @@ class RegisterSurvey extends Survey{
 		return email.match(mailformat);
 
 	}
+
+	getRandomArrayItem(list) {
+  		return list[Math.floor((Math.random()*list.length))];
+	} 
+
 
 	onFinished(){
 		if(this.getAnswer("businessOrPersonal")=="personal"){
@@ -23,17 +32,29 @@ class RegisterSurvey extends Survey{
 		
 	}
 
+
+
 	//Register user !!!
 	async onCompleted(){
 		let surveyResults = this.getSurveyResults();
-		surveyResults["profilePictureURL"] = "#29b6f6"
+		
+		let nameQuery = `${this.getAnswer("public.firstName")}+${this.getAnswer("public.lastName")}`;
+		let color = this.getRandomArrayItem(["29b6f6", "9575CD", "FFAB91", "009688", "8C9EFF", "F06292"]);
+		let profilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`
+		surveyResults.public.profilePictureURL = profilePicUrl;
+	
+
+	
 		console.log("registering...");
 		console.log(surveyResults);
+		console.log(JSON.stringify(surveyResults));
+		//let test =  {"email":"xk9wdefrvnr343nfnd@gmail.com","password":"123123","public":{"firstName":"Liverf","lastName":"Cram","customURL":"luvordie","profilePictureURL":"https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=Liverf+Cram&size=300&background=29b6f6&bold=true&color=FFFFF"}}
+
 		let postResults = await this.post("register", surveyResults);
 		
 		if(postResults.error!=""){
-			$("#finalMessage").text("Something went wrong when creating your account :'( "+postResults.error);
-			console.log("An error occoured when registering "+postResults.error);
+			$("#finalMessage").text("Something went wrong when creating your account :'(  "+postResults.error);
+			console.log("An error occoured when registering: "+postResults.error);
 		}else{
 			console.log("registered!");
 			let loginData = {email: surveyResults.email, password: surveyResults.password};
@@ -58,7 +79,7 @@ class RegisterSurvey extends Survey{
 	
 
 	getCompletedMessage(){
-		return `Calm down ${this.nameify(this.getAnswer("firstName"))}, we're making your account look pretty`;
+		return `Calm down ${this.nameify(this.getAnswer("public.firstName"))}, we're making your account look pretty`;
 	}
 
 	getPages(){
@@ -75,7 +96,7 @@ class RegisterSurvey extends Survey{
 				answer: "",
 				type: "question",
 				nameify: true,
-				key: "firstName",
+				key: "public.firstName",
 				color:"#9575CD",
 				
 				validate: async (answer) => {
@@ -91,7 +112,7 @@ class RegisterSurvey extends Survey{
 				question: "What's your last name?",
 				answer: "",
 				type: "question",
-				key: "lastName",
+				key: "public.lastName",
 				nameify: true,
 				color:"#9575CD",
 				validate: async (answer) => { 
@@ -123,7 +144,7 @@ class RegisterSurvey extends Survey{
 				key: "password",
 				color:"#009688",
 				validate: async (answer) => {
-					if(answer.length < 5)return "Your password must be at least 3 characters!";
+					if(answer.length < 5)return "Your password must be at least 5 characters!";
 					
 					return true;
 				}
@@ -144,7 +165,7 @@ class RegisterSurvey extends Survey{
 				question: "What URL will your profile be located at?",
 				answer: "",
 				type: "question",
-				key: "customURL",
+				key: "public.customURL",
 				color: "#8C9EFF",
 				validate: async (answer) => {
 					if(answer.length<4)return "This URL is too short!"
