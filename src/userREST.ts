@@ -179,6 +179,12 @@ export function defineUserREST(app: Application): void {
         // will collide with this one!!
 
 
+        // If there's already a session, REMOVE IT
+        if (req.session.uuid) {
+            req.session.uuid = undefined;
+        }
+
+
         // Take the user's password and hash it! (using 10 salt rounds)
         const hashedPassword: string = await bcrypt.hash(registrationForm.password, 10);
 
