@@ -4,7 +4,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex =0 ;
+		this.pageIndex = 0;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 		this.pageStop = 0;
@@ -28,8 +28,47 @@ class Survey {
 	//makes jquery post requests awaitable
 	async post(endpoint, json){
 		return new Promise(resolve => {
-    		$.post(`/api/${endpoint}`, json, (data) => {resolve(data)});
+			//this is dumb
+    		//$.post(`/api/${endpoint}`, JSON.parse(JSON.stringify(json)), (data) => {resolve(data)});
+    		console.log("FUCK FUCK FUCK");
+    		$.ajax({
+			  	url: `/api/${endpoint}`,
+			  	type: "POST",
+			  	data: JSON.stringify(json),
+			  	dataType: "json",
+			  	contentType: "application/json; charset=utf-8",
+			  	success: (data) => {resolve(data)}
+
+			});
+
   		});
+	}
+
+/*
+	async newpost(endpoint, json){
+		return new Promise(resolve => {
+			let test =  {"email":"xk9wdefrvnr343nfnd@gmail.com","password":"123123","public":{"firstName":"Liverf","lastName":"Cram","customURL":"luvordie","profilePictureURL":"https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=Liverf+Cram&size=300&background=29b6f6&bold=true&color=FFFFF"}}
+
+    		$.post(`/api/${endpoint}`, JSON.stringify(json), (data) => {resolve(data)});
+  		});
+	}*/
+
+
+	dotify(json){
+		for(const key in json){
+			if(json.hasOwnProperty(key)){
+				let value = json[key];
+				//console.log(key);
+				if(key.includes(".")){
+					let dictName = key.split(".")[0];
+					let dictKey = key.split(".")[1];
+					if(json[dictName]==undefined)json[dictName] = {};
+					json[dictName][dictKey] = value;
+					delete json[key];
+				}
+			}
+		}
+		return json;
 	}
 
 	nextPage(){
@@ -268,7 +307,7 @@ class Survey {
 				results[page.key] = answer;
 			}
 		}
-		return results;
+		return this.dotify(results);
 	}
 
 	getPages(){
