@@ -27,13 +27,51 @@ class databaseWrapperClass {
     private cache: databaseCacheManager;
 
 
+    // Mongo Variables
+
+    // The driver for connecting to mongoDB
+    private mongoClient: MongoClient;
+
+
+
+
     //
     //  Constructor and Initialization
     //
 
     public constructor() {
-        console.log("Starting database wrapper...");
+        console.log("Constructing Database Wrapper...");
         this.cache = new databaseCacheManager();
+    }
+
+    private async initialize(): Promise<void> {
+        await this.connectToMongo();
+        await this.verifyConnectedToMongoDB();
+        console.log("Database Wrapper Initialized!");
+    }
+
+    // Connect the database wrapper to mongoDB and cache
+    // any necessary variables
+    private async connectToMongo(): Promise<void> {
+
+        // If for some reason mongoClient already exists
+        //      AND
+        // it's connected...
+        if (this.mongoClient && this.mongoClient.isConnected()) {
+            // Bounce!
+            return;
+        }
+
+
+        // Construct mongoDB connection URL
+        const connectionString: string = `mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`;
+
+        // Create mongoDB client for the database
+        this.mongoClient = new MongoClient(connectionString, {
+            useUnifiedTopology: true
+        });
+
+        await this.mongoClient.connect();
     }
 
     // Checks to see if we can connected to mongoDB by pinging the users database
@@ -213,7 +251,7 @@ class databaseWrapperClass {
             const userAccount = tempUser.getAccountSchema();
 
             // If this user's customURL matches the slug we're using...
-            if (userAccount.customURL == userSlug) {
+            if (userAccount.public.customURL == userSlug) {
                 // Return them!
                 return tempUser;
             }
@@ -229,7 +267,7 @@ class databaseWrapperClass {
             var userCollection = await database.collection("users");
 
             // Try to get a user with the provided slug
-            const requestedUser = await userCollection.findOne({ "userAccount.customURL": userSlug });
+            const requestedUser = await userCollection.findOne({ "userAccount.public.customURL": userSlug });
 
             // if we actually have the requested user in the database...
             if (requestedUser) {
@@ -361,15 +399,11 @@ class databaseWrapperClass {
                 social: []
             };
 
-            const cardOwnerAccount = cardOwner.getAccountSchema();
-
             // Create new card schema
             const newCardSchema: cardSchema = {
                 cardID: v4(),
                 ownerID: cardOwnerID,
-
-                firstName: cardOwnerAccount.firstName,
-                lastName: cardOwnerAccount.lastName,
+                ownerInfo: cardOwner.getAccountSchema().public,
 
                 content: newContent,
                 stats: newStats
@@ -487,6 +521,64 @@ class databaseWrapperClass {
         return outputCard;
     }
 
+    // Finds a card in the database by slug
+    public async getCardBySlug(requestedCardSlug: string): Promise<card> {
+        // CHECK THE CACHE FIRST!
+        // If this card exists in the cache manager,
+        // return it!!
+        //
+        // (Saves a database call!)
+        for (const tempCard of this.cache.getCards()) {
+            const ownerInfo = tempCard.getCardSchema().ownerInfo;
+
+            // If this user's customURL matches the slug we're using...
+            if (ownerInfo.customURL == requestedCardSlug) {
+                // Return them!
+                return tempCard;
+            }
+        }
+
+        // OTHERWISE...
+        var outputCardSchema: cardSchema;
+
+        // If the Cache Manager doesn't have this card, let's look in the database!
+        await this.runMongoOperation(async function (database) {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Try to get a card with the provided slug
+            const requestedCard = await cardCollection.findOne({ "ownerInfo.customURL": requestedCardSlug });
+
+            // if we actually have the requested user in the database...
+            if (requestedCard) {
+
+                // Add it to the cache for future use...
+
+                // Save the data!
+                outputCardSchema = requestedCard;
+            }
+            // Otherwise...
+            else {
+                // This card does not exist...!
+            }
+        });
+
+        // If we couldn't get a card...
+        if (!outputCardSchema) {
+            return null;
+        }
+
+        // Create a new card object using the schema in the database
+        const outputCard: card = new card(outputCardSchema);
+
+        // Cache this card for future use!
+        this.cache.addCard(outputCard);
+
+        // Return the user.
+        return outputCard;
+    }
+
 
 
 
@@ -511,12 +603,34 @@ class databaseWrapperClass {
             // Search for cards that:
             //  * have the text provided in requestedQuery.textQuery
             //  * have the tags provided in requestedQuery.tags
-            const query = {
-                $text: {
-                    $search: requestedQuery.textQuery
-                },
+            var query = undefined;
 
-                "content.tags": { $all: requestedQuery.tags }
+            if (requestedQuery.tags.length > 0) {
+                query = {
+                    $text: {
+                        $search: requestedQuery.textQuery,
+                        $caseSensitive: false,
+                    },
+
+                    "content.tags": { $all: requestedQuery.tags }
+                }
+            }
+            else {
+                query = {
+                    $text: {
+                        $search: requestedQuery.textQuery,
+                        $caseSensitive: false,
+                    }
+                }
+            }
+
+            
+
+
+            const projection = {
+                _id: 0,
+                cardID: 1,
+
             }
 
             // Restrict the database return results so that:
@@ -524,17 +638,19 @@ class databaseWrapperClass {
             //  * we ONLY get the uuid
             const options = {
                 skip: requestedQuery.pageNumber * cardsPerPage,
+                limit: cardsPerPage,
 
-                _id: 0,
-                uuid: 1
+                projection: projection
             }
 
             // Execute search using the above query and options
             const cursor = cardCollection.find(query, options);
+            //const cursor = cardCollection.find(query);
+
 
             // Add each UUID to the list
-            cursor.forEach((card) => {
-                resultIDs.push(card.uuid);
+            await cursor.forEach((card) => {
+                resultIDs.push(card.cardID);
             });
         });
 
@@ -555,26 +671,19 @@ class databaseWrapperClass {
     // Connects to the database, runs a callback providing the database, then closes the connection
     // (used for generic database operations)
     public async runMongoOperation(operation: (db: Db) => Promise<void>): Promise<void> {
-        // Construct mongoDB connection URL
-        const connectionString: string = `mongodb+srv://main-access:${"Xpcdu9kTHUaaI03o"}@cluster0.x9cls.mongodb.net/${"passport"}?retryWrites=true&w=majority`;
 
-        // Create mongoDB client for this operation
-        var mongoClient = new MongoClient(connectionString, {
-            useUnifiedTopology: true
-        });
-
-        // Connect to the database and attempt to run the operation
-        try {
-            await mongoClient.connect();
-            var dbPassport: Db = await mongoClient.db("passport");
-
-            // Run and wait for the operation callback to finish
-            await operation(dbPassport);
+        // If for some reason the mongoDB connection isn't defined
+        //      OR
+        // If the mongoDB connection is closed...
+        if (!this.mongoClient || !this.mongoClient.isConnected) {
+            // Try to start it!
+            await this.initialize();
         }
-        // Disconnect from the database
-        finally {
-            await mongoClient.close();
-        }
+
+        var dbPassport: Db = this.mongoClient.db("passport");
+
+        // Run and wait for the operation callback to finish
+        await operation(dbPassport).catch(err => console.log(`Error while executing mongo operation: ${err}`))
     }
 }
 

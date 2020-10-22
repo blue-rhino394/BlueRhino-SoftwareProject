@@ -5,6 +5,7 @@ import { userAccountSchema } from "./interfaces/userAccountSchema";
 import { PassThrough } from "stream";
 import { databaseWrapper } from "./databaseWrapper";
 import bcrypt from "bcrypt";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 export class user {
 
@@ -18,6 +19,8 @@ export class user {
     // User Account Schema
     private email: string;
     private passwordHash: string;
+
+    // User Account Public Schema
     private firstName: string;
     private lastName: string;
     private customURL: string;
@@ -54,12 +57,17 @@ export class user {
     private initializeInternalUserAccountSchema(newUserAccountSchema: userAccountSchema): void {
         this.email = newUserAccountSchema.email;
         this.passwordHash = newUserAccountSchema.passwordHash;
-        this.firstName = newUserAccountSchema.firstName;
-        this.lastName = newUserAccountSchema.lastName;
-        this.customURL = newUserAccountSchema.customURL;
-        this.profilePictureURL = newUserAccountSchema.profilePictureURL;
+
+        this.initializeInternalUserAccountPublicSchema(newUserAccountSchema.public);
     }
 
+    // Populate internal variables related to userAccountPublicSchema
+    private initializeInternalUserAccountPublicSchema(newUserAccountPublicSchema: userAccountPublicSchema): void {
+        this.firstName = newUserAccountPublicSchema.firstName;
+        this.lastName = newUserAccountPublicSchema.lastName;
+        this.customURL = newUserAccountPublicSchema.customURL;
+        this.profilePictureURL = newUserAccountPublicSchema.profilePictureURL;
+    }
 
 
 
@@ -77,10 +85,12 @@ export class user {
         const output: userAccountSchema = {
             email: this.email,
             passwordHash: this.passwordHash,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            customURL: this.customURL,
-            profilePictureURL: this.profilePictureURL
+            public: {
+                firstName: this.firstName,
+                lastName: this.lastName,
+                customURL: this.customURL,
+                profilePictureURL: this.profilePictureURL
+            }
         }
 
         return output;
@@ -102,6 +112,9 @@ export class user {
         return this.currentAccountStatus;
     }
 
+    public getVerificationCode(): string {
+        return this.verificationCode;
+    }
 
 
 
@@ -109,13 +122,13 @@ export class user {
     //  Setters
     //
 
-    public setCardID(newCardID: string): void {
+    public async setCardID(newCardID: string): Promise<void> {
 
         // Set the cardID in memory
         this.cardID = newCardID;
 
         // Update the user in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");
@@ -142,12 +155,12 @@ export class user {
         });
     }
 
-    public setAccountStatus(newAccountStatus: accountStatus): void {
+    public async setAccountStatus(newAccountStatus: accountStatus): Promise<void> {
         // Set the account status in memory
         this.currentAccountStatus = newAccountStatus;
 
         // Update the user in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");
@@ -158,10 +171,42 @@ export class user {
             // Create options explicitly saying that we do NOT want to upsert (create new data if it doesn't exist)
             const options = { upsert: false }
 
-            // Create the update data, saying that we want to set the cardID
+            // Create the update data, saying that we want to set the account status
             const updateData = {
                 $set: {
                     currentAccountStatus: newAccountStatus
+                }
+            };
+
+            // Apply update operation!
+            const updateResult = await userCollection.updateOne(filter, updateData, options);
+
+
+            // If we wanted to check if it actually updated something at this point,
+            // we would check to see if updateResult.modifiedCount is greater than zero!
+        });
+    }
+
+    public async setVerificationCode(newVerificationCode: string): Promise<void> {
+        // Set the verification code in memory
+        this.verificationCode = newVerificationCode;
+
+        // Update the user in the database
+        await databaseWrapper.runMongoOperation(async (database) => {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Create a filter indicating that we want THIS user
+            const filter = { uuid: this.getUUID() }
+
+            // Create options explicitly saying that we do NOT want to upsert (create new data if it doesn't exist)
+            const options = { upsert: false }
+
+            // Create the update data, saying that we want to set the verification code
+            const updateData = {
+                $set: {
+                    verificationCode: newVerificationCode
                 }
             };
 
@@ -266,12 +311,12 @@ export class user {
         return result;
     }
 
-    public updateAccountSchema(accountSchemaUpdate: userAccountSchema): void {
+    public async updateAccountSchema(accountSchemaUpdate: userAccountSchema): Promise<void> {
         // Update the account schema in memory
         this.updateInternalAccountSchema(accountSchemaUpdate);
 
         // Update the user in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");
@@ -285,7 +330,7 @@ export class user {
             // Create the update data, saying that we want to update user account data
             const updateData = {
                 $set: {
-                    userAccount: this.createJsonAccountUpdateData(accountSchemaUpdate)
+                    userAccount: this.getAccountSchema()
                 }
             };
 
@@ -296,6 +341,19 @@ export class user {
             // If we wanted to check if it actually updated something at this point,
             // we would check to see if updateResult.modifiedCount is greater than zero!
         });
+
+        // If we're modifying the public account info...
+        if (accountSchemaUpdate.public) {
+
+            const ourCard = await databaseWrapper.getCard(this.getCardID());
+
+            // If we actually have a card...
+            if (ourCard) {
+
+                // Update it's known info!
+                await ourCard.setOwnerInfo(accountSchemaUpdate.public);
+            }
+        }
     }
 
 
@@ -319,50 +377,26 @@ export class user {
             this.passwordHash = accountSchemaUpdate.passwordHash;
         }
 
-        if (accountSchemaUpdate.firstName != null) {
-            this.firstName = accountSchemaUpdate.firstName;
-        }
-
-        if (accountSchemaUpdate.lastName != null) {
-            this.lastName = accountSchemaUpdate.lastName;
-        }
-
-        if (accountSchemaUpdate.customURL != null) {
-            this.customURL = accountSchemaUpdate.customURL;
-        }
-
-        if (accountSchemaUpdate.profilePictureURL != null) {
-            this.profilePictureURL = accountSchemaUpdate.profilePictureURL;
+        if (accountSchemaUpdate.public != null) {
+            this.updateInternalAccountPublicSchema(accountSchemaUpdate.public);
         }
     }
 
-    private createJsonAccountUpdateData(accountSchemaUpdate: userAccountSchema): any {
-        var output: Record<string, any> = {};
-
-        if (accountSchemaUpdate.email != null) {
-            output.email = accountSchemaUpdate.email;
+    private updateInternalAccountPublicSchema(accountPublicSchemaUpdate: userAccountPublicSchema): void {
+        if (accountPublicSchemaUpdate.firstName != null) {
+            this.firstName = accountPublicSchemaUpdate.firstName;
         }
 
-        if (accountSchemaUpdate.passwordHash != null) {
-            output.passwordHash = accountSchemaUpdate.passwordHash;
+        if (accountPublicSchemaUpdate.lastName != null) {
+            this.lastName = accountPublicSchemaUpdate.lastName;
         }
 
-        if (accountSchemaUpdate.firstName != null) {
-            output.firstName = accountSchemaUpdate.firstName;
+        if (accountPublicSchemaUpdate.customURL != null) {
+            this.customURL = accountPublicSchemaUpdate.customURL;
         }
 
-        if (accountSchemaUpdate.lastName != null) {
-            output.lastName = accountSchemaUpdate.lastName;
+        if (accountPublicSchemaUpdate.profilePictureURL != null) {
+            this.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
         }
-
-        if (accountSchemaUpdate.customURL != null) {
-            output.customURL = accountSchemaUpdate.customURL;
-        }
-
-        if (accountSchemaUpdate.profilePictureURL != null) {
-            output.profilePictureURL = accountSchemaUpdate.profilePictureURL;
-        }
-
-        return output;
     }
 }

@@ -3,6 +3,7 @@ import { cardContent, cardPropertyArrayToMap, cardPropertyMapToArray } from "./i
 import { databaseWrapper } from "./databaseWrapper";
 import { cardLayout } from "./interfaces/cardLayout";
 import { cardStats, socialArrayToMap, socialMapToArray } from "./interfaces/cardStats";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 
 
@@ -18,8 +19,9 @@ export class card {
     // Card Schema
     private cardID: string;
     private ownerID: string;
-    private firstName: string;
-    private lastName: string;
+
+    // Owner Information
+    private ownerInfo: userAccountPublicSchema;
 
     // Card Content
     private contentPublished: boolean;
@@ -51,8 +53,7 @@ export class card {
     private initializeInternalCardSchema(newCardSchema: cardSchema) {
         this.cardID = newCardSchema.cardID;
         this.ownerID = newCardSchema.ownerID;
-        this.firstName = newCardSchema.firstName;
-        this.lastName = newCardSchema.lastName;
+        this.ownerInfo = newCardSchema.ownerInfo;
 
         this.initializeInternalCardContent(newCardSchema.content);
         this.initializeInternalCardStats(newCardSchema.stats);
@@ -107,8 +108,7 @@ export class card {
         const output: cardSchema = {
             cardID: this.cardID,
             ownerID: this.ownerID,
-            firstName: this.firstName,
-            lastName: this.lastName,
+            ownerInfo: this.ownerInfo,
 
             content: this.getCardContent(),
             stats: this.getCardStats()
@@ -160,13 +160,13 @@ export class card {
     //
 
     // Updates the content of this card using the parameters defined in contentUpdate
-    public setCardContent(contentUpdate: cardContent): void {
+    public async setCardContent(contentUpdate: cardContent): Promise<void> {
 
         // Update the card in memory
         this.updateInternalCardContent(contentUpdate);
 
         // Update the card in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -177,10 +177,10 @@ export class card {
             // Create options explicitly saying that we do NOT want to upsert (create new data if it doesn't exist)
             const options = { upsert: false }
 
-            // Create the update data, saying that we want to set content to the var contentUpdate
+            // Create the update data, saying that we want to set content our content schema
             const updateData = {
                 $set: {
-                    content: this.createJsonContentUpdateData(contentUpdate)
+                    content: this.getCardContent()
                 }
             };
 
@@ -194,6 +194,38 @@ export class card {
     }
 
 
+    public async setOwnerInfo(ownerInfoUpdate: userAccountPublicSchema): Promise<void> {
+
+        // Set the owner info in memory
+        this.updateInternalOwnerInfo(ownerInfoUpdate);
+
+        // Set the owner info in the database
+        await databaseWrapper.runMongoOperation(async (database) => {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Create a filter indicating that we want THIS card
+            const filter = { cardID: this.getID() }
+
+            // Create options explicitly saying that we DO want to upsert (create new data if it doesn't exist)
+            const options = { upsert: true }
+
+            // Create the update data, saying that we want to set owner info to the var ownerInfoUpdate
+            const updateData = {
+                $set: {
+                    ownerInfo: this.ownerInfo
+                }
+            };
+
+            // Apply update operation!
+            const updateResult = await cardCollection.updateOne(filter, updateData, options);
+
+
+            // If we wanted to check if it actually updated something at this point,
+            // we would check to see if updateResult.modifiedCount is greater than zero!
+        });
+    }
 
 
 
@@ -421,52 +453,25 @@ export class card {
 
 
 
-    //
-    //  Create Anonymous JSON Methods
-    //
 
-    // Takes in a cardContent interface and converts it to a typeless JSON object.
+    // Update the internal card content variables using a provided cardContent interface.
     // If properties of the interface are explicitly null, they will be ignored!
-    private createJsonContentUpdateData(contentUpdate: cardContent): any {
-        var output: Record<string, any> = {};
+    private updateInternalOwnerInfo(updateOwnerInfo: userAccountPublicSchema): void {
 
-        if (contentUpdate.published != null) {
-            output.published = contentUpdate.published;
+        if (updateOwnerInfo.firstName != null) {
+            this.ownerInfo.firstName = updateOwnerInfo.firstName;
         }
 
-        if (contentUpdate.tags != null) {
-            output.tags = contentUpdate.tags;
+        if (updateOwnerInfo.lastName != null) {
+            this.ownerInfo.lastName = updateOwnerInfo.lastName;
         }
 
-        if (contentUpdate.socialMediaLinks != null) {
-            output.socialMediaLinks = contentUpdate.socialMediaLinks;
+        if (updateOwnerInfo.customURL != null) {
+            this.ownerInfo.customURL = updateOwnerInfo.customURL;
         }
 
-        if (contentUpdate.cardProperties != null) {
-            output.cardProperties = contentUpdate.cardProperties;
+        if (updateOwnerInfo.profilePictureURL != null) {
+            this.ownerInfo.profilePictureURL = updateOwnerInfo.profilePictureURL;
         }
-
-        if (contentUpdate.layout != null) {
-            output.layout = this.createJsonLayoutUpdateData(contentUpdate.layout);
-        }
-
-
-        return output;
-    }
-
-    // Takes in a cardContent interface and converts it to a typeless JSON object.
-    // If properties of the interface are explicitly null, they will be ignored!
-    private createJsonLayoutUpdateData(layoutUpdate: cardLayout): any {
-        var output: Record<string, any> = {};
-
-        if (layoutUpdate.background != null) {
-            output.background = layoutUpdate.background;
-        }
-
-        if (layoutUpdate.fontColor != null) {
-            output.fontColor = layoutUpdate.fontColor;
-        }
-
-        return output;
     }
 }

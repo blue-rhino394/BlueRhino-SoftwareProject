@@ -61,7 +61,7 @@ class HomeView extends View{
 	getComponents(){
 
 		return {
-			"side" : new Search("Saved Cards", "favorite"),
+			"side" : new Search("Saved Cards", "myCards"),
 			"main" : new CardViewer(this.slug)
 		}
 	}

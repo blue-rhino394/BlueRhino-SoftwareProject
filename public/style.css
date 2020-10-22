@@ -7,11 +7,7 @@ body
 
 }
 
-.survey
-{
-	background-color: #29b6f6;
-	color: white;
-}
+
 
 .textbox, textarea
 {
@@ -133,3 +129,82 @@ img {
 	width: 50px; 
 	height: 50px;
 }
+
+/*styles for survey*/
+.survey{
+	background-color: #29b6f6;
+	color: white;
+	padding: 0px;
+	margin: 0px;
+	
+	align-items: center;
+ 	display: flex;
+ 	justify-content: center;
+
+	overflow: hidden;
+
+
+}
+
+.surveyContent{
+
+	width: 50%;
+	border-left: 0px dashed transparent;
+	position: relative;
+	overflow: none;
+}
+
+
+.surveyContentHolder{
+
+	overflow: none;
+	width: 60%;
+}
+
+.surveryQuestion{
+	text-align: left;
+	border: 0px none;
+
+	height: 40px;
+	width: 100%;
+	min-width: 60%;
+	padding:0px;
+	font-size: 20px;
+
+	outline: none;
+    outline-style: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: solid #eeeeee 1px;
+    background-color: transparent;
+
+	color: white;
+}
+
+.surveryQuestion::placeholder {
+  color: white;
+  opacity: 0.5; /* Firefox */
+}
+
+
+.surveyButton{
+	border-radius: 15px;
+	 border: 1px solid white;
+  	background-color: rgba(255, 255, 255, 0.1);
+
+	padding:20px;
+
+	font-size: 15px;
+	margin-right: 5px;
+	font-weight: bold;
+	color: white;
+
+}
+
+
+.surveyButton:hover{
+	background-color: rgba(255, 255, 255, 0.3);
+	cursor: pointer;
+}
+

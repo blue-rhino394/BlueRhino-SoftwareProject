@@ -55,7 +55,7 @@ class Login extends Component{
 	}
 
 	signUp(){
-		window.location.href = "registersurvey.html";
+		window.location.href = "/register";
 	}
 
 
@@ -87,7 +87,7 @@ class Login extends Component{
 		content.append("<br><br>");
 
 		//create login button
-		content.append($("<a/>", {text:"Login", click: this.login}).css({marginLeft:"5px",marginRight:"10px"}));
+		content.append($("<a/>", {text:"Login", click: this.login}).css({marginLeft:"5px", marginRight:"10px"}));
 
 		//create login button
 		content.append($("<a/>", {text:"Sign Up", click: this.signUp}));
@@ -182,36 +182,45 @@ class Search extends Component{
 		super();
 		this.searchText = searchText;
 		this.light = (type=="light");
-		this.favorite = (type=="favorite");
+		this.myCards = (type=="myCards");
 
 	}
 
 	onRender(){
-		if(this.favorite)this.showResults("", 6);
+		if(this.myCards)this.showResults("", 6);
 	}
 
 	typed(){
 
 		let query = $("#search").val();
-		this.showResults(query.length)
+		this.showResults(query, query.length)
 		
 	}
 
 	showResults(query, dupe = -1){
 		if(dupe==-1)dupe = query.length;
-		$.post("/api/search-card", {query: query, tags:[]}, (results) => {
+		dupe = 1;
+		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 1};
+		//console.log(request);
+		
+		var start = new Date();
+		console.log("querying "+query);
+		$.post("/api/search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
 				$("#results").html("");
 
-				//for loop is here to illustrate what multiple results look like 
-				for(var i=0; i < 5; i++){
+			
+					var finish = new Date();
+					var difference = new Date();
+					difference.setTime(finish.getTime() - start.getTime());
+					console.log(`${query} took ${(difference.getSeconds())} seconds`);
 					for(var result of results.cards){
 
 						new Card(result, true).render("results");
 
 					}
-				}
+			
 
 				$("#results").fadeIn(500);
 			});
@@ -226,7 +235,7 @@ class Search extends Component{
 		});
 
 		//Searh Heading
-		if(!this.favorite)content.append($("<h2/>", {text: this.searchText}));
+		if(!this.myCards)content.append($("<h2/>", {text: this.searchText}));
 
 		//Search textbox 
 		content.append($("<input>", {
