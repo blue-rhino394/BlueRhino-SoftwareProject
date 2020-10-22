@@ -371,12 +371,109 @@ export function defineUserREST(app: Application): void {
 
 
     // Updates the account settings for a user.
-    app.post('/api/update-account-settings', (req, res) => {
+    app.post('/api/update-account-settings', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // If we're not logged in...
+        if (!req.session.uuid) {
+            // Pack response data
+            const responseData: postGenericResult = {
+                error: "Not logged in"
+            }
 
-        // Get dummy data
-        const responseData: postGenericResult = getDummyPostGenericResult();
+            // Send and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+        // Pack the body of the request into an update form
+        const updateForm: userAccountSchema = req.body;
+
+
+
+        // Manually check the update form for any potential errors
+        //
+
+        // If a new password is sent (will be unhashed despite name)...
+        if (updateForm.passwordHash) {
+            // Hash it!
+            updateForm.passwordHash = await bcrypt.hash(updateForm.passwordHash, 10);
+        }
+
+        // If a new email is sent...
+        if (updateForm.email) {
+            // Check to see if a user already is using this email!
+
+            // Get a user using this email
+            const existingUser: user = await databaseWrapper.getUserByEmail(updateForm.email);
+
+            // If a user exists with this email...
+            if (existingUser) {
+                // Pack response data
+                const responseData: postGenericResult = {
+                    error: "A user with this email already exists"
+                }
+
+                // Send and bounce!
+                res.send(responseData);
+                return;
+            }
+        }
+
+        // If a new slug is sent...
+        if (updateForm.public && updateForm.public.customURL) {
+            // Check to see if a user is already using this slug!
+
+            // Get a user using this slug
+            const existingUser: user = await databaseWrapper.getUserBySlug(updateForm.public.customURL);
+
+            // If a user exists with this email...
+            if (existingUser) {
+                // Pack response data
+                const responseData: postGenericResult = {
+                    error: "A user with this slug already exists"
+                }
+
+                // Send and bounce!
+                res.send(responseData);
+                return;
+            }
+        }
+
+
+
+
+
+        // Get the user from the database
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If this user doesn't exist...
+        if (!requestedUser) {
+            // Pack response data
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+        // OTHERWISE...
+        // We have the user. We have the update form.
+        // Let's update!
+
+        // Update the user's account data
+        await requestedUser.updateAccountSchema(updateForm);
+
+
+        // Pack response data
+        const responseData: postGenericResult = {
+            error: ""
+        };
         res.send(responseData);
     });
 }

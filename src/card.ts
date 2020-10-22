@@ -418,23 +418,23 @@ export class card {
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalCardContent(updateContent: cardContent): void {
 
-        if (updateContent.published != null) {
+        if (updateContent.published != undefined) {
             this.contentPublished = updateContent.published;
         }
 
-        if (updateContent.tags != null) {
+        if (updateContent.tags != undefined) {
             this.contentTags = updateContent.tags;
         }
 
-        if (updateContent.socialMediaLinks != null) {
+        if (updateContent.socialMediaLinks != undefined) {
             this.contentSocialMediaLinks = updateContent.socialMediaLinks;
         }
 
-        if (updateContent.cardProperties != null) {
+        if (updateContent.cardProperties != undefined) {
             this.contentCardProperties = cardPropertyArrayToMap(updateContent.cardProperties);
         }
 
-        if (updateContent.layout != null) {
+        if (updateContent.layout != undefined) {
             this.updateInternalCardLayout(updateContent.layout);
         }
     }
@@ -442,11 +442,11 @@ export class card {
     // Update the internal card layout variables using a provided cardLayout interface.
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalCardLayout(updateLayout: cardLayout): void {
-        if (updateLayout.background != null) {
+        if (updateLayout.background != undefined) {
             this.layoutBackground = updateLayout.background;
         }
 
-        if (updateLayout.fontColor != null) {
+        if (updateLayout.fontColor != undefined) {
             this.layoutFontColor = updateLayout.fontColor;
         }
     }
@@ -458,19 +458,19 @@ export class card {
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalOwnerInfo(updateOwnerInfo: userAccountPublicSchema): void {
 
-        if (updateOwnerInfo.firstName != null) {
+        if (updateOwnerInfo.firstName != undefined) {
             this.ownerInfo.firstName = updateOwnerInfo.firstName;
         }
 
-        if (updateOwnerInfo.lastName != null) {
+        if (updateOwnerInfo.lastName != undefined) {
             this.ownerInfo.lastName = updateOwnerInfo.lastName;
         }
 
-        if (updateOwnerInfo.customURL != null) {
+        if (updateOwnerInfo.customURL != undefined) {
             this.ownerInfo.customURL = updateOwnerInfo.customURL;
         }
 
-        if (updateOwnerInfo.profilePictureURL != null) {
+        if (updateOwnerInfo.profilePictureURL != undefined) {
             this.ownerInfo.profilePictureURL = updateOwnerInfo.profilePictureURL;
         }
     }

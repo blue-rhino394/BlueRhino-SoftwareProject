@@ -369,33 +369,33 @@ export class user {
     //
 
     private updateInternalAccountSchema(accountSchemaUpdate: userAccountSchema): void {
-        if (accountSchemaUpdate.email != null) {
+        if (accountSchemaUpdate.email != undefined) {
             this.email = accountSchemaUpdate.email;
         }
 
-        if (accountSchemaUpdate.passwordHash != null) {
+        if (accountSchemaUpdate.passwordHash != undefined) {
             this.passwordHash = accountSchemaUpdate.passwordHash;
         }
 
-        if (accountSchemaUpdate.public != null) {
+        if (accountSchemaUpdate.public != undefined) {
             this.updateInternalAccountPublicSchema(accountSchemaUpdate.public);
         }
     }
 
     private updateInternalAccountPublicSchema(accountPublicSchemaUpdate: userAccountPublicSchema): void {
-        if (accountPublicSchemaUpdate.firstName != null) {
+        if (accountPublicSchemaUpdate.firstName != undefined) {
             this.firstName = accountPublicSchemaUpdate.firstName;
         }
 
-        if (accountPublicSchemaUpdate.lastName != null) {
+        if (accountPublicSchemaUpdate.lastName != undefined) {
             this.lastName = accountPublicSchemaUpdate.lastName;
         }
 
-        if (accountPublicSchemaUpdate.customURL != null) {
+        if (accountPublicSchemaUpdate.customURL != undefined) {
             this.customURL = accountPublicSchemaUpdate.customURL;
         }
 
-        if (accountPublicSchemaUpdate.profilePictureURL != null) {
+        if (accountPublicSchemaUpdate.profilePictureURL != undefined) {
             this.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
         }
     }
