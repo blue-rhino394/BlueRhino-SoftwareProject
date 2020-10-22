@@ -230,7 +230,7 @@ export class user {
         return bcrypt.compareSync(password, this.passwordHash);
     }
 
-    public addSavedCard(cardToAddID: string): savedCard {
+    public async addSavedCard(cardToAddID: string): Promise<savedCard> {
 
         // Construct savedCard interface
         const newSavedCard: savedCard = {
@@ -243,7 +243,7 @@ export class user {
         this.savedCards.set(cardToAddID, newSavedCard);
 
         // Add to the array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");
@@ -274,13 +274,13 @@ export class user {
         return newSavedCard;
     }
 
-    public removeSavedCard(cardToRemoveID: string): boolean {
+    public async removeSavedCard(cardToRemoveID: string): Promise<boolean> {
 
         // Remove from data structure in memory
         const result = this.savedCards.delete(cardToRemoveID);
 
         // Remove from the array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get user collection from database
             var userCollection = await database.collection("users");

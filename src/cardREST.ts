@@ -13,6 +13,7 @@ import { user } from "./user";
 import { card } from "./card";
 import { cardContent } from "./interfaces/cardContent";
 import { defineExpressRoutes } from "./expressRoutes";
+import { savedCard } from "./interfaces/savedCard";
 
 export function defineCardREST(app: Application): void {
 
@@ -135,7 +136,7 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    // Sets properties on a card
+    // Sets properties on the card of the currently logged in user
     app.post('/api/set-card', async (req, res) => {
 
         // If the user is not logged in...
@@ -298,6 +299,7 @@ export function defineCardREST(app: Application): void {
         }
     });
 
+    // Deletes the card of the currently logged in user
     app.post('/api/delete-card', async (req, res) => {
 
         // If the user is not logged in...
@@ -363,12 +365,103 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    app.post('/api/toggle-save', (req, res) => {
+    app.post('/api/toggle-save', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // Get the cardID parameter
+        const cardID: string = req.body.cardID;
 
-        // Get dummy data
-        const responseData: postToggleSaveResult = getDummyPostToggleSaveResult();
+
+
+        var errorMessage: string = undefined;
+
+        // If the user is not logged in
+        if (!req.session.uuid) {
+            errorMessage = "User not logged in"
+        }
+        // If no cardID was sent...
+        else if (!cardID) {
+            errorMessage = "No cardID sent";
+        }
+
+        // If there was an error with one of the above statements...
+        if (errorMessage) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: errorMessage,
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Get the card from the database
+        const requestedCard: card = await databaseWrapper.getCard(cardID);
+
+        // If there's no card by this ID in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "No card with this cardID",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the currently logged in user
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "Invalid session uuid",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // OTHERWISE
+        // We've got the card that this user wants to toggle, and the user
+        // that will be doing the toggling. Let's do it!
+
+        // Try to get the saved card
+        const currentlySavedCard: savedCard = requestedUser.getSavedCard(cardID);
+        var isSaved: boolean = false;
+
+        // If this card is not saved...
+        if (!currentlySavedCard) {
+            // Save it!
+            await requestedUser.addSavedCard(cardID);
+            isSaved = true;
+        }
+        // OTHERWISE, if this card IS saved...
+        else {
+            // Unsave it!
+            await requestedUser.removeSavedCard(cardID);
+            isSaved = false;
+        }
+
+
+        // Pack response data
+        const responseData: postToggleSaveResult = {
+            error: "",
+            isSaved: isSaved
+        };
         res.send(responseData);
     });
 
