@@ -44,6 +44,9 @@ class HomeView extends View{
 
 	constructor(slug=""){
 		super();
+		//if(slug=="")slug = page.user.customURL;
+		if(slug=="")slug = "mhewitt836";
+		
 		this.slug = slug
 	}
 
