@@ -307,15 +307,6 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    app.post('/api/get-saved-cards', (req, res) => {
-
-        // TODO - IMPLEMENT!
-
-        // Get dummy data
-        const responseData: postGetSavedCardsResult = getDummyPostGetSavedCardsResult();
-        res.send(responseData);
-    });
-
     app.post('/api/toggle-save', (req, res) => {
 
         // TODO - IMPLEMENT!
