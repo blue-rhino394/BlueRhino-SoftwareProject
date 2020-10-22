@@ -267,7 +267,7 @@ class databaseWrapperClass {
             var userCollection = await database.collection("users");
 
             // Try to get a user with the provided slug
-            const requestedUser = await userCollection.findOne({ "userAccount.customURL": userSlug });
+            const requestedUser = await userCollection.findOne({ "userAccount.public.customURL": userSlug });
 
             // if we actually have the requested user in the database...
             if (requestedUser) {
