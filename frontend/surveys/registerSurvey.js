@@ -12,11 +12,23 @@ class RegisterSurvey extends Survey{
 
 	}
 
+	onFinished(){
+		if(this.getAnswer("businessOrPersonal")=="personal"){
+			window.location.href = "/";
+		}else{
+			this.pages = this.pages.concat(new CardSurvey().getPages());
+			this.pageIndex -= 1;
+			this.nextPage();
+		}
+		
+	}
+
 	//Register user !!!
 	async onCompleted(){
 		let surveyResults = this.getSurveyResults();
 		surveyResults["profilePictureURL"] = "#29b6f6"
 		console.log("registering...");
+		console.log(surveyResults);
 		let postResults = await this.post("register", surveyResults);
 		
 		if(postResults.error!=""){
@@ -33,7 +45,7 @@ class RegisterSurvey extends Survey{
 				this.countdown = 0;
 				window.setInterval(() => {
 					this.countdown+=1;
-					if(this.countdown==5)window.location.href = "/";
+					if(this.countdown==5)this.onFinished();
 					$("#finalMessage").append(".");
 
 				}, 1000);
@@ -46,10 +58,8 @@ class RegisterSurvey extends Survey{
 	
 
 	getCompletedMessage(){
-		return `Calm down ${this.nameify(this.pages[1].answer)}, we're making your account look pretty`;
+		return `Calm down ${this.nameify(this.getAnswer("firstName"))}, we're making your account look pretty`;
 	}
-
-
 
 	getPages(){
 		return [
@@ -66,6 +76,8 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				nameify: true,
 				key: "firstName",
+				color:"#9575CD",
+				
 				validate: async (answer) => {
 					
 					if(answer.length < 3){
@@ -81,6 +93,7 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				key: "lastName",
 				nameify: true,
+				color:"#9575CD",
 				validate: async (answer) => { 
 					if(answer.length < 3){
 						return "Your last name must be at least 3 characters!";
@@ -94,6 +107,7 @@ class RegisterSurvey extends Survey{
 				answer: "",
 				type: "question",
 				key: "email",
+				color: "#FFAB91",
 				validate: async (answer) => {
 					if(!(this.validEmail(answer))){
 						return "You must supply a valid email!";
@@ -107,6 +121,7 @@ class RegisterSurvey extends Survey{
 				answer: "",
 				type: "password",
 				key: "password",
+				color:"#009688",
 				validate: async (answer) => {
 					if(answer.length < 5)return "Your password must be at least 3 characters!";
 					
@@ -118,8 +133,9 @@ class RegisterSurvey extends Survey{
 				question: "Ok, but do you remember it?",
 				answer: "",
 				type: "password",
+				color:"#009688",
 				validate: async (answer) => {
-					if(this.pages[this.pageIndex-1].answer != answer)return "Passwords must match!";
+					if(this.getAnswer("password") != answer)return "Passwords must match!";
 					return true;
 				}
 			},
@@ -129,12 +145,23 @@ class RegisterSurvey extends Survey{
 				answer: "",
 				type: "question",
 				key: "customURL",
+				color: "#8C9EFF",
 				validate: async (answer) => {
 					if(answer.length<4)return "This URL is too short!"
 					let request = await this.post("slug-exists", {slug: answer});
 					if(request.result)return "This URL is taken!";
 					return true;
 				}
+			},
+			{
+				question: "Is this account for business or personal use?",
+				answer: "",
+				color: "#F06292",
+				key: "businessOrPersonal",
+				ignoreQuestion: true,
+				type: ["option", "option"],
+				data: [{attr: {"value": "Business"}}, {attr: {"value":"Personal"}}],
+				validate: async (answer) => true
 			},
 
 		]

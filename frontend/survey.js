@@ -1,18 +1,18 @@
 
 
-
-
 class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 0;
+		this.pageIndex =0 ;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
+		this.pageStop = 0;
 	}
 
 	start(){
 		this.setContent(false);
+		this.focusAll();
 	}
 
 	async selected(result){
@@ -36,6 +36,22 @@ class Survey {
 		this.pageIndex += 1;
 		this.currentPage = this.pages[this.pageIndex];
 
+		let color = this.currentPage?.color;
+		if(color==undefined) color = "#29b6f6";
+
+		let backdrop = $("<div/>", {
+			css:{
+				backgroundColor: color,
+				position: "absolute",
+				top: 0,
+				left: -window.screen.width,
+				width:"100%",
+				height:"100%",
+				zIndex: -10
+			}
+		});
+		$("#body").append(backdrop);
+
 		
 		let content = $("#contentHolder");
 		this.animating = true;
@@ -43,25 +59,56 @@ class Survey {
 			this.setContent();
 
 			content.css("left", `-${content.width()*2}px`);
+			backdrop.animate({ "left": "0px" }, 1000, "easeOutCubic");
 			content.animate({ "left": "0px" }, 1000, "easeOutCubic", () => {
+				$("#body").css("backgroundColor", color);
+				backdrop.remove();
 				this.animating = false;
+				this.focusAll();
 			});
 		});
 
 	}
 
+	focusAll(){
+		$("#welcomeText").focus();
+		$("#questionText").focus();
+		$("#passwordText").focus();
+	}
+
 	lastPage(){
 		this.pageIndex -= 1;
 		this.currentPage = this.pages[this.pageIndex];
+
+
+		let color = this.currentPage.color;
+		if(color==undefined) color = "#29b6f6";
+
+		let backdrop = $("<div/>", {
+			css:{
+				backgroundColor: color,
+				position: "absolute",
+				top: 0,
+				left: window.screen.width,
+				width:"100%",
+				height:"100%",
+				zIndex: -10
+			}
+		});
+		$("#body").append(backdrop);
+
 		let content = $("#contentHolder");
 		this.animating = true;
 		content.animate({ "left": "-="+((content.width())) }, 1000, "easeInCubic", () => {
 			this.setContent(false);
 
 			content.css("left", `${content.width()*2}px`);
-			
+			backdrop.animate({ "left": "0px" }, 1000, "easeOutCubic");
 			content.animate({ "left": "0px" }, 1000, "easeOutCubic", () => {
+				$("#body").css("backgroundColor", color);
+				backdrop.remove();
 				this.animating = false;
+				this.focusAll();
 			});
 		});
 	}
@@ -119,21 +166,41 @@ class Survey {
 				tabindex:0,
 				on: {
 					keypress: (e) => {
-						if(e.which === 13 && !this.animating)this.selected();
+						if(e.which === 13 && !this.animating){
+							this.selected();
+							//$(e.target).unfocus()
+						}
 					},
 					//prevent div from ever losing focus so enter can always be pressed
-					focusout:(e) => {$(e.target).focus();},
+					focusout:(e) => {
+						$(e.target).focus();
+					},
+					
+				}
+			}),
+
+			option: $("<input/>", {
+				type: "button",
+				class: "surveyButton",
+				on: {
+					click: (e) => {
+
+						//console.log("okefw");
+						if(!this.animating)this.selected($(e.target).attr("value"))
+					}
 				}
 			})
+
 		}
 
 
 		let results = [];
 		if(!Array.isArray(inputTypes)) inputTypes = [inputTypes];
-		for(let input of inputTypes){
-			results.push(inputs[input]);
-		}
 
+		for(let input of inputTypes){
+			results.push(inputs[input].clone(true, true));
+		}
+		//console.log(results);
 		return results;
 		
 	}
@@ -152,13 +219,12 @@ class Survey {
 			];
 
 			elements = elements.concat(inputs);
-
+		
 
 			$("#content").html(elements);
+	
 
-			for(let input of elements){
-				input.focus();
-			}
+			
 
 			//this dynamically calls the items in the data array  
 			if(!(this.currentPage.data==undefined)){
@@ -167,6 +233,7 @@ class Survey {
 					for(var key in dataItem){
 						if (dataItem.hasOwnProperty(key)) {
 							let value = dataItem[key];
+
 							elements[index][key](value);
 						}
 					}
@@ -184,10 +251,18 @@ class Survey {
 		}
 	}
 
+	getAnswer(key){
+		for(let page of this.pages){
+			if(page.key == key){
+				return page.answer;
+			}
+		}
+	}
+
 	getSurveyResults(){
 		let results = {};
 		for(let page of this.pages){
-			if(page.key != undefined){
+			if(page.key != undefined && page.ignoreQuestion!=true){
 				let answer = page.answer;
 				if(page.nameify) answer = this.nameify(answer);
 				results[page.key] = answer;
@@ -208,6 +283,7 @@ class Survey {
 
 	}
 
+	//captialize first letter of string
 	nameify(name){
 		name = name.toLowerCase();
 		return name.charAt(0).toUpperCase() + name.slice(1);
@@ -220,7 +296,7 @@ class Survey {
 
 
 window.onpopstate = function () {
-	if(survey.pageIndex == 0){
+	if(survey.pageIndex == survey.pageStop){
 		window.history.back();
 		return;
 	}
@@ -229,5 +305,5 @@ window.onpopstate = function () {
 
 //lock scrollbar into place since tabindex:0 don't know how to act right
 $(document).bind('scroll',function () { 
-       window.scrollTo(0,0); 
+      // window.scrollTo(0,0); 
   });

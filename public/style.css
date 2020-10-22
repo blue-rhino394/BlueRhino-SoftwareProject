@@ -188,4 +188,23 @@ img {
 }
 
 
+.surveyButton{
+	border-radius: 15px;
+	 border: 1px solid white;
+  	background-color: rgba(255, 255, 255, 0.1);
+
+	padding:20px;
+
+	font-size: 15px;
+	margin-right: 5px;
+	font-weight: bold;
+	color: white;
+
+}
+
+
+.surveyButton:hover{
+	background-color: rgba(255, 255, 255, 0.3);
+	cursor: pointer;
+}
 
