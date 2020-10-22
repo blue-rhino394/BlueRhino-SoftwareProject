@@ -1,12 +1,7 @@
-const dBWrapper = require('./databaseWrapper');
+const dbwrapper= require('../databaseWrapper.ts');
 
-test('Checking if the DB is connecting',()=>
+
+test('Uses mock datawrapper to create new USer',()=>
 {
-    expect(dbWrapper.verifyConnectedToMongoDB).toBe(true);
-}
-)
-test('Creating a new User', ()=>
-
-    expect(dbWrapper.createUser(newAccountSchema));
- 
+    expect (dbwrapper.createUser).toHaveReturned();
 })
