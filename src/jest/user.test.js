@@ -1,4 +1,4 @@
-const user =require('./user');
+const user =require('../user');
 
 test("get user ID", () =>{
     expect(user.getUUID).toHaveReturned();

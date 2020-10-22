@@ -1,5 +1,5 @@
-const dbwrapper= require('./databaseWrapper.ts');
-jest.mock('./databaseWrapper.ts');
+const dbwrapper= require('../databaseWrapper.ts');
+
 
 test('Uses mock datawrapper to create new USer',()=>
 {
