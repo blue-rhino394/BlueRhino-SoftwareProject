@@ -118,6 +118,11 @@ export function defineExpressRoutes(app: Application): void {
         response.sendFile(path.join(__dirname, '../frontend/cardcreationsurvey.html'));
     });
 
+    // Publish the 'Card Creation Survey' page under a cleaner name
+    app.get('/create', (request, response) => {
+        response.sendFile(path.join(__dirname, '../frontend/cardcreationsurvey.html'));
+    });
+
     // Publish the 'Register Survey' page
     app.get('/registersurvey', (request, response) => {
         response.sendFile(path.join(__dirname, '../frontend/registersurvey.html'));
