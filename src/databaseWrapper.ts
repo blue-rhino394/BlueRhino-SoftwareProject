@@ -42,7 +42,6 @@ class databaseWrapperClass {
     public constructor() {
         console.log("Constructing Database Wrapper...");
         this.cache = new databaseCacheManager();
-        this.initialize();
     }
 
     private async initialize(): Promise<void> {
@@ -252,7 +251,7 @@ class databaseWrapperClass {
             const userAccount = tempUser.getAccountSchema();
 
             // If this user's customURL matches the slug we're using...
-            if (userAccount.customURL == userSlug) {
+            if (userAccount.public.customURL == userSlug) {
                 // Return them!
                 return tempUser;
             }
@@ -400,16 +399,10 @@ class databaseWrapperClass {
                 social: []
             };
 
-            const cardOwnerAccount = cardOwner.getAccountSchema();
-
             // Create new card schema
             const newCardSchema: cardSchema = {
                 cardID: v4(),
                 ownerID: cardOwnerID,
-
-                slug: cardOwnerAccount.customURL,
-                firstName: cardOwnerAccount.firstName,
-                lastName: cardOwnerAccount.lastName,
 
                 content: newContent,
                 stats: newStats

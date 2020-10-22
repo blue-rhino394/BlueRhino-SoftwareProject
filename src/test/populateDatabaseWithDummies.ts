@@ -181,6 +181,7 @@ async function addDummies(data: any): Promise<void> {
     for (var i = 0; i < data.length; i++) {
         await addDummy(data[i]);
     }
+    console.log("\n\nAll done!\n\n\n");
 }
 
 async function addDummy(userRegistration: any): Promise<void> {
@@ -192,37 +193,39 @@ async function addDummy(userRegistration: any): Promise<void> {
         email: userRegistration.email,
         passwordHash: passwordHash,
 
-        firstName: userRegistration.firstName,
-        lastName: userRegistration.lastName,
+        public: {
+            firstName: userRegistration.firstName,
+            lastName: userRegistration.lastName,
 
-        customURL: userRegistration.customURL,
-        profilePictureURL: userRegistration.profilePictureURL
+            customURL: userRegistration.customURL,
+            profilePictureURL: userRegistration.profilePictureURL
+        }
     }
 
-    console.log(`\nChecking for existing user '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+    console.log(`\nChecking for existing user '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
     const oldUser: user = await databaseWrapper.getUserByEmail(registrationForm.email);
 
     // If there's already a user with this email, remove them
     if (oldUser) {
-        console.log(`Removing existing user '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+        console.log(`Removing existing user '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
         await databaseWrapper.deleteUser(oldUser.getUUID());
     }
 
 
-    console.log(`Adding user '${registrationForm.firstName} ${registrationForm.lastName}' to database...`);
+    console.log(`Adding user '${registrationForm.public.firstName} ${registrationForm.public.lastName}' to database...`);
     const newUser: user = await databaseWrapper.createUser(registrationForm);
 
     if (!newUser) {
-        console.log(`\t\tFailed to add user '${registrationForm.firstName} ${registrationForm.lastName}'`);
+        console.log(`\t\tFailed to add user '${registrationForm.public.firstName} ${registrationForm.public.lastName}'`);
         return;
     }
 
 
-    console.log(`\nChecking for existing card for '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+    console.log(`Checking for existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
     const oldCard: card = await databaseWrapper.getCard(newUser.getCardID());
 
     if (oldCard) {
-        console.log(`Removing existing card for '${registrationForm.firstName} ${registrationForm.lastName}'...`);
+        console.log(`Removing existing card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'...`);
         await databaseWrapper.deleteCard(oldCard.getID());
     }
 
@@ -247,7 +250,7 @@ async function addDummy(userRegistration: any): Promise<void> {
     const newCard: card = await databaseWrapper.createCard(newUser.getUUID(), newCardData);
 
     if (!newCard) {
-        console.log(`\t\tFailed to add card for '${registrationForm.firstName} ${registrationForm.lastName}'`);
+        console.log(`\t\tFailed to add card for '${registrationForm.public.firstName} ${registrationForm.public.lastName}'`);
         return
     }
 }

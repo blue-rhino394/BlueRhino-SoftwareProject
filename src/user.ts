@@ -5,6 +5,7 @@ import { userAccountSchema } from "./interfaces/userAccountSchema";
 import { PassThrough } from "stream";
 import { databaseWrapper } from "./databaseWrapper";
 import bcrypt from "bcrypt";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 export class user {
 
@@ -18,6 +19,8 @@ export class user {
     // User Account Schema
     private email: string;
     private passwordHash: string;
+
+    // User Account Public Schema
     private firstName: string;
     private lastName: string;
     private customURL: string;
@@ -54,12 +57,17 @@ export class user {
     private initializeInternalUserAccountSchema(newUserAccountSchema: userAccountSchema): void {
         this.email = newUserAccountSchema.email;
         this.passwordHash = newUserAccountSchema.passwordHash;
-        this.firstName = newUserAccountSchema.firstName;
-        this.lastName = newUserAccountSchema.lastName;
-        this.customURL = newUserAccountSchema.customURL;
-        this.profilePictureURL = newUserAccountSchema.profilePictureURL;
+
+        this.initializeInternalUserAccountPublicSchema(newUserAccountSchema.public);
     }
 
+    // Populate internal variables related to userAccountPublicSchema
+    private initializeInternalUserAccountPublicSchema(newUserAccountPublicSchema: userAccountPublicSchema): void {
+        this.firstName = newUserAccountPublicSchema.firstName;
+        this.lastName = newUserAccountPublicSchema.lastName;
+        this.customURL = newUserAccountPublicSchema.customURL;
+        this.profilePictureURL = newUserAccountPublicSchema.profilePictureURL;
+    }
 
 
 
@@ -77,10 +85,12 @@ export class user {
         const output: userAccountSchema = {
             email: this.email,
             passwordHash: this.passwordHash,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            customURL: this.customURL,
-            profilePictureURL: this.profilePictureURL
+            public: {
+                firstName: this.firstName,
+                lastName: this.lastName,
+                customURL: this.customURL,
+                profilePictureURL: this.profilePictureURL
+            }
         }
 
         return output;
@@ -354,22 +364,31 @@ export class user {
             this.passwordHash = accountSchemaUpdate.passwordHash;
         }
 
-        if (accountSchemaUpdate.firstName != null) {
-            this.firstName = accountSchemaUpdate.firstName;
-        }
-
-        if (accountSchemaUpdate.lastName != null) {
-            this.lastName = accountSchemaUpdate.lastName;
-        }
-
-        if (accountSchemaUpdate.customURL != null) {
-            this.customURL = accountSchemaUpdate.customURL;
-        }
-
-        if (accountSchemaUpdate.profilePictureURL != null) {
-            this.profilePictureURL = accountSchemaUpdate.profilePictureURL;
+        if (accountSchemaUpdate.public != null) {
+            this.updateInternalAccountPublicSchema(accountSchemaUpdate.public);
         }
     }
+
+    private updateInternalAccountPublicSchema(accountPublicSchemaUpdate: userAccountPublicSchema): void {
+        if (accountPublicSchemaUpdate.firstName != null) {
+            this.firstName = accountPublicSchemaUpdate.firstName;
+        }
+
+        if (accountPublicSchemaUpdate.lastName != null) {
+            this.lastName = accountPublicSchemaUpdate.lastName;
+        }
+
+        if (accountPublicSchemaUpdate.customURL != null) {
+            this.customURL = accountPublicSchemaUpdate.customURL;
+        }
+
+        if (accountPublicSchemaUpdate.profilePictureURL != null) {
+            this.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
+        }
+    }
+
+
+
 
     private createJsonAccountUpdateData(accountSchemaUpdate: userAccountSchema): any {
         var output: Record<string, any> = {};
@@ -382,20 +401,30 @@ export class user {
             output.passwordHash = accountSchemaUpdate.passwordHash;
         }
 
-        if (accountSchemaUpdate.firstName != null) {
-            output.firstName = accountSchemaUpdate.firstName;
+        if (accountSchemaUpdate.public != null) {
+            output.public = this.createJsonAccountPublicUpdateData(accountSchemaUpdate.public);
         }
 
-        if (accountSchemaUpdate.lastName != null) {
-            output.lastName = accountSchemaUpdate.lastName;
+        return output;
+    }
+
+    private createJsonAccountPublicUpdateData(accountPublicSchemaUpdate: userAccountPublicSchema): any {
+        var output: Record<string, any> = {};
+
+        if (accountPublicSchemaUpdate.firstName != null) {
+            output.firstName = accountPublicSchemaUpdate.firstName;
         }
 
-        if (accountSchemaUpdate.customURL != null) {
-            output.customURL = accountSchemaUpdate.customURL;
+        if (accountPublicSchemaUpdate.lastName != null) {
+            output.lastName = accountPublicSchemaUpdate.lastName;
         }
 
-        if (accountSchemaUpdate.profilePictureURL != null) {
-            output.profilePictureURL = accountSchemaUpdate.profilePictureURL;
+        if (accountPublicSchemaUpdate.customURL != null) {
+            output.customURL = accountPublicSchemaUpdate.customURL;
+        }
+
+        if (accountPublicSchemaUpdate.profilePictureURL != null) {
+            output.profilePictureURL = accountPublicSchemaUpdate.profilePictureURL;
         }
 
         return output;

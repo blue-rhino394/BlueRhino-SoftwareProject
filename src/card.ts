@@ -18,9 +18,6 @@ export class card {
     // Card Schema
     private cardID: string;
     private ownerID: string;
-    private slug: string;
-    private firstName: string;
-    private lastName: string;
 
     // Card Content
     private contentPublished: boolean;
@@ -52,8 +49,6 @@ export class card {
     private initializeInternalCardSchema(newCardSchema: cardSchema) {
         this.cardID = newCardSchema.cardID;
         this.ownerID = newCardSchema.ownerID;
-        this.firstName = newCardSchema.firstName;
-        this.lastName = newCardSchema.lastName;
 
         this.initializeInternalCardContent(newCardSchema.content);
         this.initializeInternalCardStats(newCardSchema.stats);
@@ -108,9 +103,6 @@ export class card {
         const output: cardSchema = {
             cardID: this.cardID,
             ownerID: this.ownerID,
-            slug: this.slug,
-            firstName: this.firstName,
-            lastName: this.lastName,
 
             content: this.getCardContent(),
             stats: this.getCardStats()
