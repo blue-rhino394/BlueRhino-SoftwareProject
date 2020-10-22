@@ -194,12 +194,151 @@ export function defineUserREST(app: Application): void {
 
     // Logs in a user and configures their session object on success.
     // (if session is already logged in, send back login result even if no params are sent in query)
-    app.post('/api/login', (req, res) => {
+    app.post('/api/login', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // If there are missing parameters
+        //      AND
+        // If the user is already logged in...
+        if ((!req.body.email || !req.body.password) && req.session.uuid) {
+            // Return with their information!
 
-        // Get dummy data
-        const responseData: postLoginResult = getDummyPostLoginResult();
+            // Get user from the database
+            const existingUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+            // If this user doesn't exist...
+            if (!existingUser) {
+                // Pack error data...
+                const responseData: postLoginResult = {
+                    error: "Invalid session uuid",
+
+                    uuid: undefined,
+                    email: undefined,
+                    public: undefined
+                }
+
+                // Send it and bounce!
+                res.send(responseData);
+                return;
+            }
+
+
+            // OTHERWISE...
+            // The user already exists and is logged in (which should be normal)
+            // So let's send back some info baby!
+
+            const userAccount = existingUser.getAccountSchema();
+
+            // Pack response data and bounce!
+            const responseData: postLoginResult = {
+                error: "",
+
+                uuid: existingUser.getUUID(),
+                email: userAccount.email,
+                public: userAccount.public
+            };
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Create an empty error message string
+        // If there's any missing parameters below, we'll fill this in.
+        var errorMessage: string = undefined;
+
+        // If there's no email parameter...
+        if (!req.body.email) {
+            errorMessage = "No email sent";
+        }
+        // If there's no password parameter...
+        else if (!req.body.password) {
+            errorMessage = "No password sent";
+        }
+
+        // If we've had an error defined in the above if-statements...
+        if (errorMessage) {
+            // Pack error data...
+            const responseData: postLoginResult = {
+                error: errorMessage,
+
+                uuid: undefined,
+                email: undefined,
+                public: undefined
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // The request was sent correctly so...
+
+        // Get the email & password parameters
+        const email: string = req.body.email;
+        const password: string = req.body.password;
+
+        // Get the user with this email...
+        const requestedUser: user = await databaseWrapper.getUserByEmail(email);
+
+        // If there's no user with this email...
+        if (!requestedUser) {
+            // Pack error data...
+            const responseData: postLoginResult = {
+                error: "No user with this email",
+
+                uuid: undefined,
+                email: undefined,
+                public: undefined
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+        // Check to see if the password is valid...
+        const isValidPassword: boolean = requestedUser.tryPassword(password);
+
+        // If the password is WRONG...
+        if (!isValidPassword) {
+            // Pack error data...
+            const responseData: postLoginResult = {
+                error: "Incorrect password",
+
+                uuid: undefined,
+                email: undefined,
+                public: undefined
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+        // OTHERWISE...
+        // If we're at this point, the user has provided a email & matching password so...
+        // Log them in!!
+
+        // Setup session object
+        req.session.uuid = requestedUser.getUUID();
+
+        const userAccount = requestedUser.getAccountSchema();
+        
+        // Pack response data
+        const responseData: postLoginResult = {
+            error: "",
+
+            uuid: requestedUser.getUUID(),
+            email: userAccount.email,
+            public: userAccount.public
+        };
         res.send(responseData);
     });
 

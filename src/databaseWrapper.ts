@@ -300,6 +300,9 @@ class databaseWrapperClass {
 
     // Finds a user in the database by their email
     public async getUserByEmail(userEmail: string): Promise<user> {
+
+        userEmail = userEmail.toLowerCase();
+
         // CHECK THE CACHE FIRST!
         // Loop through all of the users in the cache (A pain, I know)
         // and if one has the email we want, return it!

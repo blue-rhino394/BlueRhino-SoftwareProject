@@ -182,11 +182,8 @@ export function getDummyPostLoginResult(): postLoginResult {
 
         uuid: "566062db-df68-434f-a56f-ef9439b93622",
         email: "gfreeman@valvesoftware.com",
-        firstName: "Gordon",
-        lastName: "Freeman",
 
-        customURL: "gfreezy",
-        profilePictureURL: ""
+        public: getDummyUserAccountPublicSchema()
     };
 
     return responseData;
