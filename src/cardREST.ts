@@ -13,6 +13,7 @@ import { user } from "./user";
 import { card } from "./card";
 import { cardContent } from "./interfaces/cardContent";
 import { defineExpressRoutes } from "./expressRoutes";
+import { savedCard } from "./interfaces/savedCard";
 
 export function defineCardREST(app: Application): void {
 
@@ -135,7 +136,7 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    // Sets properties on a card
+    // Sets properties on the card of the currently logged in user
     app.post('/api/set-card', async (req, res) => {
 
         // If the user is not logged in...
@@ -298,6 +299,7 @@ export function defineCardREST(app: Application): void {
         }
     });
 
+    // Deletes the card of the currently logged in user
     app.post('/api/delete-card', async (req, res) => {
 
         // If the user is not logged in...
@@ -363,33 +365,360 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
-    app.post('/api/toggle-save', (req, res) => {
+    // Toggles whether or not the provided card is
+    // saved to the currently logged in user's list of saved cards
+    app.post('/api/toggle-save', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // Get the cardID parameter
+        const cardID: string = req.body.cardID;
 
-        // Get dummy data
-        const responseData: postToggleSaveResult = getDummyPostToggleSaveResult();
+
+
+        var errorMessage: string = undefined;
+
+        // If the user is not logged in
+        if (!req.session.uuid) {
+            errorMessage = "User not logged in"
+        }
+        // If no cardID was sent...
+        else if (!cardID) {
+            errorMessage = "No cardID sent";
+        }
+
+        // If there was an error with one of the above statements...
+        if (errorMessage) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: errorMessage,
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Get the card from the database
+        const requestedCard: card = await databaseWrapper.getCard(cardID);
+
+        // If there's no card by this ID in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "No card with this cardID",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the currently logged in user
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "Invalid session uuid",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // OTHERWISE
+        // We've got the card that this user wants to toggle, and the user
+        // that will be doing the toggling. Let's do it!
+
+        // Try to get the saved card
+        const currentlySavedCard: savedCard = requestedUser.getSavedCard(cardID);
+        var isSaved: boolean = false;
+
+        // If this card is not saved...
+        if (!currentlySavedCard) {
+            // Save it!
+            await requestedUser.addSavedCard(cardID);
+            await requestedCard.addStatSave(requestedUser.getUUID());
+            isSaved = true;
+        }
+        // OTHERWISE, if this card IS saved...
+        else {
+            // Unsave it!
+            await requestedUser.removeSavedCard(cardID);
+            await requestedCard.removeStatSave(requestedUser.getUUID());
+            isSaved = false;
+        }
+
+
+        // Pack response data
+        const responseData: postToggleSaveResult = {
+            error: "",
+            isSaved: isSaved
+        };
         res.send(responseData);
     });
 
-    app.post('/api/toggle-favorite', (req, res) => {
+    // Toggles whether or not the provided card is
+    // marked as a favorite in the user's list of saved cards
+    app.post('/api/toggle-favorite', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // Get the cardID parameter
+        const cardID: string = req.body.cardID;
 
-        // Get dummy data
-        const responseData: postToggleFavoriteResult = getDummyPostToggleFavoriteResult();
+
+
+        var errorMessage: string = undefined;
+
+        // If the user is not logged in
+        if (!req.session.uuid) {
+            errorMessage = "User not logged in"
+        }
+        // If no cardID was sent...
+        else if (!cardID) {
+            errorMessage = "No cardID sent";
+        }
+
+        // If there was an error with one of the above statements...
+        if (errorMessage) {
+            // Create error data
+            const responseData: postToggleFavoriteResult = {
+                error: errorMessage,
+                isFavorited: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Get the card from the database
+        const requestedCard: card = await databaseWrapper.getCard(cardID);
+
+        // If there's no card by this ID in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "No card with this cardID",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the currently logged in user
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "Invalid session uuid",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // OTHERWISE
+        // We've got the card that this user wants to toggle, and the user
+        // that will be doing the toggling. Let's do it!
+
+        // Check to see if we have this card as a saved card
+        var requestedSavedCard: savedCard = requestedUser.getSavedCard(cardID);
+
+        // If this card isn't already saved...
+        if (!requestedSavedCard) {
+            // Mark it as saved!
+            requestedSavedCard = await requestedUser.addSavedCard(cardID);
+        }
+
+        // Toggle the favorited value on this savedCard
+        requestedSavedCard.favorited = !requestedSavedCard.favorited;
+
+        // Update the saved card on the user
+        const didUpdate: boolean = await requestedUser.updateSavedCard(requestedSavedCard);
+
+        // Update the favorited stat
+        if (requestedSavedCard.favorited) {
+            await requestedCard.addStatFavorite(requestedUser.getUUID());
+        }
+        else {
+            await requestedCard.removeStatFavorite(requestedUser.getUUID());
+        }
+
+        // If for some reason it failed to update this saved card...
+        if (!didUpdate) {
+            // Create error data
+            const responseData: postToggleSaveResult = {
+                error: "Failed to update card for unknown reason",
+                isSaved: false
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Pack response data
+        const responseData: postToggleFavoriteResult = {
+            error: "",
+            isFavorited: requestedSavedCard.favorited
+        };
         res.send(responseData);
     });
 
-    app.post('/api/set-memo', (req, res) => {
+    // Adds memo text to the provided card in
+    // the user's list of saved cards
+    app.post('/api/set-memo', async (req, res) => {
 
-        // TODO - IMPLEMENT!
+        // Get the cardID & memoText parameters
+        const cardID: string = req.body.cardID;
+        const memoText: string = req.body.memoText;
 
-        // Get dummy data
-        const responseData: postGenericResult = getDummyPostGenericResult();
+
+        var errorMessage: string = undefined;
+
+        // If the user is not logged in
+        if (!req.session.uuid) {
+            errorMessage = "User not logged in"
+        }
+        // If no cardID was sent...
+        else if (!cardID) {
+            errorMessage = "No cardID sent";
+        }
+        // If no memoText was sent...
+        else if (!memoText) {
+            errorMessage = "No memoText sent";
+        }
+
+        // If there was an error with one of the above statements...
+        if (errorMessage) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: errorMessage
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Get the card from the database
+        const requestedCard: card = await databaseWrapper.getCard(cardID);
+
+        // If there's no card by this ID in the database...
+        if (!requestedCard) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "No card with this cardID"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // Get the currently logged in user
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user with this uuid in the database...
+        if (!requestedUser) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // OTHERWISE
+        // We've got the card that this user wants to set a memo on, and the user
+        // that will be holding said memo. Let's do it!
+
+        // Check to see if we have this card as a saved card
+        var requestedSavedCard: savedCard = requestedUser.getSavedCard(cardID);
+
+        // If this card isn't already saved...
+        if (!requestedSavedCard) {
+            // Mark it as saved!
+            requestedSavedCard = await requestedUser.addSavedCard(cardID);
+        }
+
+        // Set the memo text and update the database
+        requestedSavedCard.memo = memoText;
+
+        // Update the saved card on the user
+        const didUpdate: boolean = await requestedUser.updateSavedCard(requestedSavedCard);
+
+        // Update the memo stat
+        if (requestedSavedCard.memo) {
+            await requestedCard.addStatMemo(requestedUser.getUUID());
+        }
+        else {
+            await requestedCard.removeStatMemo(requestedUser.getUUID());
+        }
+
+        // If for some reason it failed to update this saved card...
+        if (!didUpdate) {
+            // Create error data
+            const responseData: postGenericResult = {
+                error: "Failed to update card for unknown reason"
+            }
+
+            // Send, and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+
+
+        // Pack response data
+        const responseData: postGenericResult = {
+            error: ""
+        };
         res.send(responseData);
     });
 
+    // Searches for cards across either the entire database, or just
+    // in the user's list of saved cards.
+    //
+    // If searching through the user's list of saved cards and an
+    // empty string is sent, all saved cards will be returned
     app.post('/api/search-card', async (req, res) => {
 
         // Cram the body into a query interface
@@ -428,8 +757,30 @@ export function defineCardREST(app: Application): void {
 
 
 
-        // Search the database for cards using this query
-        const foundCardIDs = await databaseWrapper.searchQuery(query);
+        var foundCardIDs: string[] = [];
+
+        // If we're supposed to be searching through the user's cards
+        if (query.isMyCards) {
+
+            // If the user is logged in...
+            if (req.session.uuid) {
+                // Get the user from the database
+                const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+                // If this user actually exists...
+                if (requestedUser) {
+                    // Search the database for cards using this query
+                    foundCardIDs = await databaseWrapper.searchQuery(query, requestedUser);
+                }
+            }
+        }
+        // Otherwise... Search through the whole database.
+        else {
+            // Search the database for cards using this query
+            foundCardIDs = await databaseWrapper.searchQuery(query);
+        }
+
+        
 
 
         // Create array to hold schemas in
@@ -442,8 +793,15 @@ export function defineCardREST(app: Application): void {
 
             // If the card exists and was retrieved correctly...
             if (foundCard) {
+
+                // Grab the schema
+                const foundSchema = foundCard.getCardSchema();
+
+                // Omit stats!
+                foundSchema.stats = undefined;
+
                 // Add it to the foundCards array!
-                foundCards.push(foundCard.getCardSchema());
+                foundCards.push(foundSchema);
             }
         }
 

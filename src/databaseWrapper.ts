@@ -11,6 +11,7 @@ import { searchQuery } from "./interfaces/searchQuery";
 import { user } from "./user";
 import { card } from "./card";
 import { databaseCacheManager } from "./databaseCacheManager";
+import { savedCard } from "./interfaces/savedCard";
 
 
 class databaseWrapperClass {
@@ -590,72 +591,123 @@ class databaseWrapperClass {
     //
 
     // Searches for cards in the database using a query
-    public async searchQuery(requestedQuery: searchQuery): Promise<string[]> {
-
-        // TODO - Implement isMyCards
+    public async searchQuery(requestedQuery: searchQuery, currentUser?: user): Promise<string[]> {
 
         var resultIDs: string[] = [];
         const cardsPerPage: number = this.pageCount;
 
-        await this.runMongoOperation(async function (database) {
+        // If we're supposed to search through the user's list of saved cards 
+        //      AND
+        // The user was actually passed in...
+        //
+        //          MY CARDS SEARCH
+        //
+        if (requestedQuery.isMyCards && currentUser) {
 
-            // Get card collection from database
-            var cardCollection = await database.collection("cards");
+            // Get this user's saved cards
+            const savedCards: savedCard[] = currentUser.getAllSavedCards();
 
+            // If there's an empty textQuery for saved cards...
+            if (!requestedQuery.textQuery) {
 
-            // Search for cards that:
-            //  * have the text provided in requestedQuery.textQuery
-            //  * have the tags provided in requestedQuery.tags
-            var query = undefined;
-
-            if (requestedQuery.tags.length > 0) {
-                query = {
-                    $text: {
-                        $search: requestedQuery.textQuery,
-                        $caseSensitive: false,
-                    },
-
-                    "content.tags": { $all: requestedQuery.tags }
+                // Loop through every saved card and
+                // add it to our results!
+                for (const tempCard of savedCards) {
+                    resultIDs.push(tempCard.cardID);
                 }
             }
+            // Otherwise, perform a normal search.
             else {
-                query = {
-                    $text: {
-                        $search: requestedQuery.textQuery,
-                        $caseSensitive: false,
+
+                // Loop through every saved card and...
+                for (const tempCard of savedCards) {
+                    // Pull full card info
+                    const realCard: card = await databaseWrapper.getCard(tempCard.cardID);
+
+                    // If this card is in the database...
+                    if (realCard) {
+
+                        // If this card has the requested tags
+                        //      AND
+                        // If this card has the requested text
+                        if (realCard.hasTags(requestedQuery.tags) && realCard.hasText(requestedQuery.textQuery)) {
+                            resultIDs.push(tempCard.cardID);
+                        }
                     }
                 }
             }
+        }
+        // Otherwise, search through the entire database!
+        //
+        //          FULL DATABASE SEARCH
+        //
+        else {
+            await this.runMongoOperation(async function (database) {
 
-            
-
-
-            const projection = {
-                _id: 0,
-                cardID: 1,
-
-            }
-
-            // Restrict the database return results so that:
-            //  * we skip to the page provided in requestedQuery.pageNumber
-            //  * we ONLY get the uuid
-            const options = {
-                skip: requestedQuery.pageNumber * cardsPerPage,
-                limit: cardsPerPage,
-
-                projection: projection
-            }
-
-            // Execute search using the above query and options
-            const cursor = cardCollection.find(query, options);
-            //const cursor = cardCollection.find(query);
+                // Get card collection from database
+                var cardCollection = await database.collection("cards");
 
 
-            // Add each UUID to the list
-            await cursor.forEach((card) => {
-                resultIDs.push(card.cardID);
+                // Search for cards that:
+                //  * have the text provided in requestedQuery.textQuery
+                //  * have the tags provided in requestedQuery.tags
+                var query = undefined;
+
+                if (requestedQuery.tags.length > 0) {
+                    query = {
+                        $text: {
+                            $search: requestedQuery.textQuery,
+                            $caseSensitive: false,
+                        },
+
+                        "content.published": true,
+                        "content.tags": { $all: requestedQuery.tags }
+                    }
+                }
+                else {
+                    query = {
+                        $text: {
+                            $search: requestedQuery.textQuery,
+                            $caseSensitive: false,
+                        },
+
+                        "content.published": true,
+                    }
+                }
+
+
+
+
+                const projection = {
+                    _id: 0,
+                    cardID: 1,
+
+                }
+
+                // Restrict the database return results so that:
+                //  * we skip to the page provided in requestedQuery.pageNumber
+                //  * we ONLY get the uuid
+                const options = {
+                    skip: requestedQuery.pageNumber * cardsPerPage,
+                    limit: cardsPerPage,
+
+                    projection: projection
+                }
+
+                // Execute search using the above query and options
+                const cursor = cardCollection.find(query, options);
+
+
+                // Add each UUID to the list
+                await cursor.forEach((card) => {
+                    resultIDs.push(card.cardID);
+                });
             });
-        });
+        }
+
+
+
+        
 
         return resultIDs;
     }

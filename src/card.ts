@@ -234,52 +234,52 @@ export class card {
     //
 
     // VIEWS - Adds a uuid to the views stat on this card
-    public addStatView(uuidToAdd: string): void {
-        this.addStat(statType.cardViews, uuidToAdd);
+    public async addStatView(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.cardViews, uuidToAdd);
     }
 
     // VIEWS - Removes a uuid from the views stat on this card
-    public removeStatView(uuidToRemove: string): void {
-        this.removeStat(statType.cardViews, uuidToRemove);
+    public async removeStatView(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.cardViews, uuidToRemove);
     }
 
 
     // SAVES - Adds a uuid to the saves stat on this card
-    public addStatSave(uuidToAdd: string): void {
-        this.addStat(statType.saves, uuidToAdd);
+    public async addStatSave(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.saves, uuidToAdd);
     }
 
     // SAVES - Removes a uuid from the saves stat on this card
-    public removeStatSave(uuidToRemove: string): void {
-        this.removeStat(statType.saves, uuidToRemove);
+    public async removeStatSave(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.saves, uuidToRemove);
     }
 
 
     // FAVORITES - Adds a uuid to the favorites stat on this card
-    public addStatFavorite(uuidToAdd: string): void {
-        this.addStat(statType.favorites, uuidToAdd);
+    public async addStatFavorite(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.favorites, uuidToAdd);
     }
 
     // FAVORITES - Removes a uuid from the favorites stat on this card
-    public removeStatFavorite(uuidToRemove: string): void {
-        this.removeStat(statType.favorites, uuidToRemove);
+    public async removeStatFavorite(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.favorites, uuidToRemove);
     }
 
 
     // MEMOS - Adds a uuid to the memos stat on this card
-    public addStatMemo(uuidToAdd: string): void {
-        this.addStat(statType.memos, uuidToAdd);
+    public async addStatMemo(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.memos, uuidToAdd);
     }
 
     // MEMOS - Removes a uuid from the memos stat on this card
-    public removeStatMemo(uuidToRemove: string): void {
-        this.removeStat(statType.memos, uuidToRemove);
+    public async removeStatMemo(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.memos, uuidToRemove);
     }
 
 
 
     // HELPER METHOD - Adds a uuid to a specified stat on this card
-    private addStat(type: statType, uuidToAdd: string): void {
+    private async addStat(type: statType, uuidToAdd: string): Promise<void> {
 
         // Get the correct stat property from this card schema.stats
         var statArray: string[] = this.statMap.get(type);
@@ -296,7 +296,7 @@ export class card {
         statArray.push(uuidToAdd);
 
         // Add to the stat array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -322,7 +322,7 @@ export class card {
     }
 
     // HELPER METHOD - Removes a uuid from a specified stat on this card
-    private removeStat(type: statType, uuidToRemove: string): void {
+    private async removeStat(type: statType, uuidToRemove: string): Promise<void> {
 
         // Get the correct stat property from this card schema.stats
         var statArray: string[] = this.statMap.get(type);
@@ -339,7 +339,7 @@ export class card {
         this.statMap.set(type, statArray.filter(function (value, index, arr) { return value != uuidToRemove }));
 
         // Remove from the stat array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -408,6 +408,39 @@ export class card {
     //
     //  Utility Methods
     //
+
+    // If the tags passed in are inside
+    // the list of tags on this card,
+    // return true
+    public hasTags(tagsToCheck: string[]): boolean {
+        return tagsToCheck.every((tag) => {
+            return this.contentTags.indexOf(tag) !== -1;
+        })
+    }
+
+    // If this card contains a text value
+    // equal to textToCheck,
+    // return true
+    public hasText(textToCheck: string): boolean {
+
+        const processedTextQuery: string = textToCheck.toLowerCase();
+
+        
+        if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        return false;
+    }
+
 
 
     //
