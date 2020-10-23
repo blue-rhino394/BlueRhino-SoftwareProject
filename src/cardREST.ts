@@ -365,6 +365,8 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
+    // Toggles whether or not the provided card is
+    // saved to the currently logged in user's list of saved cards
     app.post('/api/toggle-save', async (req, res) => {
 
         // Get the cardID parameter
@@ -467,6 +469,8 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
+    // Toggles whether or not the provided card is
+    // marked as a favorite in the user's list of saved cards
     app.post('/api/toggle-favorite', async (req, res) => {
 
         // Get the cardID parameter
@@ -588,6 +592,8 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
+    // Adds memo text to the provided card in
+    // the user's list of saved cards
     app.post('/api/set-memo', async (req, res) => {
 
         // Get the cardID & memoText parameters
@@ -708,6 +714,11 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
+    // Searches for cards across either the entire database, or just
+    // in the user's list of saved cards.
+    //
+    // If searching through the user's list of saved cards and an
+    // empty string is sent, all saved cards will be returned
     app.post('/api/search-card', async (req, res) => {
 
         // Cram the body into a query interface
