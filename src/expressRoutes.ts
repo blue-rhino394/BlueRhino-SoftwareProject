@@ -2,6 +2,7 @@
 import { databaseWrapper } from "./databaseWrapper";
 import { user } from "./user";
 import { accountStatus } from "./enum/accountStatus";
+import { card } from "./card";
 const path = require('path');
 
 export function defineExpressRoutes(app: Application): void {
@@ -13,25 +14,47 @@ export function defineExpressRoutes(app: Application): void {
     // Social Link
     // Redirect the current user to a provided URL and log statistics on this redirect
     // (uses the parameter url from request body to redirect)
-    app.get('/social-link', (request, response) => {
+    app.get('/social-link', async (request, response) => {
         
-        // If there's no URL parameter set...
-        if (!request.query.url) {
+        // If there's no url or slug parameter set...
+        if (!request.query.url || !request.query.slug) {
             // Bounce and just redirect to the base site!
             response.redirect("/");
             return;
         }
 
-        // Get the URL passed in with this GET request
-        const redirectURL: string = request.query.url.toString();
-
         // Otherwise...
         // Let's properly log and redirect!
 
-        // TODO - Log link statistics!
+        // Get the URL passed in with this GET request
+        const redirectURL: string = request.query.url.toString();
 
-        // Redirect to the desired URL
+        // Redirect ASAP
         response.redirect(301, redirectURL);
+
+
+        // If the user is not logged in...
+        if (!request.session.uuid) {
+            // ... bounce!
+            return;
+        }
+
+
+        // Get the slug passed in with this GET request
+        const cardSlug: string = request.query.slug.toString();
+
+        // Try to get the card by this slug
+        const requestedCard: card = await databaseWrapper.getCardBySlug(cardSlug);
+
+        // If there's no card with this slug...
+        if (!requestedCard) {
+            // ... bounce!
+            return;
+        }
+
+        // Otherwise, we've got a card to log!
+        // Log the view statistic
+        await requestedCard.addStatView(request.session.uuid);
     });
 
 

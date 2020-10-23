@@ -447,12 +447,14 @@ export function defineCardREST(app: Application): void {
         if (!currentlySavedCard) {
             // Save it!
             await requestedUser.addSavedCard(cardID);
+            await requestedCard.addStatSave(requestedUser.getUUID());
             isSaved = true;
         }
         // OTHERWISE, if this card IS saved...
         else {
             // Unsave it!
             await requestedUser.removeSavedCard(cardID);
+            await requestedCard.removeStatSave(requestedUser.getUUID());
             isSaved = false;
         }
 
@@ -553,6 +555,14 @@ export function defineCardREST(app: Application): void {
 
         // Update the saved card on the user
         const didUpdate: boolean = await requestedUser.updateSavedCard(requestedSavedCard);
+
+        // Update the favorited stat
+        if (requestedSavedCard.favorited) {
+            await requestedCard.addStatFavorite(requestedUser.getUUID());
+        }
+        else {
+            await requestedCard.removeStatFavorite(requestedUser.getUUID());
+        }
 
         // If for some reason it failed to update this saved card...
         if (!didUpdate) {
@@ -667,6 +677,14 @@ export function defineCardREST(app: Application): void {
 
         // Update the saved card on the user
         const didUpdate: boolean = await requestedUser.updateSavedCard(requestedSavedCard);
+
+        // Update the memo stat
+        if (requestedSavedCard.memo) {
+            await requestedCard.addStatMemo(requestedUser.getUUID());
+        }
+        else {
+            await requestedCard.removeStatMemo(requestedUser.getUUID());
+        }
 
         // If for some reason it failed to update this saved card...
         if (!didUpdate) {
