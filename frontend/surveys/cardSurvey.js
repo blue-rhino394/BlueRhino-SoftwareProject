@@ -56,6 +56,7 @@ class CardSurvey extends Survey{
 				type: "text",
 				id: "questionText",
 				placeholder: (index==0) ? "Qualification" : "Value",
+				
 				on: {
 					keypress: (e) => {
 						if(e.which === 13 && !this.animating) {
@@ -76,14 +77,15 @@ class CardSurvey extends Survey{
 							//$(e.target).next("#questionText").focus();
 						}
 						//this.selected($(e.target).val());
-					}
+					},
+
 				},
 				css: {
 					float: "left",
 					minWidth :"30%",
 					width: "30%"
 				}
-			}).attr("autocomplete", "off")
+			})
 	}
 
 	getQualificationPair(){
@@ -95,6 +97,60 @@ class CardSurvey extends Survey{
 				//"<br>","<br>",
 				$("<br>").css("clear", "both")
 			]
+	}
+
+	getTag(text){
+		return $("<span/>").attr("class", "tag").css({
+			"float":"left", 
+			margin:"5px",
+			marginRight:"5px", 
+			"display":"flex",
+			"alignItems": "center",
+			padding:"5px",
+			
+		}).text(text);
+	}
+
+	getTagQuestion(){
+		//theres some real fuckery going on here
+		return  $("<div/>", {
+				"class": "surveryQuestion", 
+				css:{"margin":"10px"},
+				id: "questionText",
+				//¿¿¿ no, like, why the FUCK does this have to use a CSS grid ???
+				css: {display: "flex"},
+				html: $("<input/>",{
+					type: "text",
+					placeholder: "Type your tags seperated by a comma and press enter",
+					"class": "surveryQuestionGhost",
+					on: {
+						keypress: (e) => {
+							//alert(e.which);
+							
+							if(/*e.which===32 || */e.which===44){
+								let answer = $(e.target).val();
+								$(e.target).before(this.getTag(answer));
+								$(e.target).val("");
+								//if(this.currentPage.answer.length)
+								$(e.target).attr("placeholder","");
+								e.preventDefault();
+								this.currentPage.answer.push(answer);
+							}
+							if(e.which === 13 && !this.animating) this.selected(this.currentPage.answer);
+						},
+						keydown: (e) => {
+							let me = $(e.target);
+							if(e.which==8 && me.val()==""){
+								me.prev().remove();
+								this.currentPage.answer.pop();
+								if(this.currentPage.answer.length==0)me.attr("placeholder","Indecisive, are we?");
+							}
+							
+						}
+					}
+				})
+				
+			})
 	}
 
 	//build card builder
@@ -121,6 +177,15 @@ class CardSurvey extends Survey{
 		}).css("position", "fixed")
 	}
 
+
+	getCompletedMessage(){
+		return `Please wait while we force Graham to write down your personal info...`;
+	}
+
+	async onCompleted(){
+		console.log(this.getSurveyResults());
+	}
+
 	getPages(){
 		return [
 
@@ -143,6 +208,7 @@ class CardSurvey extends Survey{
 				answer: [],
 				type: "cardBuilder",
 				data: [],
+				key: "content",
 				validate: async (answer) => true
 			
 			},
@@ -152,9 +218,9 @@ class CardSurvey extends Survey{
 				
 				question: "Enter your tags",
 				color: "#7E57C2",
-				answer: "",
-				type: "question",
-				data: [{attr:{"placeholder": "press space after each tag"}}],
+				answer: [],
+				type: "tagQuestion",
+				key: "tags",
 				validate: async (answer) => true
 			
 			},
@@ -165,3 +231,5 @@ class CardSurvey extends Survey{
 	}
 
 }
+
+//I just don't know anymore man

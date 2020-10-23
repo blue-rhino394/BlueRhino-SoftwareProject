@@ -236,7 +236,8 @@ class Survey {
 			}),
 
 		//	card: new Card(this.getCardContent()).getContent()
-			cardBuilder: this.getCardBuilder()
+			cardBuilder: this.getCardBuilder(),
+			tagQuestion: this.getTagQuestion()
 		}
 
 
