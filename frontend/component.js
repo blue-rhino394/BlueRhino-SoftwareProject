@@ -47,6 +47,7 @@ class Login extends Component{
 		let loginData = {email: $("#email").val(), password: $("#password").val()}
 		$.post("/api/login", loginData, (response)=>{
 			if(response.error==""){
+				console.log(response);
 				page.user = response;
 				console.log(page.user);
 				page.navigate("/");
@@ -204,7 +205,7 @@ class Search extends Component{
 		//console.log(request);
 		
 		var start = new Date();
-		console.log("querying "+query);
+		//console.log("querying "+query);
 		$.post("/api/search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
@@ -214,7 +215,7 @@ class Search extends Component{
 					var finish = new Date();
 					var difference = new Date();
 					difference.setTime(finish.getTime() - start.getTime());
-					console.log(`${query} took ${(difference.getSeconds())} seconds`);
+					//console.log(`${query} took ${(difference.getSeconds())} seconds`);
 					for(var result of results.cards){
 
 						new Card(result, true).render("results");
@@ -364,9 +365,10 @@ class Card extends Component{
 	constructor(card, light = false){
 		super();
 		this.card = card;
+		console.log(this.card);
 		this.user = this.card.ownerInfo;
 		this.light = light;
-		console.log(this.card);
+		
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
@@ -430,7 +432,7 @@ class Card extends Component{
 		//add card properties
 		let props = $("<div/>").attr("class", "properties");
 		console.log(this.card.content.cardProperties);
-		this.card.content.cardProperties.push({key: "Another", value: "one"})
+		//this.card.content.cardProperties.push({key: "Another", value: "one"})
 		//this.card.content.cardProperties.push({key: "next", value: "to"})
 		for(const property of this.card.content.cardProperties){
 			let key = property.key;

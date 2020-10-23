@@ -13,6 +13,7 @@ class Survey {
 	start(){
 		this.setContent(false);
 		this.focusAll();
+		$("#body").css("backgroundColor", this.currentPage.color);
 	}
 
 	async selected(result){
@@ -29,8 +30,6 @@ class Survey {
 	async post(endpoint, json){
 		return new Promise(resolve => {
 			//this is dumb
-    		//$.post(`/api/${endpoint}`, JSON.parse(JSON.stringify(json)), (data) => {resolve(data)});
-    		console.log("FUCK FUCK FUCK");
     		$.ajax({
 			  	url: `/api/${endpoint}`,
 			  	type: "POST",
@@ -218,6 +217,12 @@ class Survey {
 				}
 			}),
 
+			text: $("<div/>", {
+				id: "welcomeText",
+				
+				
+			}),
+
 			option: $("<input/>", {
 				type: "button",
 				class: "surveyButton",
@@ -228,8 +233,11 @@ class Survey {
 						if(!this.animating)this.selected($(e.target).attr("value"))
 					}
 				}
-			})
+			}),
 
+		//	card: new Card(this.getCardContent()).getContent()
+			cardBuilder: this.getCardBuilder(),
+			tagQuestion: this.getTagQuestion()
 		}
 
 

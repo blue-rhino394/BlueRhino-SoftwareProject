@@ -191,7 +191,29 @@ img {
 	color: white;
 }
 
-.surveryQuestion::placeholder {
+.surveryQuestionGhost{
+	text-align: left;
+	border: 0px none;
+
+	height: 40px;
+	
+	width: 100%;
+	flex-grow: 1;
+	padding:0px;
+	font-size: 20px;
+
+	outline: none;
+    outline-style: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    background-color: transparent;
+
+	color: white;
+}
+
+.surveryQuestion::placeholder,  .surveryQuestionGhost::placeholder{
   color: white;
   opacity: 0.5; /* Firefox */
 }
