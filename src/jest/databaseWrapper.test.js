@@ -1,7 +1,18 @@
-const dbwrapper= require('../databaseWrapper.ts');
+const dbwrapper= require('../databaseWrapper');
 
 
-test('Uses mock datawrapper to create new USer',()=>
+test('Uses datawrapper to create new User',async ()=>
 {
-    expect (dbwrapper.createUser).toHaveReturned();
-})
+    const data=await fetchData();
+    expect(dbwrapper.createuser()).toReturn();
+}
+)
+
+test('the fetch fails with an error', async () => {
+    expect.assertions(1);
+    try {
+      await fetchData();
+    } catch (e) {
+      expect(e).toMatch('error');
+    }
+  });

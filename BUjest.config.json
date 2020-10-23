@@ -1,6 +1,27 @@
-module.exports = {
+{
+  "testRegex": "(./tests/.*|\\.(spec))\\.(ts)$",
+  "collectCoverage": true,
+  "testEnvironment": "node",
+  "coverageDirectory": "./coverage",
+  "coveragePathIgnorePatterns": [
+    "node_modules",
+    "tests"
+  ],
+  
+  "moduleFileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "json"
+  ],
+  "testPathIgnorePatterns": [
+    "./dist",
+    "./tests/__mock__"
+  ],
   "roots": [
-    "<rootDir>/src"
+    "<rootDir>/src",
+    "/node_modules/", 
+    "\\.pnp\\.[^\\\/]+$"
   ],
   "testMatch": [
     "**/__tests__/**/*.+(ts|tsx|js)",
@@ -8,5 +29,5 @@ module.exports = {
   ],
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
-  },
+  }
 }
