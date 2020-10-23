@@ -409,6 +409,39 @@ export class card {
     //  Utility Methods
     //
 
+    // If the tags passed in are inside
+    // the list of tags on this card,
+    // return true
+    public hasTags(tagsToCheck: string[]): boolean {
+        return tagsToCheck.every((tag) => {
+            return this.contentTags.indexOf(tag) !== -1;
+        })
+    }
+
+    // If this card contains a text value
+    // equal to textToCheck,
+    // return true
+    public hasText(textToCheck: string): boolean {
+
+        const processedTextQuery: string = textToCheck.toLowerCase();
+
+        
+        if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 
     //
     //  Internal Update Methods

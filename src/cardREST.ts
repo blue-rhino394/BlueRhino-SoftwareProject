@@ -757,8 +757,30 @@ export function defineCardREST(app: Application): void {
 
 
 
-        // Search the database for cards using this query
-        const foundCardIDs = await databaseWrapper.searchQuery(query);
+        var foundCardIDs: string[] = [];
+
+        // If we're supposed to be searching through the user's cards
+        if (query.isMyCards) {
+
+            // If the user is logged in...
+            if (req.session.uuid) {
+                // Get the user from the database
+                const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+                // If this user actually exists...
+                if (requestedUser) {
+                    // Search the database for cards using this query
+                    foundCardIDs = await databaseWrapper.searchQuery(query, requestedUser);
+                }
+            }
+        }
+        // Otherwise... Search through the whole database.
+        else {
+            // Search the database for cards using this query
+            foundCardIDs = await databaseWrapper.searchQuery(query);
+        }
+
+        
 
 
         // Create array to hold schemas in
@@ -771,8 +793,15 @@ export function defineCardREST(app: Application): void {
 
             // If the card exists and was retrieved correctly...
             if (foundCard) {
+
+                // Grab the schema
+                const foundSchema = foundCard.getCardSchema();
+
+                // Omit stats!
+                foundSchema.stats = undefined;
+
                 // Add it to the foundCards array!
-                foundCards.push(foundCard.getCardSchema());
+                foundCards.push(foundSchema);
             }
         }
 
