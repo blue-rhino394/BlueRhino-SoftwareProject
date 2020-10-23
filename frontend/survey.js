@@ -43,6 +43,14 @@ class Survey {
   		});
 	}
 
+	getCardBuilder(){
+		
+	}
+
+	getTagQuestion(){
+		
+	}
+
 /*
 	async newpost(endpoint, json){
 		return new Promise(resolve => {
