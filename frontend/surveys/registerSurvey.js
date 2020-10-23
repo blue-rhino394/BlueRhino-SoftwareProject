@@ -22,7 +22,7 @@ class RegisterSurvey extends Survey{
 
 
 	onFinished(){
-		if(this.getAnswer("businessOrPersonal")=="personal"){
+		if(this.getAnswer("businessOrPersonal")=="Personal"){
 			window.location.href = "/";
 		}else{
 			this.pages = this.pages.concat(new CardSurvey().getPages());
@@ -47,9 +47,7 @@ class RegisterSurvey extends Survey{
 	
 		console.log("registering...");
 		console.log(surveyResults);
-		console.log(JSON.stringify(surveyResults));
-		//let test =  {"email":"xk9wdefrvnr343nfnd@gmail.com","password":"123123","public":{"firstName":"Liverf","lastName":"Cram","customURL":"luvordie","profilePictureURL":"https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=Liverf+Cram&size=300&background=29b6f6&bold=true&color=FFFFF"}}
-
+	
 		let postResults = await this.post("register", surveyResults);
 		
 		if(postResults.error!=""){
