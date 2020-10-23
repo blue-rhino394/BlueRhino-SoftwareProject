@@ -274,6 +274,47 @@ export class user {
         return newSavedCard;
     }
 
+    public async updateSavedCard(cardUpdateForm: savedCard): Promise<boolean> {
+
+        // If we don't have this savedCard...
+        if (!this.savedCards.has(cardUpdateForm.cardID)) {
+            // ... bounce!
+            return false;
+        }
+
+        // Update the data structure in memory
+        this.savedCards.set(cardUpdateForm.cardID, cardUpdateForm);
+
+        // Update the array in the database
+        await databaseWrapper.runMongoOperation(async (database) => {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Create a filter indicating that we want THIS user, and THIS savedCard
+            const filter = { uuid: this.getUUID(),  "savedCards.cardID": cardUpdateForm.cardID }
+
+            // Create options explicitly saying that we do NOT want to upsert (create new data if it doesn't exist)
+            const options = { upsert: false }
+
+            // Create the update data, saying that we want to push the new savedCard to the savedCard array
+            const updateData = {
+                $set: {
+                    "savedCards.$": cardUpdateForm
+                }
+            };
+
+            // Apply set operation!
+            const setResult = await userCollection.updateOne(filter, updateData, options);
+
+
+            // If we wanted to check if it actually updated something at this point,
+            // we would check to see if pushResult.modifiedCount is greater than zero!
+        });
+
+        return true;
+    }
+
     public async removeSavedCard(cardToRemoveID: string): Promise<boolean> {
 
         // Remove from data structure in memory
