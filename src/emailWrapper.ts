@@ -88,12 +88,12 @@ class emailWrapperClass {
             html: content
         }
 
-        // Create send mail promise
-        const sendMailPromise = util.promisify(this.emailTransport.sendMail);
 
         // Actually send the mail
         var sentEmail = true;
-        await sendMailPromise(mailOptions).catch(err => {
+        await this.emailTransport.sendMail(mailOptions).catch(err => {
+
+            console.log(err);
             sentEmail = false;
         });
 
