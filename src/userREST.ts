@@ -11,6 +11,8 @@ import { userSchema } from "./interfaces/userSchema";
 import { userAccountSchema } from "./interfaces/userAccountSchema";
 import bcrypt from "bcrypt";
 import util from "util";
+import { emailWrapper } from "./emailWrapper";
+import { accountStatus } from "./enum/accountStatus";
 
 export function defineUserREST(app: Application): void {
 
@@ -171,12 +173,14 @@ export function defineUserREST(app: Application): void {
         // registration form AND there's not a user that
         // will collide with this one!!
 
+        //
+        //      CREATE THE NEW USER!
+        //
 
         // If there's already a session, REMOVE IT
         if (req.session.uuid) {
             req.session.uuid = undefined;
         }
-
 
         // Take the user's password and hash it! (using 10 salt rounds)
         const hashedPassword: string = await bcrypt.hash(registrationForm.password, 10);
@@ -191,10 +195,106 @@ export function defineUserREST(app: Application): void {
         // Create the user in the database...
         const newUser: user = await databaseWrapper.createUser(newUserSchema);
 
+        // Send the verification email...
+        const sentEmailCorrectly: boolean = await emailWrapper.sendAccountVerificationEmail(newUser, req.get('host'));
+
+        // If we've failed to send the account verification email...
+        if (!sentEmailCorrectly) {
+            // Remove the user from the database.
+            await databaseWrapper.deleteUser(newUser.getUUID());
+
+            // Pack error data...
+            const responseData: postGenericResult = {
+                error: "Backend failed to send verification email (something is very wrong)"
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE
+        // ... we're golden!
+
         // Construct response data!
         const responseData: postGenericResult = {
             error: ""
         };
+        res.send(responseData);
+    });
+
+    // Attempts to re-send the account verification email
+    // To the currently signed in user.
+    app.post('/api/resend-verification-email', async (req, res) => {
+
+        // If the user is not currently logged in...
+        if (!req.session.uuid) {
+            // Pack error data...
+            const responseData: postGenericResult = {
+                error: "Not logged in"
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // Get the user from the database
+        const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
+
+        // If there's no user by this uuid...
+        if (!requestedUser) {
+            // Pack error data...
+            const responseData: postGenericResult = {
+                error: "Invalid session uuid"
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+        // If this user is not waiting to have their account verified...
+        if (requestedUser.getAccountStatus() != accountStatus.EmailVerification) {
+            // Pack error data...
+            const responseData: postGenericResult = {
+                error: "No email verification needed"
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // We have a legit user. They need to verify their email.
+        // Let's resend them their verification email!
+
+        // Send the verification email...
+        const sentEmailCorrectly: boolean = await emailWrapper.sendAccountVerificationEmail(requestedUser, req.get('host'));
+
+        // If we've failed to send the account verification email...
+        if (!sentEmailCorrectly) {
+            // Pack error data...
+            const responseData: postGenericResult = {
+                error: "Backend failed to send verification email (something is very wrong)"
+            }
+
+            // Send it and bounce!
+            res.send(responseData);
+            return;
+        }
+
+
+        // OTHERWISE...
+        // We're golden! Email sent.
+
+        // Pack response data!
+        const responseData: postGenericResult = {
+            error: ""
+        }
         res.send(responseData);
     });
 
