@@ -1,5 +1,4 @@
 ﻿import { userAccountPublicSchema } from "../userAccountPublicSchema";
-import { accountStatus } from "../../enum/accountStatus";
 
 export interface postLoginResult {
     error: string;
@@ -7,6 +6,5 @@ export interface postLoginResult {
     uuid: string;
     email: string;
 
-    currentAccountStatus: accountStatus;
     public: userAccountPublicSchema;
 }
