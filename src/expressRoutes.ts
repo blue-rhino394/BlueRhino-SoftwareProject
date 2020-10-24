@@ -61,7 +61,7 @@ export function defineExpressRoutes(app: Application): void {
     // Email Verification
     // Attempt to verify the user's account
     // (this URL will be sent via email)
-    app.get('/verify-email', async (request, response) => {
+    app.get('/email-verify', async (request, response) => {
 
         // If there's no verification token parameter set
         //      OR
