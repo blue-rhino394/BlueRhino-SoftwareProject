@@ -60,27 +60,15 @@ export function defineCardREST(app: Application): void {
         // Generate the card schema from the requested card
         const cardSchema = requestedCard.getCardSchema();
 
-        // If the user is NOT logged in
-        //      OR
-        // The user is logged in and this is NOT their card...
-        if (!req.session.uuid || req.session.uuid != requestedCard.getOwnerUUID()) {
+        // If a user is currently logged in and this is NOT their card...
+        if (req.session.uuid && req.session.uuid != requestedCard.getOwnerUUID()) {
             // Remove the stats from cardSchema
             cardSchema.stats = undefined;
         }
 
-        // If the user is logged in...
-        if (req.session.uuid) {
-            // Log this card as viewed, if it hasn't been already!
-            //      NOTE:   This is an async function but
-            //              we're not awaiting it to save
-            //              response time :)
-            logViewStatOnCard(requestedCard, req.session.uuid);
-        }
-
-
         // Construct response data
         const responseData: postGetCardResult = {
-            card: cardSchema,
+            card: requestedCard.getCardSchema(),
             error: ""
         }
 
@@ -132,26 +120,15 @@ export function defineCardREST(app: Application): void {
         // Generate the card schema from the requested card
         const cardSchema = requestedCard.getCardSchema();
 
-        // If the user is NOT logged in
-        //      OR
-        // The user is logged in and this is NOT their card...
-        if (!req.session.uuid || req.session.uuid != requestedCard.getOwnerUUID()) {
+        // If a user is currently logged in and this is NOT their card...
+        if (req.session.uuid && req.session.uuid != requestedCard.getOwnerUUID()) {
             // Remove the stats from cardSchema
             cardSchema.stats = undefined;
         }
 
-        // If the user is logged in...
-        if (req.session.uuid) {
-            // Log this card as viewed, if it hasn't been already!
-            //      NOTE:   This is an async function but
-            //              we're not awaiting it to save
-            //              response time :)
-            logViewStatOnCard(requestedCard, req.session.uuid);
-        }
-
         // Construct response data
         const responseData: postGetCardResult = {
-            card: cardSchema,
+            card: requestedCard.getCardSchema(),
             error: ""
         }
 
@@ -835,39 +812,4 @@ export function defineCardREST(app: Application): void {
         };
         res.send(responseData);
     });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//  Utility Functions
-//
-
-// Counts the provided UUID as a view on the provided card.
-// If the uuid isn't legit, then it's not logged.
-async function logViewStatOnCard(cardToUse: card, uuidToLog: string): Promise<void> {
-
-    // Get the user from the database.
-    const requestedUser: user = await databaseWrapper.getUser(uuidToLog);
-
-    // If there's not a user by this ID in the database...
-    if (!requestedUser) {
-        // Bounce!
-        return;
-    }
-
-
-    // OTHERWISE...
-    // Let's log this stat!
-
-    await cardToUse.addStatView(uuidToLog);
 }
