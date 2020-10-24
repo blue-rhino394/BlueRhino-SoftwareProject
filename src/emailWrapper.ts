@@ -88,12 +88,13 @@ class emailWrapperClass {
             html: content
         }
 
-        // Create send mail promise
-        const sendMailPromise = util.promisify(this.emailTransport.sendMail);
+
 
         // Actually send the mail
         var sentEmail = true;
-        await sendMailPromise(mailOptions).catch(err => {
+        await this.emailTransport.sendMail(mailOptions).catch(err => {
+
+            console.log(err);
             sentEmail = false;
         });
 
@@ -103,11 +104,11 @@ class emailWrapperClass {
     public async sendAccountVerificationEmail(userToSendTo: user, baseURL: string): Promise<boolean> {
 
         // Construct the link that'll get sent to actually verify the user's account
-        const verifyLink = `${baseURL}/api/verify-email?verificationToken=${userToSendTo.getVerificationCode()}&uuid=${userToSendTo.getUUID()}`;
+        const verifyLink = baseURL + "/verify-email?verificationToken=" + userToSendTo.getVerificationCode() + "&uuid=" + userToSendTo.getUUID();
 
-        var emailContents = "<h1>Welcome to Passport!</h1>";
-        emailContents += "<p>Click the link below to verify your email.</p>";
-        emailContents += `<a href="${verifyLink}">Verify Email</a>`
+        var emailContents = "<h1>Welcome to Passport!</h1>\n";
+        emailContents += "<p>Click the link below to verify your email.</p>\n";
+        emailContents += "<a href='http://" + verifyLink + "'>Verify Email</a>";
 
         const email = userToSendTo.getAccountSchema().email;
 
