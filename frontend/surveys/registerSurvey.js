@@ -4,7 +4,7 @@ class RegisterSurvey extends Survey{
 	constructor(){
 		super();
 
-
+		//console.log(this.getAllFuncs());
 
 
 	}
@@ -25,8 +25,16 @@ class RegisterSurvey extends Survey{
 		if(this.getAnswer("businessOrPersonal")=="Personal"){
 			window.location.href = "/";
 		}else{
-			this.pages = this.pages.concat(new CardSurvey().getPages());
-			this.pageIndex -= 1;
+			let cardSurvey = new CardSurvey();
+			this.pages = cardSurvey.getPages();
+
+			//indescriminentaly copy all of the methods from the old survey to the current survey
+			for(const func of this.getAllFuncs()){
+				this[func] = cardSurvey[func];
+			}
+
+
+			this.pageIndex =-1;
 			this.nextPage();
 		}
 		

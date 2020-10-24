@@ -72,11 +72,8 @@ class CardSurvey extends Survey{
 							}
 							$(e.target).next().next().focus()
 							
-							
 							$(e.target).replaceWith(this.bigText(typed, index));
-							//$(e.target).next("#questionText").focus();
 						}
-						//this.selected($(e.target).val());
 					},
 
 				},
@@ -88,25 +85,16 @@ class CardSurvey extends Survey{
 			})
 	}
 
-	getQualificationPair(){
-		return [
-
-				this.getTextBox(0),
-				$("<div/>").text(":").css({"float": "left", "fontSize": "1.17em", "marginLeft":"5px", "marginRight":"10px"}),
-				this.getTextBox(1),
-				//"<br>","<br>",
-				$("<br>").css("clear", "both")
-			]
-	}
 
 	getTag(text){
 		return $("<span/>").attr("class", "tag").css({
-			"float":"left", 
+			//"float":"left", 
 			margin:"5px",
 			marginRight:"5px", 
 			"display":"flex",
 			"alignItems": "center",
 			padding:"5px",
+			whiteSpace: "nowrap"
 			
 		}).text(text);
 	}
@@ -127,23 +115,39 @@ class CardSurvey extends Survey{
 						keypress: (e) => {
 							//alert(e.which);
 							
-							if(/*e.which===32 || */e.which===44){
-								let answer = $(e.target).val();
-								$(e.target).before(this.getTag(answer));
+							let answer = $(e.target).val().trim();
+							//console.log($(e.target).width());
+							if($(e.target).width() < 100){
+								
+								alert("You've reached the tag limit!")
 								$(e.target).val("");
-								//if(this.currentPage.answer.length)
-								$(e.target).attr("placeholder","");
 								e.preventDefault();
-								this.currentPage.answer.push(answer);
+								return;
+							}
+							if(e.which===44 ){
+								
+
+								if(answer!=""){
+									$(e.target).before(this.getTag(answer));
+									$(e.target).val("");
+									//if(this.currentPage.answer.length)
+									$(e.target).attr("placeholder","");
+									e.preventDefault();
+									this.currentPage.answer.push(answer);
+								}else{
+									$(e.target).val("");
+									e.preventDefault();
+								}
 							}
 							if(e.which === 13 && !this.animating) this.selected(this.currentPage.answer);
 						},
+						//backspace only works on keydown
 						keydown: (e) => {
 							let me = $(e.target);
 							if(e.which==8 && me.val()==""){
 								me.prev().remove();
 								this.currentPage.answer.pop();
-								if(this.currentPage.answer.length==0)me.attr("placeholder","Indecisive, are we?");
+								if(this.currentPage.answer.length==0)me.attr("placeholder", "Indecisive, are we?");
 							}
 							
 						}
@@ -151,6 +155,71 @@ class CardSurvey extends Survey{
 				})
 				
 			})
+	}
+
+
+	getQualificationPair(){
+		return [
+
+				this.getTextBox(0),
+				$("<div/>").text(":").css({"float": "left", "fontSize": "1.17em", "marginLeft":"5px", "marginRight":"10px"}),
+				this.getTextBox(1),
+				//"<br>","<br>",
+				$("<br>").css("clear", "both")
+			]
+	}
+
+	getSocialPair(){
+		return [
+
+			$("<input/>", {
+				"class": "surveryQuestion", 
+				type: "text",
+				id: "questionText",
+				placeholder: "type a social media link and press enter",
+			
+				css: {
+					float: "left",
+					
+					width: "100%"
+				}
+			}),
+				
+			$("<br>").css("clear", "both"),
+			]
+	}
+
+	getSocial(){
+		return [$("<input/>", {
+				"class": "surveryQuestion", 
+				type: "text",
+				id: "questionText",
+				placeholder: "Enter a social media link",
+				
+				on: {
+					keypress: (e) => {
+						if(e.which === 13 && !this.animating) {
+							//alert(index);
+							
+							let typed = $(e.target).val();
+						
+							$("#socialBuilder").append(this.getSocial());
+
+							this.currentPage.answer.push(typed);
+						
+							$(e.target).next().next().focus()
+							
+							$(e.target).replaceWith([this.bigText(typed, 0),"<br>"]);
+						}
+					},
+
+				},
+				css: {
+					float: "left",
+					minWidth :"30%",
+					
+				}
+			}),$("<br>").css("clear", "both")]
 	}
 
 	//build card builder
@@ -177,14 +246,59 @@ class CardSurvey extends Survey{
 		}).css("position", "fixed")
 	}
 
+	getSocialBuilder(){
+		return $("<div/>", {
+			
+			html: [
+				$("<div/>", {
+					id : "socialBuilder",
+					html : this.getSocial()
+				}),
+				$("<input/>", {
+					type:"button", 
+					id:"finished", 
+					click: (e) => {
+						console.log(this.currentPage.answer);
+						this.nextPage()
+					}
+				}).attr("class", "surveyButton").val("Finished").css("marginTop","20px"),
+
+			]
+
+			
+		}).css("position", "fixed")
+	}
+
 
 	getCompletedMessage(){
-		return `Please wait while we force Graham to write down your personal info...`;
+		return `Please wait while we force Graham to write down your personal info`;
+	}
+
+	onFinished(){
+		window.location.href = "/";
 	}
 
 	async onCompleted(){
-		console.log(this.getSurveyResults());
+		
+		let surveyResults = this.getSurveyResults();
+		surveyResults.published = false;
+		surveyResults.layout = {"background": "#FFFFFF", "fontColor": "#00000"}
+		//console.log(surveyResults);
+		let postResults = await this.post("set-card", surveyResults);
+		if(postResults.error==""){
+			this.countdown=0;
+			window.setInterval(() => {
+				this.countdown+=1;
+				if(this.countdown==5)this.onFinished();
+				$("#finalMessage").append(".");
+				
+			}, 1000);
+		}else{
+			$("#finalMessage").text("Something went wrong when creating your card :'(  "+postResults.error);
+		}
 	}
+
+
 
 	getPages(){
 		return [
@@ -208,7 +322,7 @@ class CardSurvey extends Survey{
 				answer: [],
 				type: "cardBuilder",
 				data: [],
-				key: "content",
+				key: "cardProperties",
 				validate: async (answer) => true
 			
 			},
@@ -221,6 +335,18 @@ class CardSurvey extends Survey{
 				answer: [],
 				type: "tagQuestion",
 				key: "tags",
+				validate: async (answer) => true
+			
+			},
+
+
+			{
+				
+				question: "Add you social media accounts",
+				color: "#7E57C2",
+				answer: [],
+				type: "socialBuilder",
+				key: "socialMediaLinks",
 				validate: async (answer) => true
 			
 			},

@@ -26,6 +26,18 @@ class Survey {
 		}
 	}
 
+	getAllFuncs() {
+		let obj = this;
+		let methods = new Set();
+		while (obj = Reflect.getPrototypeOf(obj)) {
+		let keys = Reflect.ownKeys(obj)
+		keys.forEach((k) => methods.add(k));
+		}
+		return methods;
+	}
+
+
+
 	//makes jquery post requests awaitable
 	async post(endpoint, json){
 		return new Promise(resolve => {
@@ -48,7 +60,11 @@ class Survey {
 	}
 
 	getTagQuestion(){
-		
+
+	}
+
+	getSocialBuilder(){
+
 	}
 
 /*
@@ -245,7 +261,8 @@ class Survey {
 
 		//	card: new Card(this.getCardContent()).getContent()
 			cardBuilder: this.getCardBuilder(),
-			tagQuestion: this.getTagQuestion()
+			tagQuestion: this.getTagQuestion(),
+			socialBuilder: this.getSocialBuilder()
 		}
 
 
