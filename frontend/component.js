@@ -51,6 +51,8 @@ class Login extends Component{
 				page.user = response;
 				console.log(page.user);
 				page.navigate("/");
+			}else{
+				alert(response.error);
 			}
 		});
 	}
@@ -279,7 +281,7 @@ class CardStats extends Component{
 		});
 
 		//add heading
-		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${page.user.firstName}'s</span> Stats`));
+		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${page.user.public.firstName}'s</span> Stats`));
 
 		//add stats 
 		for(var key in this.stats){
@@ -375,7 +377,7 @@ class Card extends Component{
 		
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
-			"Social": new CardSocial(this.card.firstName, this.card.content.socialMediaLinks),
+			"Social": new CardSocial(this.card.ownerInfo.firstName, this.card.content.socialMediaLinks),
 			"Stats": new CardStats(this.card.stats),
 			"View": ()=>{this.viewCard()}
 		} 
