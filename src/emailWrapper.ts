@@ -92,11 +92,11 @@ class emailWrapperClass {
 
         // Actually send the mail
         var sentEmail = true;
-        //await this.emailTransport.sendMail(mailOptions).catch(err => {
-        //
-        //    console.log(err);
-        //    sentEmail = false;
-        //});
+        await this.emailTransport.sendMail(mailOptions).catch(err => {
+
+            console.log(err);
+            sentEmail = false;
+        });
 
         return sentEmail;
     }
