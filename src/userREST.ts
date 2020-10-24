@@ -226,6 +226,7 @@ export function defineUserREST(app: Application): void {
 
                     uuid: undefined,
                     email: undefined,
+                    currentAccountStatus: undefined,
                     public: undefined
                 }
 
@@ -247,6 +248,7 @@ export function defineUserREST(app: Application): void {
 
                 uuid: existingUser.getUUID(),
                 email: userAccount.email,
+                currentAccountStatus: existingUser.getAccountStatus(),
                 public: userAccount.public
             };
             res.send(responseData);
@@ -277,6 +279,7 @@ export function defineUserREST(app: Application): void {
 
                 uuid: undefined,
                 email: undefined,
+                currentAccountStatus: undefined,
                 public: undefined
             }
 
@@ -304,6 +307,7 @@ export function defineUserREST(app: Application): void {
 
                 uuid: undefined,
                 email: undefined,
+                currentAccountStatus: undefined,
                 public: undefined
             }
 
@@ -325,6 +329,7 @@ export function defineUserREST(app: Application): void {
 
                 uuid: undefined,
                 email: undefined,
+                currentAccountStatus: undefined,
                 public: undefined
             }
 
@@ -350,6 +355,7 @@ export function defineUserREST(app: Application): void {
 
             uuid: requestedUser.getUUID(),
             email: userAccount.email,
+            currentAccountStatus: requestedUser.getAccountStatus(),
             public: userAccount.public
         };
         res.send(responseData);
