@@ -21,7 +21,8 @@ export function defineExpressSessions(app: Application): void {
         secret: "The secret sauce to passport is that it's powered by actual carrier pigeons",
 
         cookie: {
-            maxAge: 1000 * 60 * 60 * 24 * 7 // cookie decays after 1 week
+            maxAge: 1000 * 60 * 60 * 24 * 7,    // cookie decays after 1 week
+            httpOnly: false                     // Ensure JS frontend can see the cookie
         },
 
         store: store,
