@@ -11,6 +11,8 @@ import { userSchema } from "./interfaces/userSchema";
 import { userAccountSchema } from "./interfaces/userAccountSchema";
 import bcrypt from "bcrypt";
 import util from "util";
+import { emailWrapper } from "./emailWrapper";
+import { accountStatus } from "./enum/accountStatus";
 
 export function defineUserREST(app: Application): void {
 
