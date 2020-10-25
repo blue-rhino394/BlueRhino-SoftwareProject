@@ -100,9 +100,6 @@ class CPigeon {
 
 
 
-                pageView.render();
-                this.currentPage = pageView;
-                $("#content").fadeIn(500);
 
             });
         }
