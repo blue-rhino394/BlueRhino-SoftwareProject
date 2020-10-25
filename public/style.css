@@ -13,15 +13,12 @@ body
 .navBar {
 	overflow: hidden;
 	background-color: #29b6f6; 
-	padding-left: 40px;
-	padding-right: 35px;
 }
 
 main{
 	
 	margin:50px;
 	margin-top: 0px;
-	margin-bottom: 10px;
 }
 
 .navBar a{
