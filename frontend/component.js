@@ -76,7 +76,7 @@ class Component {
         	});
 			
 		}
-
+	}
 
 	getContent(){}
 	onRender(){}
