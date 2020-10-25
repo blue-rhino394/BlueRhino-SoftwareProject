@@ -18,11 +18,43 @@ class CPigeon {
         //json to hold user data
         this.user = false;
         //list of components that are rendered by view 
-        this.components = []
+        this.components = [];
+        this.releasePigeon();
+        
+    }
+
+    //method that starts everything
+    async releasePigeon(){
+
+        let postResult = await this.post("login");
+        if(postResult.error == "") {
+            
+            this.user = postResult;
+        }else{
+            console.log(postResult.error);
+        }
         this.navigate(this.getUrl(), false);
+            
+      
     }
 
 
+    /* Awaitable post request*/
+    async post(endpoint, json={}){
+        return new Promise(resolve => {
+            //this is dumb
+            $.ajax({
+                  url: `/api/${endpoint}`,
+                  type: "POST",
+                  data: JSON.stringify(json),
+                  dataType: "json",
+                  contentType: "application/json; charset=utf-8",
+                  success: (data) => {resolve(data)}
+
+            });
+
+        });
+    }
     /*
         this method navigates to a page by finding the appropreate view in getPageMaps, renders the view 
         and deRenders the components in the old view.  Also adds the current page to navigation stack
@@ -68,6 +100,7 @@ class CPigeon {
     getPageMaps(){
         return {
             "/": (this.user != false) ? new HomeView() : new LoginView(),
+            "/search":(this.user != false) ? new SearchView() : new LoginView(),
             "*": new HomeView(this.getUrl())
         }
     }

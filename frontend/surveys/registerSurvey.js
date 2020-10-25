@@ -22,6 +22,7 @@ class RegisterSurvey extends Survey{
 
 
 	onFinished(){
+		console.log(document.cookie);
 		if(this.getAnswer("businessOrPersonal")=="Personal"){
 			window.location.href = "/";
 		}else{

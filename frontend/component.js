@@ -133,12 +133,14 @@ class CardViewer extends Component{
 	getContent(){
 		let content = $("<div/>");
 		let heading = "Your Card";
-		content.append($("<h1/>").html("Your Card").attr("id", "cardHeading"));
+		content.append($("<h1/>").html("").attr("id", "cardHeading"));
 		content.append($("<div/>").attr("id", "cardDisplay"));
 		return content;
 	}
 
 	async getCardData(cardUrl){
+		cardUrl = cardUrl.substring(1);
+		console.log("get Card "+cardUrl);
 		return new Promise(resolve => {
     		$.post(`/api/get-card-by-slug`, {"slug": cardUrl}, (data) => {console.log(data); resolve(data.card)});
   		});
@@ -181,7 +183,7 @@ class CardViewer extends Component{
 
 class Search extends Component{
 	
-	constructor(searchText, type = "none"){
+	constructor(searchText=undefined, type = "none"){
 		super();
 		this.searchText = searchText;
 		this.light = (type=="light");
@@ -203,26 +205,32 @@ class Search extends Component{
 	showResults(query, dupe = -1){
 		if(dupe==-1)dupe = query.length;
 		dupe = 1;
+
 		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 1};
 		//console.log(request);
 		
 		var start = new Date();
-		//console.log("querying "+query);
+		console.log("querying "+query);
 		$.post("/api/search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
 				$("#results").html("");
 
-			
-					var finish = new Date();
-					var difference = new Date();
-					difference.setTime(finish.getTime() - start.getTime());
-					//console.log(`${query} took ${(difference.getSeconds())} seconds`);
-					for(var result of results.cards){
+				
+				var finish = new Date();
+				var difference = new Date();
+				difference.setTime(finish.getTime() - start.getTime());
+				
+				/*
+				console.log(`<${query}>`);
+				console.log(`took ${(difference.getSeconds())} seconds`);
+				console.log(results);
+				console.log(`</${query}>`);*/
+				for(var result of results.cards){
 
-						new Card(result, true).render("results");
+					new Card(result, true).render("results");
 
-					}
+				}
 			
 
 				$("#results").fadeIn(500);
@@ -238,7 +246,7 @@ class Search extends Component{
 		});
 
 		//Searh Heading
-		if(!this.myCards)content.append($("<h2/>", {text: this.searchText}));
+		if(!this.myCards || this.searchText==undefined)content.append($("<h2/>", {text: this.searchText}));
 
 		//Search textbox 
 		content.append($("<input>", {
@@ -280,6 +288,7 @@ class CardStats extends Component{
 			"class": "box"
 		});
 
+		//connect.sid
 		//add heading
 		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${page.user.public.firstName}'s</span> Stats`));
 
@@ -394,7 +403,7 @@ class Card extends Component{
 
 	viewCard(){
 		//page.getCardViewer().view(this.card);
-		this.card.customURL="gfreezy";
+		//this.card.customURL="gfreezy";
 		page.navigate("/"+this.card.customURL);
 	}
 
@@ -419,7 +428,12 @@ class Card extends Component{
 		//add profile pic to card
 		let color = "29b6f6";
 		let nameQuery = `${this.user.firstName}+${this.user.lastName}`;
-		let prfoilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`;
+		console.log();
+		//let prfoilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`;
+		let prfoilePicUrl = this.card.ownerInfo.profilePictureURL;
+		//fix 
+		//if(!prfoilePicUrl.includes("&format=png"))prfoilePicUrl+="&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
+
 		content.append($("<div>", {
 			"class": "profilePic",
 			html: $("<img/>").attr("src", prfoilePicUrl)
