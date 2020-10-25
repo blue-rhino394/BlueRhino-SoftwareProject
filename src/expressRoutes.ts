@@ -3,6 +3,7 @@ import { databaseWrapper } from "./databaseWrapper";
 import { user } from "./user";
 import { accountStatus } from "./enum/accountStatus";
 import { card } from "./card";
+import { reservedRoutes } from "./reservedRoutes";
 const path = require('path');
 
 export function defineExpressRoutes(app: Application): void {
@@ -169,4 +170,25 @@ export function defineExpressRoutes(app: Application): void {
     app.get('*', (request, response) => {
         response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
     });
+
+
+
+    // Once the above definitions are complete,
+    // take the definitions from express and 
+    // add them to reservedRoutes
+
+    // If there's an app stack
+    if (app._router.stack && app._router.stack.length > 0) {
+
+        const routeStack = app._router.stack;
+
+        for (var x = 0; x < routeStack.length; x++) {
+            if (routeStack[x].route) {
+                reservedRoutes.addRoute(routeStack[x].route.path);
+            }
+        }
+    }
+    else {
+        console.error("Could not define reserved routes...!");
+    }
 }

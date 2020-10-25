@@ -12,6 +12,7 @@ import { user } from "./user";
 import { card } from "./card";
 import { databaseCacheManager } from "./databaseCacheManager";
 import { savedCard } from "./interfaces/savedCard";
+import { reservedRoutes } from "./reservedRoutes";
 
 
 class databaseWrapperClass {
@@ -243,7 +244,20 @@ class databaseWrapperClass {
 
     // Finds a user in the database by their slug
     public async getUserBySlug(userSlug: string): Promise<user> {
-        // CHECK THE CACHE FIRST!
+
+        // CHECK THE RESERVED ROTUES FIRST
+        // If we're trying to find a user using a RESERVED ROUTE,
+        // that means that there should IN NO WAY be a user at this slug.
+        //
+        // If this slug is a reserved route...
+        if (reservedRoutes.hasRoute(userSlug)) {
+            // BOUNCE!
+            return null;
+        }
+
+
+
+        // CHECK THE CACHE NEXT!
         // Loop through all of the users in the cache (A pain, I know)
         // and if one has the slug we want, return it!
         //
