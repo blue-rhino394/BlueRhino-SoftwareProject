@@ -32,16 +32,7 @@ class CPigeon {
             let savedCardsRequest = {textQuery:"", tags:[], isMyCards: true, pageNumber: 0};
             let savedCards = await this.post("search-card", savedCardsRequest)
             this.user = postResult;
-            this.user.savedCards = savedCards.cards;
-            this.user.hasSaved = (cardId) => {
-      
-                for(const card of this.user.savedCards){
-             
-                    if(card.cardID == cardId)return true;
- 
-                }
-                return false;
-            }
+            this.addSavedCards(savedCards)
             console.log(this.user);
         }else{
             console.log(postResult.error);
@@ -51,6 +42,19 @@ class CPigeon {
       
     }
 
+
+    addSavedCards(savedCards){
+        this.user.savedCards = savedCards.cards;
+        this.user.hasSaved = (cardId) => {
+
+            for(const card of this.user.savedCards){
+         
+                if(card.cardID == cardId)return true;
+
+            }
+            return false;
+        }
+    }
 
     /* Awaitable post request*/
     async post(endpoint, json={}){
@@ -79,7 +83,7 @@ class CPigeon {
        
         //let cardViewerPages = ["About"];
         let cardViewer = this.getCardViewer();
-        if(cardViewer!=false /*&& page*/){
+        if(cardViewer!=false && (page!="/search" && page!="/")){
             cardViewer.view(page);
         }else{
             $("#content").fadeOut(500, () => {

@@ -36,7 +36,7 @@ class Component {
 			if(!fadeIn){
 				
 				content = this.getContent();
-				content.css(this.getStyle());
+				if(!content instanceof Array)content.css(this.getStyle());
 				
 				
 				this.element = content.appendTo(location);
@@ -78,18 +78,29 @@ class Login extends Component{
 		super();
 	}
 
-	login(){
+	loginWrapper(){
+		this.login();
+	}
+
+	async login(){
+
 		let loginData = {email: $("#email").val(), password: $("#password").val()}
-		$.post("/api/login", loginData, (response)=>{
-			if(response.error==""){
-				console.log(response);
-				page.user = response;
-				console.log(page.user);
-				page.navigate("/");
-			}else{
-				alert(response.error);
-			}
-		});
+		let response = await this.awaitPost("login", loginData);
+		console.log(response);
+
+		if(response.error==""){
+
+			page.user = response;
+			let savedCardsRequest = {textQuery:"", tags:[], isMyCards: true, pageNumber: 0};
+			let savedCards = await this.awaitPost("search-card", savedCardsRequest);
+  
+            page.addSavedCards(savedCards)
+			console.log(page.user);
+			page.navigate("/");
+		}else{
+			alert(response.error);
+		}
+		
 	}
 
 	signUp(){
@@ -125,7 +136,8 @@ class Login extends Component{
 		content.append("<br><br>");
 
 		//create login button
-		content.append($("<a/>", {text:"Login", click: this.login}).css({marginLeft:"5px", marginRight:"10px"}));
+		//content.append($("<a/>", {text:"Login", click: ()=>{this.loginWrapper()}}).css({marginLeft:"5px", marginRight:"10px"}));
+		content.append($("<a/>", {text:"Login", click: ()=>{this.login()}}).css({marginLeft:"5px", marginRight:"10px"}));
 
 		//create login button
 		content.append($("<a/>", {text:"Sign Up", click: this.signUp}));
@@ -197,6 +209,7 @@ class CardViewer extends Component{
 	}
 
 	async getCardData(cardUrl){
+		if(cardUrl=="/")cardUrl = "/"+page.user.public.customURL;
 		cardUrl = cardUrl.substring(1);
 		console.log("get Card "+cardUrl);
 		return new Promise(resolve => {
@@ -210,6 +223,7 @@ class CardViewer extends Component{
 	}
 
 	async view(slug){
+
 		let display = $("#cardDisplay");
 		let cardData = await this.getCardData(slug);
 
@@ -439,6 +453,33 @@ class CardSocial extends Component{
 
 }
 
+class NavBar extends Component{
+	constructor(){
+		super();
+
+	}
+
+	async logout(){
+		//alert("");
+		await this.awaitPost("logout", {}); 
+		window.location.replace("/");
+	}
+
+	getContent(){
+		let content = $("<div/>").css("width", "100%");
+		let buttons = [
+
+			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left"),		
+			$("<a/>", {click:()=> this.logout(), text: "Logout"}).css("float", "right"),
+			$("<a/>", {click:()=> page.navigate("/search"), text: "Search"}).css("float", "right"),
+		];
+		let innerDiv = $("<div/>").html(buttons).css({"width": "100%", postion:"fixed"});
+		content.html(buttons);
+
+		return content;
+	}
+
+}
 
 class Card extends Component{
 

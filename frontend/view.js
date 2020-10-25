@@ -70,7 +70,7 @@ class HomeView extends View{
 		return {
 			"side" : new Search("Saved Cards", "myCards"),
 			"main" : new CardViewer(this.slug),
-
+			"navBar" : new NavBar()
 		}
 	}
 
@@ -88,6 +88,7 @@ class SearchView extends View{
 		return {
 			"side" : new Search(),
 			"main" : new CardViewer("search"),
+			"navBar" : new NavBar()
 		}
 	}
 
