@@ -793,7 +793,7 @@ export function defineCardREST(app: Application): void {
         for (var i = 0; i < wordQuery.length; i++) {
 
             // If this word is not empty
-            if (wordQuery[i]) {
+            if (wordQuery[i] || query.isMyCards) {
 
                 // Search the database using this word
                 const results = await searchDatabase(req, {
