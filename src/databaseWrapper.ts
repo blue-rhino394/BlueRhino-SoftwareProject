@@ -20,7 +20,7 @@ class databaseWrapperClass {
     // Settings
 
     // The number of pages per each search
-    private pageCount: number = 20;
+    private pageCount: number = 10;
 
 
     // Data Structures
@@ -655,22 +655,32 @@ class databaseWrapperClass {
         //
         //          FULL DATABASE SEARCH
         //
-        else {
+        else if (requestedQuery.textQuery) {
             await this.runMongoOperation(async function (database) {
 
                 // Get card collection from database
                 var cardCollection = await database.collection("cards");
 
 
-                // Search for cards that:
-                //  * have the text provided in requestedQuery.textQuery
-                //  * have the tags provided in requestedQuery.tags
-                var query = {
-                    $text: {
-                        $search: requestedQuery.textQuery,
-                        $caseSensitive: false,
-                    }
-                };
+
+                var query = { };
+
+                // Use mongoDB's search function.
+                // Does NOT use partial matching.
+                //query["$text"] = {
+                //    $search: requestedQuery.textQuery,
+                //    $caseSensitive: false,
+                //}
+
+                // Use REGEX for partial matching
+                query["$or"] = [
+                    { "ownerInfo.firstName": { $regex: requestedQuery.textQuery, $options: "i" }},
+                    { "ownerInfo.lastName": { $regex: requestedQuery.textQuery, $options: "i" } },
+                    { "ownerInfo.customURL": { $regex: requestedQuery.textQuery, $options: "i" } },
+                    { "content.tags": { $regex: requestedQuery.textQuery, $options: "i" } },
+                    { "content.cardProperties": { $regex: requestedQuery.textQuery, $options: "i" } }
+                ]
+
 
                 // Only search through published cards
                 //query["content.published"] = true;
@@ -697,7 +707,7 @@ class databaseWrapperClass {
                 //  * we ONLY get the uuid
                 const options = {
                     skip: requestedQuery.pageNumber * cardsPerPage,
-                    limit: cardsPerPage,
+                    //limit: cardsPerPage,
 
                     projection: projection
                 }
@@ -747,6 +757,31 @@ class databaseWrapperClass {
 
         // Run and wait for the operation callback to finish
         await operation(dbPassport).catch(err => console.log(`Error while executing mongo operation: ${err}`))
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //
+    //  Gettters
+    //
+
+    public getPageCount(): number {
+        return this.pageCount;
     }
 }
 

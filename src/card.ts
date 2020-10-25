@@ -425,18 +425,35 @@ export class card {
 
         const processedTextQuery: string = textToCheck.toLowerCase();
 
-        
+        // If this text is in the firstName
         if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
             return true;
         }
 
+        // If this text is in the lastName
         if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
             return true;
         }
 
+        // If this text is in the customURL
         if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
             return true;
         }
+
+        // If this text is in an element of tags
+        if (this.contentTags.some(function (tag) { return tag.includes(processedTextQuery) })) {
+            return true;
+        }
+
+        // If this text is in an element of cardProperties
+        this.contentCardProperties.forEach((value, key) => {
+
+            if (value.includes(processedTextQuery) || key.includes(processedTextQuery)) {
+                return true;
+            }
+        });
+
+
 
         return false;
     }
