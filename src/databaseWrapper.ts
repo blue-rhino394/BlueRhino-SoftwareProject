@@ -651,27 +651,21 @@ class databaseWrapperClass {
                 // Search for cards that:
                 //  * have the text provided in requestedQuery.textQuery
                 //  * have the tags provided in requestedQuery.tags
-                var query = undefined;
-
-                if (requestedQuery.tags.length > 0) {
-                    query = {
-                        $text: {
-                            $search: requestedQuery.textQuery,
-                            $caseSensitive: false,
-                        },
-
-                        "content.published": true,
-                        "content.tags": { $all: requestedQuery.tags }
+                var query = {
+                    $text: {
+                        $search: requestedQuery.textQuery,
+                        $caseSensitive: false,
                     }
-                }
-                else {
-                    query = {
-                        $text: {
-                            $search: requestedQuery.textQuery,
-                            $caseSensitive: false,
-                        },
+                };
 
-                        "content.published": true,
+                // Only search through published cards
+                //query["content.published"] = true;
+                
+                // If we're using tags in our search...
+                if (requestedQuery.tags.length > 0) {
+                    // Search for cards that contain all of our required tags
+                    query["content.tags"] = {
+                        $all: requestedQuery.tags
                     }
                 }
 
