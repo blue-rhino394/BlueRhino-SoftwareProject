@@ -76,13 +76,14 @@ class CPigeon {
         this method navigates to a page by finding the appropreate view in getPageMaps, renders the view 
         and deRenders the components in the old view.  Also adds the current page to navigation stack
     */
-    navigate(page, pushState=true){
+    async navigate(page, pushState=true){
         
         if(pushState)window.history.pushState("", "", page);
 
        
         //let cardViewerPages = ["About"];
-        let cardViewer = this.getCardViewer();
+        //let cardViewer = this.getCardViewer();
+        let cardViewer = this.getComponent("CardViewer");
         if(cardViewer!=false && (page!="/search" && page!="/")){
             cardViewer.view(page);
         }else{
@@ -90,9 +91,15 @@ class CPigeon {
                 let pageView = this.getPageMaps()[page];
                 //if there is no route avaible for current page, use the '*' route 
                 if(pageView==undefined) pageView = this.getPageMaps()["*"];
-                pageView.render();
-                this.currentPage = pageView;
-                $("#content").fadeIn(500);
+                
+                let x = pageView.render().then(()=>{
+                    this.currentPage = pageView;
+                     $("#content").fadeIn(500);
+
+                });
+
+
+                
             });
         }
    
@@ -102,21 +109,13 @@ class CPigeon {
     //~Unity war flashbacks~
     getComponent(type){
         for(const component of this.components){
-            //console.log(typeof component);
             if(component.constructor.name == type)return component;
         }
         return false;
     }
 
 
-    getCardViewer(){
-        for(const component of this.components){
-            if(component instanceof CardViewer){
-                return component;
-            }
-        }
-        return false;
-    }
+
 
     //returns the slug of the page
     getUrl(){

@@ -3,7 +3,7 @@ class View {
 	async render(){
 
 	
-		this.data = await this.getData();
+//		this.data = await this.getData();
 
 		let view = await this.loadImport(this.getView());
 		page.components = [];
