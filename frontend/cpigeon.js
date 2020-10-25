@@ -94,7 +94,7 @@ class CPigeon {
                 
                 let x = pageView.render().then(()=>{
                     this.currentPage = pageView;
-                     $("#content").fadeIn(500);
+                    $("#content").fadeIn(500);
 
                 });
 

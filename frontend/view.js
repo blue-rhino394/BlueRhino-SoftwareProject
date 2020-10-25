@@ -14,7 +14,7 @@ class View {
 		
 		for (let [key, component] of Object.entries(this.getComponents())) {
 			try{
-				page.components.push(component);
+				
 				component.render(key); 
 			}catch(err){
 				console.error(err);
@@ -68,7 +68,7 @@ class HomeView extends View{
 	getComponents(){
 
 		return {
-			"side" : new Search("Saved Cards", "myCards"),
+			"side" : (page.user!=false) ? new Search("Saved Cards", "myCards") : new Login(),
 			"main" : new CardViewer(this.slug),
 			"navBar" : new NavBar()
 		}
@@ -107,6 +107,7 @@ class LoginView extends View{
 		return {
 			"side" : new Login(),
 			"main" : new Search("Discover Passport", "light"),
+			"navBar" : new NavBar()
 		}
 	}
 

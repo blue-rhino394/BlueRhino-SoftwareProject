@@ -33,6 +33,8 @@ class Component {
 		
 		try{
 			let location = $("#"+locationId);
+			this.location = locationId;
+			page.components.push(this);
 			if(!fadeIn){
 				
 				content = this.getContent();
@@ -61,8 +63,19 @@ class Component {
 		return false;
 	}
 
-	deRender(){
-		this.element.remove();
+	async deRender(animate=false){
+		page.components.splice(page.components.indexOf(this), 1);
+		if(!animate){
+			this.element.remove();
+		}else{
+			return new Promise(resolve => {
+	            this.element.fadeOut(500, ()=> {
+					resolve()
+				});
+
+        	});
+			
+		}
 	}
 
 	getContent(){}
@@ -87,6 +100,10 @@ class Login extends Component{
 		this.login();
 	}
 
+	onRender(){
+		$("#SavedText").text("Sign in to Save Cards");
+	}
+
 	async login(){
 
 		let loginData = {email: $("#email").val(), password: $("#password").val()}
@@ -100,8 +117,16 @@ class Login extends Component{
 			let savedCards = await this.awaitPost("search-card", savedCardsRequest);
   
             page.addSavedCards(savedCards)
-			console.log(page.user);
-			page.navigate("/");
+			
+			if(page.getUrl()!="/"){
+				let x = await this.deRender(true);
+				
+				$("#SavedText").text("Saved Cards");
+				new Search("Saved Cards", "myCards").render(this.location, true);
+			}else{
+				page.navigate("/");
+			}
+			
 		}else{
 			alert(response.error);
 		}
@@ -537,6 +562,12 @@ class Card extends Component{
 
 	async toggleSaveCard(target){
 		if(this.waitingForSave)return;
+
+		if(page.user == false){
+			alert("Login or Sign up to save cards!");
+			return;
+		}
+
 		console.log(target);
 		this.waitingForSave = true;
 		let saveWord = target.text();
