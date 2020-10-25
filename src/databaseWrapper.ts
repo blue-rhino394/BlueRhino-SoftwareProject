@@ -694,12 +694,9 @@ class databaseWrapperClass {
                 }
 
 
-
-
                 const projection = {
                     _id: 0,
                     cardID: 1,
-
                 }
 
                 // Restrict the database return results so that:
