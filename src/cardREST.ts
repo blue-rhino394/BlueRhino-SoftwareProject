@@ -737,6 +737,12 @@ export function defineCardREST(app: Application): void {
         res.send(responseData);
     });
 
+
+
+
+
+
+
     // Searches for cards across either the entire database, or just
     // in the user's list of saved cards.
     //
@@ -812,6 +818,97 @@ export function defineCardREST(app: Application): void {
         // Loop through the found card ID's and pack the cards into 
         // the foundCards array
         for (const cardID of foundCardIDs) {
+            const foundCard = await databaseWrapper.getCard(cardID);
+
+            // If the card exists and was retrieved correctly...
+            if (foundCard) {
+
+                // Grab the schema
+                const foundSchema = foundCard.getCardSchema();
+
+                // Omit stats!
+                foundSchema.stats = undefined;
+
+                // Add it to the foundCards array!
+                foundCards.push(foundSchema);
+            }
+        }
+
+
+        // Pack response data using the cards we've retrieved!
+        const responseData: postSearchCardResult = {
+            cards: foundCards
+        };
+        res.send(responseData);
+    });
+
+    // Fetches the top 10 most popular cards in the system
+    app.post('/api/hot-cards', async (req, res) => {
+
+        var resultIDs: string[] = [];
+
+
+        await databaseWrapper.runMongoOperation(async (database) => {
+
+            // Get the card collection from the database
+            const cardCollection = database.collection("cards");
+
+            // Aggregate the top 10 search results.
+            //
+            // Note for the future: This can be optimized
+            // by caching a cardViewCount variable inside stats!
+            // That way, we don't have to manually calculate it
+            // every time we run this aggregation
+            //
+            // Works by:
+            // Adding a new field to the search result that's
+            // equal to the size of the cardViews array in stats.
+            // Then, sorting the returned collection by the calculated viewCount.
+            // Then, limiting the return results to 10 objects.
+            const cursor = cardCollection.aggregate([
+                {
+                    $project: {
+                        _id: 0,
+                        cardID: 1,
+                        viewCount: { $size: { "$ifNull": ["$stats.cardViews", []] } }
+                    }
+                },
+                {
+                    $sort: { "viewCount": -1 }
+                },
+                {
+                    $limit: 10
+                }
+            ]);
+
+
+
+
+            // Manually iterate through
+            // AggregationCursor because
+            // for some reason the mongoDB
+            // implementation doesn't
+            // have a forEach process
+            // like it's other cursors do...
+
+            var cursorLocation = await cursor.next();
+
+            while (cursorLocation) {
+
+                resultIDs.push(cursorLocation["cardID"]);
+                cursorLocation = await cursor.next();
+            }
+        });
+
+
+        console.log(resultIDs);
+
+        // Create array to hold schemas in
+        var foundCards: cardSchema[] = [];
+
+        // Loop through the found card ID's and pack the cards into 
+        // the foundCards array
+        for (const cardID of resultIDs) {
             const foundCard = await databaseWrapper.getCard(cardID);
 
             // If the card exists and was retrieved correctly...
