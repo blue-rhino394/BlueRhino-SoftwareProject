@@ -19,6 +19,7 @@ class CPigeon {
         this.user = false;
         //list of components that are rendered by view 
         this.components = [];
+
         this.releasePigeon();
         
     }
@@ -28,8 +29,20 @@ class CPigeon {
 
         let postResult = await this.post("login");
         if(postResult.error == "") {
-            
+            let savedCardsRequest = {textQuery:"", tags:[], isMyCards: true, pageNumber: 0};
+            let savedCards = await this.post("search-card", savedCardsRequest)
             this.user = postResult;
+            this.user.savedCards = savedCards.cards;
+            this.user.hasSaved = (cardId) => {
+      
+                for(const card of this.user.savedCards){
+             
+                    if(card.cardID == cardId)return true;
+ 
+                }
+                return false;
+            }
+            console.log(this.user);
         }else{
             console.log(postResult.error);
         }
@@ -74,11 +87,21 @@ class CPigeon {
                 //if there is no route avaible for current page, use the '*' route 
                 if(pageView==undefined) pageView = this.getPageMaps()["*"];
                 pageView.render();
+                this.currentPage = pageView;
                 $("#content").fadeIn(500);
             });
         }
    
 
+    }
+
+    //~Unity war flashbacks~
+    getComponent(type){
+        for(const component of this.components){
+            //console.log(typeof component);
+            if(component.constructor.name == type)return component;
+        }
+        return false;
     }
 
 

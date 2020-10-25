@@ -1,5 +1,33 @@
 class Component {
 
+	post(endpoint, json={}, callback){
+        $.ajax({
+              url: `/api/${endpoint}`,
+              type: "POST",
+              data: JSON.stringify(json),
+              dataType: "json",
+              contentType: "application/json; charset=utf-8",
+              success: (data) => {callback(data)}
+
+        });
+    }
+
+    async awaitPost(endpoint, json={}){
+		return new Promise(resolve => {
+			//this is dumb
+    		$.ajax({
+			  	url: `/api/${endpoint}`,
+			  	type: "POST",
+			  	data: JSON.stringify(json),
+			  	dataType: "json",
+			  	contentType: "application/json; charset=utf-8",
+			  	success: (data) => {resolve(data)}
+
+			});
+
+  		});
+	}
+
 	render(locationId, fadeIn=false){
 		let content =  undefined;
 		
@@ -208,15 +236,11 @@ class CardViewer extends Component{
 		if(card.myCard)headingText = "Your Card";
 		$("#cardHeading").html(headingText);
 
-		/*
-		if(card.myCard){
-			card.toggleAction("Social", true);
-			card.toggleAction("Stats", true);
-			card.toggleAction("Details", true);
-		}*/
+	
 		if(collapseAll){
 			for(let button of card.getButtons()){
-				card.toggleAction(button, true);
+				//We do not want to save some rando's card when collaping all actions
+				if(button!="Save" && button!="UnSave")card.toggleAction(button, true);
 			}
 		}
 	}
@@ -244,20 +268,7 @@ class Search extends Component{
 		
 	}
 
-	post(endpoint, json={}, callback){
-     
-            $.ajax({
-                  url: `/api/${endpoint}`,
-                  type: "POST",
-                  data: JSON.stringify(json),
-                  dataType: "json",
-                  contentType: "application/json; charset=utf-8",
-                  success: (data) => {callback(data)}
-
-            });
-
-     
-    }
+	
 
 
 	showResults(query, dupe = -1){
@@ -441,12 +452,15 @@ class Card extends Component{
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
+		this.waitingForSave = false;
 		
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.ownerInfo.firstName, this.card.content.socialMediaLinks),
 			"Stats": new CardStats(this.card.stats),
-			"View": ()=>{this.viewCard()}
+			"View": (target)=>{this.viewCard()},
+			"Save": (target)=>{this.toggleSaveCard(target)},
+			"UnSave": (target)=>{this.toggleSaveCard(target)}
 		} 
 		
 	}
@@ -456,7 +470,8 @@ class Card extends Component{
 		//details : Tags
 		//Social : social media links
 		//Stats: card stats
-		return (!this.light) ? ["Details", "Social", "Stats"] : ["View", "Save"]
+		let toSave = (page.user == false || !page.user.hasSaved(this.card.cardID)) ? "Save" : "UnSave";
+		return (!this.light) ? ["Details", "Social", (this.myCard) ? "Stats" : toSave] : ["View", toSave];
 	}
 
 	viewCard(){
@@ -466,7 +481,33 @@ class Card extends Component{
 		page.navigate("/"+this.card.ownerInfo.customURL);
 	}
 
-	toggleAction(actionName, forceRender=false){
+	toggleSaveWord(word){
+		return (word=="Save") ? "UnSave" : "Save";
+	}
+
+	async toggleSaveCard(target){
+		if(this.waitingForSave)return;
+		console.log(target);
+		this.waitingForSave = true;
+		let saveWord = target.text();
+		target.text(this.toggleSaveWord(saveWord));
+		let saveResult = await this.awaitPost("toggle-save", {cardID: this.card.cardID});
+		if(saveResult.error!=""){
+			let saveWord = target.text();
+			target.text(this.toggleSaveWord(saveWord));
+			alert("An error occoured when attempting to save this card: "+saveResult.error);
+		}else{
+			//refresh feed if successful 
+			let savedCardComponent = page.getComponent("Search");
+			if(savedCardComponent!= false && savedCardComponent.myCards){
+				savedCardComponent.showResults("");
+			}
+			//console.log(savedCardComponent);
+		}
+		this.waitingForSave = false;
+	}
+
+	toggleAction(actionName, forceRender=false, clicked = undefined){
 
 		let action = this.actions[actionName];
 		if(action instanceof Component){
@@ -477,7 +518,7 @@ class Card extends Component{
 				action.deRender();
 			}
 		}else{
-			action();
+			action(clicked);
 		}
 	}
 
@@ -521,7 +562,7 @@ class Card extends Component{
 		//add card buttons
 		let buttons = $("<div/>").attr("class", "buttons");
 		for(const button of this.getButtons()){
-			buttons.append($("<a/>", {text: button, click:()=>this.toggleAction(button)}));
+			buttons.append($("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))}));
 		}
 
 		content.append(buttons)

@@ -22,8 +22,12 @@ class View {
 			}
 		}
 	
+
 		
 	}
+
+
+	
 
 	
 	async loadImport(name){
