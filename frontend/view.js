@@ -47,7 +47,7 @@ class HomeView extends View{
 		if(slug=="")slug = "/"+page.user.public.customURL;
 		//if(slug=="")slug = "mhewitt836";
 		
-		this.slug = slug
+		this.slug = slug;
 	}
 
 	getView(){
@@ -83,7 +83,7 @@ class SearchView extends View{
 
 		return {
 			"side" : new Search(),
-			"main" : new CardViewer("/marc"),
+			"main" : new CardViewer("search"),
 		}
 	}
 

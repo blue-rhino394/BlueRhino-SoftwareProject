@@ -1,18 +1,25 @@
 class Component {
 
-	render(locationId){
+	render(locationId, fadeIn=false){
 		let content =  undefined;
 		
 		try{
-
-				
 			let location = $("#"+locationId);
-			content = this.getContent();
-			content.css(this.getStyle());
-			
-			
-			this.element = content.appendTo(location);
-			this.onRender();
+			if(!fadeIn){
+				
+				content = this.getContent();
+				content.css(this.getStyle());
+				
+				
+				this.element = content.appendTo(location);
+				this.onRender();
+			}else{
+				
+				location.hide();
+				this.render(locationId);
+				//console.log("here");
+				location.fadeIn(500);
+			}
 		}catch(err){
 			console.error(err);
 			new ErrorComponent(err).render(locationId);
@@ -119,6 +126,24 @@ class ErrorComponent extends Component{
 
 }
 
+
+class MessageComponent extends Component{
+
+	constructor(title, message){
+		super();
+		this.title = title;
+		this.message = message;
+	}
+
+	getContent(){
+		let content = $("<div/>").attr("class", "box");
+		content.append($("<h1/>").html(this.title));
+		content.append($("<h2/>").text(this.message));
+		return content;
+	}
+
+}
+
 class CardViewer extends Component{
 	
 	constructor(slug){
@@ -127,6 +152,11 @@ class CardViewer extends Component{
 	}
 
 	onRender(){
+		if(this.slug=="search"){
+			$("#cardHeading").html("Search Results");
+			new MessageComponent("Your search results will appear here", "").render("cardDisplay");
+			return;
+		}
 		this.view(this.slug);
 	}
 
@@ -142,13 +172,19 @@ class CardViewer extends Component{
 		cardUrl = cardUrl.substring(1);
 		console.log("get Card "+cardUrl);
 		return new Promise(resolve => {
-    		$.post(`/api/get-card-by-slug`, {"slug": cardUrl}, (data) => {console.log(data); resolve(data.card)});
+    		$.post(`/api/get-card-by-slug`, {"slug": cardUrl}, (data) => {
+    			if(data==undefined){
+    				console.error("I bet you're wondering how I ended up in this situation " + slug);
+    			}
+    			resolve(data.card)
+    		});
   		});
 	}
 
 	async view(slug){
 		let display = $("#cardDisplay");
 		let cardData = await this.getCardData(slug);
+
 		console.log(cardData);
 		//display.empty();
 		if(display.length > 0){
@@ -165,17 +201,23 @@ class CardViewer extends Component{
 
 	}
 
-	showCard(cardData){
+	showCard(cardData, collapseAll=true){
 		let card = new Card(cardData)
 		card.render("cardDisplay");
 		let headingText = `${card.user.firstName}'s Card`
 		if(card.myCard)headingText = "Your Card";
 		$("#cardHeading").html(headingText);
 
+		/*
 		if(card.myCard){
 			card.toggleAction("Social", true);
 			card.toggleAction("Stats", true);
 			card.toggleAction("Details", true);
+		}*/
+		if(collapseAll){
+			for(let button of card.getButtons()){
+				card.toggleAction(button, true);
+			}
 		}
 	}
 
@@ -224,9 +266,9 @@ class Search extends Component{
 
 		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 0};
 		//console.log(request);
-		console.log(request);
+		//console.log(request);
 		var start = new Date();
-		console.log("querying "+query);
+		//console.log("querying "+query);
 		this.post("search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
@@ -237,11 +279,11 @@ class Search extends Component{
 				var difference = new Date();
 				difference.setTime(finish.getTime() - start.getTime());
 				
-				
+				/*
 				console.log(`<${query}>`);
 				console.log(`took ${(difference.getSeconds())} seconds`);
 				console.log(results);
-				console.log(`</${query}>`);
+				console.log(`</${query}>`);*/
 				for(var result of results.cards){
 
 					new Card(result, true).render("results");
@@ -392,7 +434,7 @@ class Card extends Component{
 	constructor(card, light = false){
 		super();
 		this.card = card;
-		console.log(this.card);
+		
 		this.user = this.card.ownerInfo;
 		this.light = light;
 		
@@ -420,14 +462,17 @@ class Card extends Component{
 	viewCard(){
 		//page.getCardViewer().view(this.card);
 		//this.card.customURL="gfreezy";
-		page.navigate("/"+this.card.customURL);
+		console.log(this.card);
+		page.navigate("/"+this.card.ownerInfo.customURL);
 	}
 
 	toggleAction(actionName, forceRender=false){
+
 		let action = this.actions[actionName];
 		if(action instanceof Component){
 			if(!($("#"+actionName).length) || forceRender){
-				action.render("actions");
+
+				action.render("action-"+actionName, true);
 			}else{
 				action.deRender();
 			}
@@ -487,7 +532,9 @@ class Card extends Component{
 			//TODO: add divs so order stays the same 
 			content = $("<div/>").html([oldContent]);
 			content.append($("<br>"));
-			content.append($("<div/>").attr("id", "actions"));
+			content.append($("<div/>").attr("id", "action-Social"));
+			content.append($("<div/>").attr("id", "action-Stats"));
+			content.append($("<div/>").attr("id", "action-Details"));
 		}
 		return content;
 	}
