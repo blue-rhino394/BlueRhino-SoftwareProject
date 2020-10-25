@@ -202,16 +202,32 @@ class Search extends Component{
 		
 	}
 
+	post(endpoint, json={}, callback){
+     
+            $.ajax({
+                  url: `/api/${endpoint}`,
+                  type: "POST",
+                  data: JSON.stringify(json),
+                  dataType: "json",
+                  contentType: "application/json; charset=utf-8",
+                  success: (data) => {callback(data)}
+
+            });
+
+     
+    }
+
+
 	showResults(query, dupe = -1){
 		if(dupe==-1)dupe = query.length;
 		dupe = 1;
 
-		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 1};
+		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 0};
 		//console.log(request);
-		
+		console.log(request);
 		var start = new Date();
 		console.log("querying "+query);
-		$.post("/api/search-card", request, (results) => {
+		this.post("search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
 				$("#results").html("");
@@ -221,11 +237,11 @@ class Search extends Component{
 				var difference = new Date();
 				difference.setTime(finish.getTime() - start.getTime());
 				
-				/*
+				
 				console.log(`<${query}>`);
 				console.log(`took ${(difference.getSeconds())} seconds`);
 				console.log(results);
-				console.log(`</${query}>`);*/
+				console.log(`</${query}>`);
 				for(var result of results.cards){
 
 					new Card(result, true).render("results");
