@@ -15,7 +15,7 @@ const dataJSON: string = `[
     "email": "celesterojas@brhino.org",
     "password": "rojas445",
     "customURL": "crojas365",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Celeste+Rojas"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Celeste+Rojas&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Nieves",
@@ -23,7 +23,7 @@ const dataJSON: string = `[
     "email": "nievesboyle@brhino.org",
     "password": "boyle244",
     "customURL": "nboyle434",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Nieves+Boyle"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Nieves+Boyle&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Deloris",
@@ -31,7 +31,7 @@ const dataJSON: string = `[
     "email": "delorisjimenez@brhino.org",
     "password": "jimenez939",
     "customURL": "djimenez99",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Deloris+Jimenez"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Deloris+Jimenez&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Anne",
@@ -39,7 +39,7 @@ const dataJSON: string = `[
     "email": "annebarber@brhino.org",
     "password": "barber297",
     "customURL": "abarber873",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Anne+Barber"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Anne+Barber&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Muriel",
@@ -47,7 +47,7 @@ const dataJSON: string = `[
     "email": "murielhewitt@brhino.org",
     "password": "hewitt738",
     "customURL": "mhewitt836",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Muriel+Hewitt"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Muriel+Hewitt&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Frankie",
@@ -55,7 +55,7 @@ const dataJSON: string = `[
     "email": "frankienolan@brhino.org",
     "password": "nolan208",
     "customURL": "fnolan642",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Frankie+Nolan"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Frankie+Nolan&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Gilda",
@@ -63,7 +63,7 @@ const dataJSON: string = `[
     "email": "gildahopper@brhino.org",
     "password": "hopper753",
     "customURL": "ghopper669",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Gilda+Hopper"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Gilda+Hopper&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Freida",
@@ -71,7 +71,7 @@ const dataJSON: string = `[
     "email": "freidawalsh@brhino.org",
     "password": "walsh63",
     "customURL": "fwalsh52",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Freida+Walsh"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Freida+Walsh&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Kline",
@@ -79,7 +79,7 @@ const dataJSON: string = `[
     "email": "klinecarney@brhino.org",
     "password": "carney977",
     "customURL": "kcarney477",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Kline+Carney"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Kline+Carney&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Polly",
@@ -87,7 +87,7 @@ const dataJSON: string = `[
     "email": "pollyglenn@brhino.org",
     "password": "glenn78",
     "customURL": "pglenn720",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Polly+Glenn"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Polly+Glenn&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Nunez",
@@ -95,7 +95,7 @@ const dataJSON: string = `[
     "email": "nuneztalley@brhino.org",
     "password": "talley836",
     "customURL": "ntalley574",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Nunez+Talley"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Nunez+Talley&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Lavonne",
@@ -103,7 +103,7 @@ const dataJSON: string = `[
     "email": "lavonnebutler@brhino.org",
     "password": "butler570",
     "customURL": "lbutler490",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Lavonne+Butler"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Lavonne+Butler&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Tammi",
@@ -111,7 +111,7 @@ const dataJSON: string = `[
     "email": "tammiblanchard@brhino.org",
     "password": "blanchard311",
     "customURL": "tblanchard241",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Tammi+Blanchard"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Tammi+Blanchard&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Adele",
@@ -119,7 +119,7 @@ const dataJSON: string = `[
     "email": "adelewaters@brhino.org",
     "password": "waters529",
     "customURL": "awaters219",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Adele+Waters"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Adele+Waters&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Shana",
@@ -127,7 +127,7 @@ const dataJSON: string = `[
     "email": "shanabean@brhino.org",
     "password": "bean15",
     "customURL": "sbean111",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Shana+Bean"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Shana+Bean&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Ola",
@@ -135,7 +135,7 @@ const dataJSON: string = `[
     "email": "olagoff@brhino.org",
     "password": "goff670",
     "customURL": "ogoff849",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Ola+Goff"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Ola+Goff&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Katheryn",
@@ -143,7 +143,7 @@ const dataJSON: string = `[
     "email": "katherynbyrd@brhino.org",
     "password": "byrd238",
     "customURL": "kbyrd423",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Katheryn+Byrd"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Katheryn+Byrd&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Nolan",
@@ -151,7 +151,7 @@ const dataJSON: string = `[
     "email": "nolanconway@brhino.org",
     "password": "conway534",
     "customURL": "nconway186",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Nolan+Conway"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Nolan+Conway&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Loretta",
@@ -159,7 +159,7 @@ const dataJSON: string = `[
     "email": "lorettadickson@brhino.org",
     "password": "dickson425",
     "customURL": "ldickson783",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Loretta+Dickson"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Loretta+Dickson&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   },
   {
     "firstName": "Sheppard",
@@ -167,7 +167,7 @@ const dataJSON: string = `[
     "email": "sheppardford@brhino.org",
     "password": "ford895",
     "customURL": "sford753",
-    "profilePictureURL": "https://ui-avatars.com/api/?name=Sheppard+Ford"
+    "profilePictureURL": "https://ui-avatars.com/api/?name=Sheppard+Ford&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
   }
 ]`;
 

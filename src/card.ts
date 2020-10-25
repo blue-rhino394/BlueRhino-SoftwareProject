@@ -285,7 +285,7 @@ export class card {
         var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has already been logged...
-        if (uuidToAdd in statArray) {
+        if (statArray.includes(uuidToAdd)) {
             // BOUNCE!
             return;
         }
@@ -328,7 +328,7 @@ export class card {
         var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has NOT already been logged...
-        if (!(uuidToRemove in statArray)) {
+        if (!statArray.includes(uuidToRemove)) {
             // BOUNCE!
             return;
         }
@@ -370,22 +370,22 @@ export class card {
         switch (type) {
             case statType.cardViews:
                 return {
-                    "content.stats.cardViews": uuid
+                    "stats.cardViews": uuid
                 }
 
             case statType.saves:
                 return {
-                    "content.stats.saves": uuid
+                    "stats.saves": uuid
                 }
 
             case statType.favorites:
                 return {
-                    "content.stats.favorites": uuid
+                    "stats.favorites": uuid
                 }
 
             case statType.memos:
                 return {
-                    "content.stats.memos": uuid
+                    "stats.memos": uuid
                 }
 
             default:
