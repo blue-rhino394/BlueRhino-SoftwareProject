@@ -41,8 +41,7 @@ class Component {
 				if(!content instanceof Array)content.css(this.getStyle());
 				
 				
-				if(!this.replaceContainer())this.element = content.appendTo(location);
-				else this.element = location.html(content);
+				this.element = content.appendTo(location);
 				this.onRender();
 			}else{
 				
@@ -58,6 +57,7 @@ class Component {
 	
 		return content;
 	}
+
 
 	replaceContainer(){
 		return false;
@@ -76,7 +76,7 @@ class Component {
         	});
 			
 		}
-	}
+
 
 	getContent(){}
 	onRender(){}
@@ -495,10 +495,6 @@ class NavBar extends Component{
 		window.location.replace("/");
 	}
 
-	replaceContainer(){
-		return true;
-	}
-
 	getContent(){
 		let content = $("<div/>").css("width", "100%");
 		let buttons = [
@@ -507,7 +503,7 @@ class NavBar extends Component{
 			$("<a/>", {click:()=> this.logout(), text: "Logout"}).css("float", "right"),
 			$("<a/>", {click:()=> page.navigate("/search"), text: "Search"}).css("float", "right"),
 		];
-		let innerDiv = $("<div/>", {mouseover:()=>{alert("woa")}}).html(buttons).css({"width": "100%", "height":"5px"});
+		let innerDiv = $("<div/>").html(buttons).css({"width": "100%", postion:"fixed"});
 		content.html(buttons);
 
 		return content;
