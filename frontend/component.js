@@ -40,8 +40,12 @@ class Component {
 				content = this.getContent();
 				if(!content instanceof Array)content.css(this.getStyle());
 				
-				
-				this.element = content.appendTo(location);
+				if(!this.replaceContainer()){
+					this.element = content.appendTo(location);
+					
+				}else{
+					this.element = location.html(content);
+				}
 				this.onRender();
 			}else{
 				
@@ -207,8 +211,8 @@ class MessageComponent extends Component{
 
 	getContent(){
 		let content = $("<div/>").attr("class", "box");
-		content.append($("<h1/>").html(this.title));
-		content.append($("<h2/>").text(this.message));
+		content.append($("<h2/>").html(this.title).css("margin", "0px").css("marginBottom", "10px"));
+		content.append($("<span/>").html(this.message));
 		return content;
 	}
 
@@ -244,8 +248,11 @@ class CardViewer extends Component{
 		console.log("get Card "+cardUrl);
 		return new Promise(resolve => {
     		$.post(`/api/get-card-by-slug`, {"slug": cardUrl}, (data) => {
-    			if(data==undefined){
-    				console.error("I bet you're wondering how I ended up in this situation " + slug);
+    			if(data.error!=""){
+    				//console.log(data);
+    				console.log("I bet you're wondering how I ended up in this situation " + cardUrl);
+    				resolve(false);
+    				return;
     			}
     			resolve(data.card)
     		});
@@ -256,7 +263,23 @@ class CardViewer extends Component{
 
 		let display = $("#cardDisplay");
 		let cardData = await this.getCardData(slug);
+		if(cardData==false){
+		//	console.log(page);
+		//	console.log(page.user);
+			if(page.getUrl()=="/" || page.getUrl()=="/"+page.user.public.customURL){
+				$("#"+this.location).append($("<h1/>").text("You don't have a card!"));
+			
+				let message = "If you want to create your card, click <a href='/create' style='padding-right:0px'>here</a>";
+				new MessageComponent("This card doesn't exist!", message).render(this.location);
+			}else{
+				$("#"+this.location).append($("<h1/>").text("Card not found :/"));
+			
+				let message = "If you would like to register an account with this url, click <a href='/register' style='padding-right:0px'>here</a>";
+				new MessageComponent("This card doesn't exist!", message).render(this.location);
+			}
 
+			return;
+		}
 		console.log(cardData);
 		//display.empty();
 		if(display.length > 0){
@@ -507,6 +530,10 @@ class NavBar extends Component{
 		content.html(buttons);
 
 		return content;
+	}
+
+	replaceContainer(){
+		return true;
 	}
 
 }
