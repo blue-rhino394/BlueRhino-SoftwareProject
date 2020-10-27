@@ -22,12 +22,12 @@ class View {
 			}
 		}
 	
-
-		
 	}
 
 
-	
+	getTitle(){
+		return false;
+	}
 
 	
 	async loadImport(name){
@@ -58,12 +58,10 @@ class HomeView extends View{
 		return "home";
 	}
 
-/*
-	async getData(){
-		return new Promise(resolve => {
-    		$.post(`/api/get-card`, {"":""},(data) => resolve(data.card));
-  		});
-	}*/
+	getTitle(){
+		return "Passport.";
+	}
+
 
 	getComponents(){
 
@@ -83,10 +81,15 @@ class SearchView extends View{
 		return "search";
 	}
 
+	getTitle(){
+		return "Search";
+	}
+
+
 	getComponents(){
 
 		return {
-			"side" : new Search(),
+			"side" : new Search("Search"),
 			"main" : new CardViewer("search"),
 			"navBar" : new NavBar()
 		}
@@ -102,11 +105,15 @@ class LoginView extends View{
 		return "login";
 	}
 
+	getTitle(){
+		return "Passport.";
+	}
+
 	getComponents(){
 
 		return {
 			"side" : new Login(),
-			"main" : new Search("Discover Passport", "light"),
+			"main" : new Search("Search", "light"),
 			"navBar" : new NavBar(),
 			"hotMain" : new HotCards()
 		}

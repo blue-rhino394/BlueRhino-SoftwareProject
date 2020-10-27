@@ -274,16 +274,19 @@ class CardViewer extends Component{
 		if(cardData==false){
 		//	console.log(page);
 		//	console.log(page.user);
+			display.empty();
+			//$("#cardHeading").remove();
 			if(page.getUrl()=="/" || page.getUrl()=="/"+page.user.public.customURL){
-				$("#"+this.location).append($("<h1/>").text("You don't have a card!"));
-			
+				//$(display).append($("<h1/>").text("You don't have a card!"));
+				$("#cardHeading").text("You don't have a card!");
 				let message = "If you want to create your card, click <a href='/create' style='padding-right:0px'>here</a>";
-				new MessageComponent("This card doesn't exist!", message).render(this.location);
+				new MessageComponent("This card doesn't exist!", message).render("cardDisplay");
 			}else{
-				$("#"+this.location).append($("<h1/>").text("Card not found :/"));
-			
+				//$(display).append($("<h1/>").text("Card not found :/"));
+				$("#cardHeading").text("Card not found :/");
 				let message = "If you would like to register an account with this url, click <a href='/register' style='padding-right:0px'>here</a>";
-				new MessageComponent("This card doesn't exist!", message).render(this.location);
+				new MessageComponent("This card doesn't exist!", message).render("cardDisplay");
+				document.title = "404: Card not found!"
 			}
 
 			return;
@@ -300,6 +303,7 @@ class CardViewer extends Component{
 			});
 		}else{
 			display.hide();
+			display.empty();
 			showCard(cardData);
 			display.fadeIn(500);
 		}
@@ -323,11 +327,12 @@ class CardViewer extends Component{
 
 	showCard(cardData, collapseAll=true){
 		let card = new Card(cardData)
-
+		if(!card.myCard)document.title = `${card.user.firstName} ${card.user.lastName}'s Card`
+		else document.title = "My Card";
 		if(card.myCard && page.user.currentAccountStatus==1){
 			let msgParts = ["Didn't get an email? Click ", $("<a/>").click(()=>{this.verifyEmail()}).text("here")];
 			new MessageComponent("Verify your email to publish your card!", msgParts).render("cardDisplay");
-			$("#cardDisplay").append("<br>")
+			$("#cardDisplay").append("<br>");
 		}
 
 
@@ -660,7 +665,8 @@ class NavBar extends Component{
 		];
 		if(page.user==false){
 			buttons = [
-				$("<a/>", {click:()=> window.location.replace("/register"), text: "Register For Passport"}).css("float", "left").css("marginLeft",35),		
+				$("<a/>", {click:()=> window.location.replace("/register"), text: "Register For Passport"}).css("float", "left").css("marginLeft",35),
+				$("<a/>", {click:()=> page.navigate("/"), text: "Home"}).css("float", "right"),		
 				$("<a/>", {click:()=> window.location.replace("/faq"), text: "FAQ"}).css("float", "right"),
 				$("<a/>", {click:()=>  window.location.replace("/aboutus"), text: "About Us"}).css("float", "right"),
 			];
@@ -727,8 +733,6 @@ class Card extends Component{
 	toggleSaveWord(word){
 		return (word=="Save") ? "UnSave" : "Save";
 	}
-
-	//guy we force to write down cards
 
 	//when stuff is typed in the memo box
 	async typed(event){
@@ -877,13 +881,13 @@ class Card extends Component{
 		let buttons = $("<div/>").attr("class", "buttons");
 		for(const button of this.getButtons()){
 			let link = $("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))});
-			//if(button=="Settings")link.css("marginLeft","5px");
-			if(button=="Settings")buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
+			if((button=="Settings" && this.light) || (this.myCard && button=="Save")) continue;
+			if(button=="Settings" )buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
 			buttons.append(link);
 			
 		}
 
-		content.append(buttons)
+		content.append(buttons);
 
 		//if this is a full/non-light card, wrap it in a div, and add another div to hold the card actions (details, social, etc)
 		if(!this.light)	{
