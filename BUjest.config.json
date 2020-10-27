@@ -27,10 +27,15 @@
     "**/__tests__/**/*.+(ts|tsx|js)",
     "**/?(*.)+(spec|test).+(ts|tsx|js)"
   ],
+  "transformIgnorePatterns": [
+    "<rootDir>/node_modules/(?!lodash-es/)"
+  ],
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
-
+  
     "preset": "@shelf/jest-mongodb"
   
+
+
 }
