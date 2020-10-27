@@ -13,6 +13,9 @@ body
 .navBar {
 	overflow: hidden;
 	background-color: #29b6f6; 
+	position: fixed;
+	top: 0;
+	width: 100%;
 }
 
 main{
@@ -35,6 +38,22 @@ main{
 
 }
 
+select{
+	border-radius: 25px;
+	border: 0px none; 
+	padding:5px;
+	font-size: 15px;
+	margin-right: 5px;
+	font-weight: bold;
+	color:white;
+	background-color: #29b6f6;
+	border: 0px none;
+		border-radius: .5em;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+
+}
 
 
 .textbox, textarea
@@ -160,6 +179,19 @@ a{
 	padding-top: 5px;
 
 
+}
+
+.select:focus{
+		outline-width: 0;
+	 outline:none !important;
+    outline-width: 0 !important;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.select::-ms-expand {
+	display: none;
 }
 
 img { 

@@ -307,7 +307,7 @@ class CardViewer extends Component{
 		if(collapseAll){
 			for(let button of card.getButtons()){
 				//We do not want to save some rando's card when collaping all actions
-				if(button!="Save" && button!="UnSave")card.toggleAction(button, true);
+				if(button!="Save" && button!="UnSave" && button!="Settings")card.toggleAction(button, true);
 			}
 		}
 	}
@@ -506,6 +506,89 @@ class CardSocial extends Component{
 
 }
 
+
+class CardSettings extends Component{
+
+	constructor(published){
+		super();
+		this.waiting = false;
+		this.published = published;
+	}
+
+	async change(e){
+		if(this.waiting){
+			$("#publish").val(this.ogValue);
+			return;
+		}
+		this.waiting = true;
+		if(page.user.currentAccountStatus==1){
+			alert("You cannot change your account visibility until your email is verified!")
+			this.onRender();
+			
+		}else{
+			let result = await this.awaitPost("set-card", {published: ($("#publish").val()=="Published")});
+			//console.log(result);
+			if(result.error!=""){
+				alert("Could not change your card visibility! : "+result.error);
+				$("#publish").val(this.ogValue);
+			}
+		}
+		this.waiting = false;
+	}
+
+	focus(){
+		this.ogValue = $("#publish").val();
+	}
+
+	onRender(){
+		if(page.user.currentAccountStatus==1)$("#publish").val("UnPublished");
+		else {
+			$("#publish").val((this.published) ? "Published": "UnPublished" );
+		}
+		this.ogValue = $("#publish").val();
+	}
+
+	async deleteCard(){
+		if(window.confirm("Are you sure you want to delete your card?")){
+			if(window.confirm("Ok, but like, for real for real?")){
+				let result = await this.awaitPost("delete-card");
+				if(result.error!=""){
+					alert("There was an error deleting your card! "+result.error);
+				}else{
+					alert("Your card was deleted successfully!");
+					page.navigate("/");
+				}
+			}
+		}
+	}
+
+	getContent(){
+		//create card
+		let content = $("<div/>", {
+			"id": "Settings",
+			"class": "box"
+		});
+
+		//add heading
+		content.append($("<h1/>").html(`<span style='color: #29b6f6'>Card</span> Settings`));
+		content.append($("<hr/>"));
+		content.append("<b>Card Visibility: </b>");
+		content.append($("<select/>", {id: "publish",focus:()=>{this.focus()}}).html([
+			$("<option/>").attr("id","pub").text("Published"),
+			$("<option/>").attr("id","pub").text("UnPublished")//.attr("selected","false"),
+		])).on("change", (e)=>{this.change(e)});
+		
+		content.append("<hr>");
+		content.append("<b>Danger Zone: </b>");
+		content.append($("<a/>").text("Delete Card").css({"fontWeight":"bold", "color":"red"}).click(()=>{this.deleteCard()}));
+
+		content = $("<div/>").html([content, "<br>"]);
+		return content;
+	}
+
+}
+
+
 class NavBar extends Component{
 	constructor(){
 		super();
@@ -538,6 +621,8 @@ class NavBar extends Component{
 
 }
 
+
+
 class Card extends Component{
 
 	constructor(card, light = false){
@@ -556,6 +641,7 @@ class Card extends Component{
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.ownerInfo.firstName, this.card.content.socialMediaLinks),
 			"Stats": new CardStats(this.card.stats),
+			"Settings": new CardSettings(this.card.content.published),
 			"View": (target)=>{this.viewCard()},
 			"Save": (target)=>{this.toggleSaveCard(target)},
 			"UnSave": (target)=>{this.toggleSaveCard(target)}
@@ -569,7 +655,9 @@ class Card extends Component{
 		//Social : social media links
 		//Stats: card stats
 		let toSave = (page.user == false || !page.user.hasSaved(this.card.cardID)) ? "Save" : "UnSave";
-		return (!this.light) ? ["Details", "Social", (this.myCard) ? "Stats" : toSave] : ["View", toSave];
+		let buttons = (!this.light) ? ["Details", "Social", (this.myCard) ? "Stats" : toSave] : ["View", toSave];
+		if(this.myCard)buttons.push("Settings");
+		return buttons;
 	}
 
 	viewCard(){
@@ -666,7 +754,11 @@ class Card extends Component{
 		//add card buttons
 		let buttons = $("<div/>").attr("class", "buttons");
 		for(const button of this.getButtons()){
-			buttons.append($("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))}));
+			let link = $("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))});
+			//if(button=="Settings")link.css("marginLeft","5px");
+			if(button=="Settings")buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
+			buttons.append(link);
+			
 		}
 
 		content.append(buttons)
@@ -677,6 +769,7 @@ class Card extends Component{
 			//TODO: add divs so order stays the same 
 			content = $("<div/>").html([oldContent]);
 			content.append($("<br>"));
+			content.append($("<div/>").attr("id", "action-Settings"));
 			content.append($("<div/>").attr("id", "action-Social"));
 			content.append($("<div/>").attr("id", "action-Stats"));
 			content.append($("<div/>").attr("id", "action-Details"));
