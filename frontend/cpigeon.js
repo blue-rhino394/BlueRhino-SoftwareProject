@@ -30,9 +30,7 @@ class CPigeon {
         let postResult = await this.post("login");
         if(postResult.error == "") {
             let savedCardsRequest = {textQuery:"", tags:[], isMyCards: true, pageNumber: 0};
-            let savedCards = await this.post("search-card", savedCardsRequest)
             this.user = postResult;
-            this.addSavedCards(savedCards)
             console.log(this.user);
         }else{
             console.log(postResult.error);
@@ -43,18 +41,39 @@ class CPigeon {
     }
 
 
-    addSavedCards(savedCards){
-        this.user.savedCards = savedCards.cards;
-        this.user.hasSaved = (cardId) => {
+    
+    hasSaved(cardId) {
 
-            for(const card of this.user.savedCards){
-         
-                if(card.cardID == cardId)return true;
+        for(const card of this.user.savedCards){
+     
+            if(card.cardID == cardId)return true;
 
+        }
+        return false;
+    }
+
+
+    getMemo(cardId) {
+
+        for(const card of this.user.savedCards){
+             //console.log(card.cardID+" vs "+cardId);
+            if(card.cardID == cardId)return card.memo;
+
+        }
+        return false;
+    }
+
+    updateMemos(id, memoText){
+        let memos = $(`span[id=memo-${id}]`);
+        for(const memo of memos){
+            if(memoText!=false){
+                $(memo).text(`"${memoText}"`);
+            }else{
+                 $(memo).text("");
             }
-            return false;
         }
     }
+
 
     /* Awaitable post request*/
     async post(endpoint, json={}){

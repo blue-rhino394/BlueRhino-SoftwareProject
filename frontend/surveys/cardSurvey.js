@@ -77,7 +77,7 @@ class CardSurvey extends Survey{
 						}
 					},
 					keydown: (e) => {
-
+						
 						if(e.which== 9&& !this.animating){
 							e.preventDefault();
 							let typed = $(e.target).val();

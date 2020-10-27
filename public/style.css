@@ -16,6 +16,8 @@ body
 	position: fixed;
 	top: 0;
 	width: 100%;
+	
+
 }
 
 main{
@@ -79,6 +81,11 @@ select{
 	width:95%;
 	padding:15px;
 	font-size: 20px;
+}
+
+.memo{
+
+  opacity: 0.5; 
 }
 
 .tag

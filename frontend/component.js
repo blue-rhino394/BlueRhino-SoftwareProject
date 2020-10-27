@@ -117,10 +117,7 @@ class Login extends Component{
 		if(response.error==""){
 
 			page.user = response;
-			let savedCardsRequest = {textQuery:"", tags:[], isMyCards: true, pageNumber: 0};
-			let savedCards = await this.awaitPost("search-card", savedCardsRequest);
-  
-            page.addSavedCards(savedCards)
+            
 			
 			if(page.getUrl()!="/"){
 				let x = await this.deRender(true);
@@ -605,10 +602,17 @@ class NavBar extends Component{
 		let content = $("<div/>").css("width", "100%");
 		let buttons = [
 
-			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left"),		
+			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left").css("marginLeft",35),		
 			$("<a/>", {click:()=> this.logout(), text: "Logout"}).css("float", "right"),
 			$("<a/>", {click:()=> page.navigate("/search"), text: "Search"}).css("float", "right"),
 		];
+		if(page.user==false){
+			buttons = [
+				$("<a/>", {click:()=> window.location.replace("/register"), text: "Register For Passport"}).css("float", "left").css("marginLeft",35),		
+				$("<a/>", {click:()=> window.location.replace("/faq"), text: "FAQ"}).css("float", "right"),
+				$("<a/>", {click:()=>  window.location.replace("/aboutus"), text: "About Us"}).css("float", "right"),
+			];
+		}
 		let innerDiv = $("<div/>").html(buttons).css({"width": "100%", postion:"fixed"});
 		content.html(buttons);
 
@@ -654,7 +658,7 @@ class Card extends Component{
 		//details : Tags
 		//Social : social media links
 		//Stats: card stats
-		let toSave = (page.user == false || !page.user.hasSaved(this.card.cardID)) ? "Save" : "UnSave";
+		let toSave = (page.user == false || !page.hasSaved(this.card.cardID)) ? "Save" : "UnSave";
 		let buttons = (!this.light) ? ["Details", "Social", (this.myCard) ? "Stats" : toSave] : ["View", toSave];
 		if(this.myCard)buttons.push("Settings");
 		return buttons;
@@ -671,14 +675,32 @@ class Card extends Component{
 		return (word=="Save") ? "UnSave" : "Save";
 	}
 
+	//guy we force to write down cards
 
-	typed(event){
+	//when stuff is typed in the memo box
+	async typed(event){
 		if(event.key=="Enter"){
 			if($("#memoBox").val()==""){
 				$("#memoBox").remove();
 				return;
 			}
-			alert("YOU DID A THING!!!");
+			let memo = $("#memoBox").val();
+			let memoPost = {cardID: this.card.cardID, memoText: memo};
+			console.log(memoPost);
+			let result = await this.awaitPost("set-memo", memoPost);
+			if(result.error!=""){
+				alert("Error saving memo: "+result.error);
+			}else{
+				$("#memoBox").remove();
+				for(let i =0 ; i<page.user.savedCards.length; i++){
+					let card = page.user.savedCards[i];
+					if(card.cardID == this.card.cardID){
+						card["memo"] = memo;
+						break;
+					}
+				}
+				page.updateMemos(this.card.cardID, memo);
+			}
 		}else if(event.key=="Escape"){
 			$("#memoBox").remove();
 		}
@@ -697,8 +719,9 @@ class Card extends Component{
 
 		$("#memoBox").remove();
 		if(saveWord=="Save"){
-			let memoText = "Type a memo and hit enter or leave it blank to not include a memo";
+			let memoText = "Type a memo and hit enter or leave it blank";
 			$("#"+this.propId).append($("<input/>", {placeholder:memoText, "id":"memoBox", on: {keypress: (e) => {this.typed(e)}} }).attr("class", "tinytextbox"));
+			$("#memoBox").focus();
 		}
 
 		target.text(this.toggleSaveWord(saveWord));
@@ -709,10 +732,25 @@ class Card extends Component{
 			alert("An error occoured when attempting to save this card: "+saveResult.error);
 		}else{
 			//refresh feed if successful 
+			
+			if(target.text()=="UnSave"){
+				let cardVal = {cardID: this.card.cardID, favorited: "false", memo:""};
+				page.user.savedCards.push(cardVal);
+
+			}else{
+				for(let i =0 ; i<page.user.savedCards.length; i++){
+					if(page.user.savedCards[i].cardID == this.card.cardID){
+						page.user.savedCards.splice(i,1);
+						break;
+					}
+				}
+				page.updateMemos(this.card.cardID, false);
+			}
 			let savedCardComponent = page.getComponent("Search");
 			if(savedCardComponent!= false && savedCardComponent.myCards){
 				savedCardComponent.showResults("");
 			}
+
 			//console.log(savedCardComponent);
 		}
 		this.waitingForSave = false;
@@ -736,6 +774,7 @@ class Card extends Component{
 	getRandomInt(max) {
   		return Math.floor(Math.random() * Math.floor(max));
 	}
+
 
 
 	getContent(){
@@ -766,14 +805,19 @@ class Card extends Component{
 		//add card properties
 		this.propId = "props-"+this.card.cardID+"-"+this.getRandomInt(99999);
 		let props = $("<div/>").attr("id", this.propId).attr("class", "properties");
-		console.log(this.card.content.cardProperties);
-		//this.card.content.cardProperties.push({key: "Another", value: "one"})
-		//this.card.content.cardProperties.push({key: "next", value: "to"})
+
+
 		for(const property of this.card.content.cardProperties){
 			let key = property.key;
 			let value = property.value;
 			props.append(`${key}: ${value}<br>`);
 		}
+
+		//check if I've saved a card with a memo and if so add it to properties
+		let memo = page.getMemo(this.card.cardID);
+		let memoText = (memo!=false) ? `"${memo}"` : "";
+		props.append($("<span/>").text(memoText).attr("class", "memo").attr("id", "memo-"+this.card.cardID));
+		
 		content.append(props)
 
 		//add card buttons
