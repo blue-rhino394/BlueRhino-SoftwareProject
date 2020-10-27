@@ -100,23 +100,26 @@ class CPigeon {
         if(pushState)window.history.pushState("", "", page);
 
        
-        //let cardViewerPages = ["About"];
+       
         let cardViewer = this.getCardViewer();
         if(cardViewer!=false && (page!="/search" && page!="/")){
             cardViewer.view(page);
         }else{
             $("#content").fadeOut(500, () => {
                 let pageView = this.getPageMaps()[page];
+                
                 //if there is no route avaible for current page, use the '*' route 
                 if(pageView==undefined) pageView = this.getPageMaps()["*"];
 
-                
+
+                let pageTitle = pageView.getTitle();
+                if(pageTitle!=false)document.title = pageTitle;
+
+                //after page is done rendering, fade it in for style points
                 let x = pageView.render().then(()=>{
                     this.currentPage = pageView;
                     $("#content").fadeIn(500);
-
                 });
-
 
 
 
@@ -129,7 +132,6 @@ class CPigeon {
     //~Unity war flashbacks~
     getComponent(type){
         for(const component of this.components){
-            //console.log(typeof component);
             if(component.constructor.name == type)return component;
         }
         return false;
