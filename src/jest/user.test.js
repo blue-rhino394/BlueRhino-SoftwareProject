@@ -1,7 +1,7 @@
 const user =require('../user');
 
 test("get user ID", () =>{
-    expect(user.getUUID).toHaveReturned();
+    expect(user.getUUID).toHaveBeenCalled();
 });
 test("get user Accounts Schema", () =>{
     expect(user.getAccountSchema).toHaveReturned();
