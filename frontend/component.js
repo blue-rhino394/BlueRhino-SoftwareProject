@@ -200,7 +200,7 @@ class ErrorComponent extends Component{
 
 class MessageComponent extends Component{
 
-	constructor(title, message){
+	constructor(title, message=""){
 		super();
 		this.title = title;
 		this.message = message;
@@ -209,7 +209,17 @@ class MessageComponent extends Component{
 	getContent(){
 		let content = $("<div/>").attr("class", "box");
 		content.append($("<h2/>").html(this.title).css("margin", "0px").css("marginBottom", "10px"));
-		content.append($("<span/>").html(this.message));
+		let span = $("<span/>");
+		if(this.message instanceof Array){
+			for(let msg of this.message){
+				span.append(msg);
+			}
+		}else{
+			span.html(this.message);
+			
+		}
+		
+		content.append(span);
 		return content;
 	}
 
@@ -220,6 +230,7 @@ class CardViewer extends Component{
 	constructor(slug){
 		super();
 		this.slug = slug;
+		this.sendingEmail = false;
 	}
 
 	onRender(){
@@ -278,7 +289,9 @@ class CardViewer extends Component{
 			return;
 		}
 		console.log(cardData);
-		//display.empty();
+		
+
+
 		if(display.length > 0){
 			display.fadeOut(500, ()=>{
 				display.empty();
@@ -293,8 +306,31 @@ class CardViewer extends Component{
 
 	}
 
+	async verifyEmail(){
+		if(this.sendingEmail){
+			alert("We'll get there when we get there! Wait!");
+			return;
+		}
+		this.sendingEmail = true;
+		let result = await this.awaitPost("resend-verification-email");
+		if(result.error!=""){
+			alert("Error! Could not resend email! "+result.error);
+		}else{
+			alert("Go check your email ;)");
+		}
+		this.sendingEmail = false;
+	}
+
 	showCard(cardData, collapseAll=true){
 		let card = new Card(cardData)
+
+		if(card.myCard && page.user.currentAccountStatus==1){
+			let msgParts = ["Didn't get an email? Click ", $("<a/>").click(()=>{this.verifyEmail()}).text("here")];
+			new MessageComponent("Verify your email to publish your card!", msgParts).render("cardDisplay");
+			$("#cardDisplay").append("<br>")
+		}
+
+
 		card.render("cardDisplay");
 		let headingText = `${card.user.firstName}'s Card`
 		if(card.myCard)headingText = "Your Card";
@@ -369,25 +405,12 @@ class Search extends Component{
 		dupe = 1;
 
 		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 0};
-		//console.log(request);
-		//console.log(request);
-		var start = new Date();
-		//console.log("querying "+query);
+
 		this.post("search-card", request, (results) => {
 			
 			$("#results").fadeOut(500,() => {
 				$("#results").html("");
 
-				
-				var finish = new Date();
-				var difference = new Date();
-				difference.setTime(finish.getTime() - start.getTime());
-				
-				/*
-				console.log(`<${query}>`);
-				console.log(`took ${(difference.getSeconds())} seconds`);
-				console.log(results);
-				console.log(`</${query}>`);*/
 				for(var result of results.cards){
 
 					new Card(result, true).render("results");
