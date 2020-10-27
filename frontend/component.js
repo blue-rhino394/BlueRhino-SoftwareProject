@@ -671,6 +671,19 @@ class Card extends Component{
 		return (word=="Save") ? "UnSave" : "Save";
 	}
 
+
+	typed(event){
+		if(event.key=="Enter"){
+			if($("#memoBox").val()==""){
+				$("#memoBox").remove();
+				return;
+			}
+			alert("YOU DID A THING!!!");
+		}else if(event.key=="Escape"){
+			$("#memoBox").remove();
+		}
+	}
+
 	async toggleSaveCard(target){
 		if(this.waitingForSave)return;
 
@@ -678,10 +691,16 @@ class Card extends Component{
 			alert("Login or Sign up to save cards!");
 			return;
 		}
-
-		console.log(target);
+		
 		this.waitingForSave = true;
 		let saveWord = target.text();
+
+		$("#memoBox").remove();
+		if(saveWord=="Save"){
+			let memoText = "Type a memo and hit enter or leave it blank to not include a memo";
+			$("#"+this.propId).append($("<input/>", {placeholder:memoText, "id":"memoBox", on: {keypress: (e) => {this.typed(e)}} }).attr("class", "tinytextbox"));
+		}
+
 		target.text(this.toggleSaveWord(saveWord));
 		let saveResult = await this.awaitPost("toggle-save", {cardID: this.card.cardID});
 		if(saveResult.error!=""){
@@ -714,6 +733,11 @@ class Card extends Component{
 		}
 	}
 
+	getRandomInt(max) {
+  		return Math.floor(Math.random() * Math.floor(max));
+	}
+
+
 	getContent(){
 		//create content div
 		let content = $("<div/>").attr("class", "card");
@@ -740,7 +764,8 @@ class Card extends Component{
 		}));
 
 		//add card properties
-		let props = $("<div/>").attr("class", "properties");
+		this.propId = "props-"+this.card.cardID+"-"+this.getRandomInt(99999);
+		let props = $("<div/>").attr("id", this.propId).attr("class", "properties");
 		console.log(this.card.content.cardProperties);
 		//this.card.content.cardProperties.push({key: "Another", value: "one"})
 		//this.card.content.cardProperties.push({key: "next", value: "to"})

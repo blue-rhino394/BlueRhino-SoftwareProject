@@ -59,6 +59,7 @@ class CardSurvey extends Survey{
 				
 				on: {
 					keypress: (e) => {
+						//alert(e.which);
 						if(e.which === 13 && !this.animating) {
 							//alert(index);
 							
@@ -75,7 +76,23 @@ class CardSurvey extends Survey{
 							$(e.target).replaceWith(this.bigText(typed, index));
 						}
 					},
+					keydown: (e) => {
 
+						if(e.which== 9&& !this.animating){
+							e.preventDefault();
+							let typed = $(e.target).val();
+							if(index == 1){
+								$("#cardBuilder").append(this.getQualificationPair());
+								this.currentAnswer.value = typed;
+								this.currentPage.answer.push(this.currentAnswer);
+							}else{
+								this.currentAnswer={key: typed, value:""};
+							}
+							$(e.target).next().next().focus()
+							
+							$(e.target).replaceWith(this.bigText(typed, index));
+						}
+					}
 				},
 				css: {
 					float: "left",
