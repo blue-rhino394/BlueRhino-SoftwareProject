@@ -311,6 +311,35 @@ class CardViewer extends Component{
 
 }
 
+//GET YOUR PIPING FRESH HOT CARDS HERE
+class HotCards extends Component{
+
+	async onRender(){
+		let hotCards = await this.awaitPost("hot-cards");
+		for(let sexyCard of hotCards.cards){
+			new Card(sexyCard, true).render("hotResults_he_he");
+		}
+	}
+
+	getContent(){
+
+		//create card div
+		let content = $("<div/>", {
+			"class" : "box"
+		});
+
+		content.append($("<div/>",{
+			"id": "hotResults_he_he",
+			"css":{
+				padding:"10px"
+			}
+		}));
+
+
+		return content;
+	}
+}
+
 class Search extends Component{
 	
 	constructor(searchText=undefined, type = "none"){
@@ -624,6 +653,7 @@ class NavBar extends Component{
 	}
 
 }
+
 
 
 

@@ -54,7 +54,7 @@ class CPigeon {
 
 
     getMemo(cardId) {
-
+        if(this.user==false)return false;
         for(const card of this.user.savedCards){
              //console.log(card.cardID+" vs "+cardId);
             if(card.cardID == cardId)return card.memo;

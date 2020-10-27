@@ -107,7 +107,8 @@ class LoginView extends View{
 		return {
 			"side" : new Login(),
 			"main" : new Search("Discover Passport", "light"),
-			"navBar" : new NavBar()
+			"navBar" : new NavBar(),
+			"hotMain" : new HotCards()
 		}
 	}
 
