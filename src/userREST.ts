@@ -13,6 +13,7 @@ import bcrypt from "bcrypt";
 import util from "util";
 import { emailWrapper } from "./emailWrapper";
 import { accountStatus } from "./enum/accountStatus";
+import { reservedRoutes } from "./reservedRoutes";
 
 export function defineUserREST(app: Application): void {
 
@@ -68,11 +69,21 @@ export function defineUserREST(app: Application): void {
         // Get slug parameter
         const slug: string = req.body.slug;
 
-        // Look for a user with this slug in the database
-        const requestedUser = await databaseWrapper.getUserBySlug(slug);
+        // Default to true
+        var slugExists = true;
 
-        // If the user exists, then this slug exists!
-        const slugExists: boolean = requestedUser != null;
+        // If this slug is NOT a reserved route...
+        if (!reservedRoutes.hasRoute(slug)) {
+
+            // Look for a user with this slug in the database
+            const requestedUser = await databaseWrapper.getUserBySlug(slug);
+
+            // If we have NOT found this user in the database...
+            if (requestedUser) {
+                // Flip to false!
+                slugExists = false;
+            }
+        }
 
         // Construct response data
         const responseData: postSlugExistsResult = {
