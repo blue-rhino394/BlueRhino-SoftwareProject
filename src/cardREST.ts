@@ -937,9 +937,6 @@ export function defineCardREST(app: Application): void {
             }
         });
 
-
-        console.log(resultIDs);
-
         // Create array to hold schemas in
         var foundCards: cardSchema[] = [];
 
