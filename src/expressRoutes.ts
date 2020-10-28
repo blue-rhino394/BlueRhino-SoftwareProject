@@ -127,16 +127,6 @@ export function defineExpressRoutes(app: Application): void {
     //  Specific File Routes
     //
 
-    // Publish the 'About Us' page
-    app.get('/aboutus', (request, response) => {
-        response.sendFile(path.join(__dirname, '../frontend/aboutus.html'));
-    });
-
-    // Publish the 'FAQ' page
-    app.get('/faq', (request, response) => {
-        response.sendFile(path.join(__dirname, '../frontend/faq.html'));
-    });
-
     // Publish the 'Card Creation Survey' page
     app.get('/cardcreationsurvey', (request, response) => {
         response.sendFile(path.join(__dirname, '../frontend/cardcreationsurvey.html'));
@@ -163,6 +153,16 @@ export function defineExpressRoutes(app: Application): void {
     //
     //  Carrier Pigeon
     //
+
+    // Publish the 'About Us' page to redirect to carrier pigeon
+    app.get('/aboutus', (request, response) => {
+        response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
+    });
+
+    // Publish the 'FAQ' page to redirect to carrier pigeon
+    app.get('/faq', (request, response) => {
+        response.sendFile(path.join(__dirname, '../frontend/cpigeon.html'));
+    });
 
     // Setup Carrier Pigeon Wildcard system
     // (Routes anything other than the above definitions to the carrier pigeon HTML)
