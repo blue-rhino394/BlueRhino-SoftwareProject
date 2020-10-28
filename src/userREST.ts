@@ -79,7 +79,7 @@ export function defineUserREST(app: Application): void {
             const requestedUser = await databaseWrapper.getUserBySlug(slug);
 
             // If we have NOT found this user in the database...
-            if (requestedUser) {
+            if (!requestedUser) {
                 // Flip to false!
                 slugExists = false;
             }
