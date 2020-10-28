@@ -14,6 +14,12 @@ class reservedRoutesClass {
     // Adds a route to this object
     public addRoute(routeToAdd: string): void {
 
+        // If this route starts with a forward slash...
+        if (routeToAdd[0] == "/") {
+            // Remove it!
+            routeToAdd = routeToAdd.substring(1);
+        }
+
         // If we already have this route..
         if (this.hasRoute(routeToAdd)) {
             return;

@@ -73,7 +73,7 @@ export function defineUserREST(app: Application): void {
         var slugExists = true;
 
         // If this slug is NOT a reserved route...
-        if (!reservedRoutes.hasRoute("/" + slug)) {
+        if (!reservedRoutes.hasRoute(slug)) {
 
             // Look for a user with this slug in the database
             const requestedUser = await databaseWrapper.getUserBySlug(slug);
