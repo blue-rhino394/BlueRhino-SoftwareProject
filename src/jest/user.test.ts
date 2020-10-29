@@ -28,6 +28,7 @@ describe("User Testing 1", () => {
     }
 
 
+    
     //
     //  Setup / Teardown
     //
@@ -61,34 +62,144 @@ describe("User Testing 1", () => {
             expect(testUser.getAccountSchema().email).toEqual(newUserSchema.email);
         });
 
+        test("Ensure that password Hash was set correctly",()=>{
+            expect(testUser.getAccountSchema().passwordHash).toEqual(newUserSchema.passwordHash);
+        });
+        test("Ensure that first name was set correctly",()=>{
+            expect(testUser.getAccountSchema().public.firstName).toEqual(newUserSchema.public.firstName);
+        });
+        test("Ensure that first name was set correctly",()=>{
+            expect(testUser.getAccountSchema().public.lastName).toEqual(newUserSchema.public.lastName);
+        });
+        test("Ensure that first name was set correctly",()=>{
+            expect(testUser.getAccountSchema().public.customURL).toEqual(newUserSchema.public.customURL);
+        });
+        test("Ensure that first name was set correctly",()=>{
+            expect(testUser.getAccountSchema().public.profilePictureURL).toEqual(newUserSchema.public.profilePictureURL);
+        });
+
+
     });
-});
 
 
-
-
-
-
-
-/*
-
-test("get user ID", () =>{
-    expect(user.getUUID).toHaveBeenCalled();
-});
-test("get user Accounts Schema", () =>{
-    expect(user.getAccountSchema).toHaveReturned();
+    test("Ensures getCardID() returns something defined", () =>{
+        expect(testUser.getCardID()).toBeDefined();
+    });
+    
+    test("Ensures getSavedCard() returns something defined", () =>{
+    expect(testUser.getSavedCard('1232354')).toBeDefined();
+})
+test("Ensures that getAllSaveCards() returns something defined",()=>
+{
+    expect(testUser.getAllSavedCards()).toBeDefined();
 })
 
-test("gets the Card ID", () =>{
-    expect(user.getCardID).toHaveReturned();
-})
-test("gets the user saved Cards", () =>{
-    expect(user.getSavedCard).toHaveReturned();
-})
-test("gets Account Status", () => {
-    expect(user.getAccountStatus).toHaveReturned();
+test("Ensures that getAccoutStatus returns something defined", () => {
+    expect(testUser.getAccountStatus()).toBeDefined();
 })
 
+test("Ensures that getVerificationCode() returnes something defined",()=>{
+
+    expect(testUser.getVerificationCode()).toBeDefined();
+
+})
+
+
+
+
+describe ("Test setCardID()",() =>{
+    
+    test("Ensures that card id will be set correctly",()=>
+    {
+         expect(testUser.setCardID(testUser.getCardID())).toBeDefined();
+        })
+/* 
+        test("Ensures that the filter will be set correctly",()=>
+        {
+            expect(testUser.setCardID().filter).toEqual(testUser.getUUID);
+        })
+        test("Ensures that options will be set correctly",()=>
+        {
+            expect(testUser.setCardID().options).toBeFalsy();
+        }) */
+        })
+
+
+        describe ("Test setAccountStatus()",() =>{
+    
+        
+                test("Ensures that Account Status will be set correctly",()=>
+                {
+                    expect(testUser.setAccountStatus(testUser.getAccountStatus())).toBeDefined();
+                })/* 
+                test("Ensures that options will be set correctly",()=>
+                {
+                    expect(testUser.setAccountStatus().options).toBeFalsy();
+                }) */
+                })
+
+                describe ("Test setVerficationCode()",() =>{
+    
+        
+                    test("Ensures that the Verfication Code will be set correctly",()=>
+                    {
+                        expect(testUser.setVerificationCode(testUser.getVerificationCode())).toBeDefined();
+                    })
+     /*                test("Ensures that options will be set correctly",()=>
+                    {
+                        expect(testUser.setVerficationCode().options).toBeFalsy();
+                    }) */
+                    })
+
+
+test("Ensures that tryPassword() is defined",()=>
+{
+    expect(testUser.tryPassword(newUserSchema.passwordHash)).toBeTruthy();
+})
+
+describe("Test addSavedCard()",()=>
+{
+    test("Ensures that savedCards is defined",()=>
+{
+    expect(testUser.addSavedCard('1232354')).toBeDefined();
+          })
+      })
+
+
+      describe("Test updateSavedCard()",()=>
+      {
+          test("Ensures that savedCard update return true",()=>
+      {
+          expect(testUser.updateSavedCard(testUser.getSavedCard('1232354'))).toBeTruthy();
+                })
+            })
+
+
+            describe("Test removeSavedCard()",()=>
+            {
+                test("Ensures that savedCard is removed return true",()=>
+            {
+                expect(testUser.removeSavedCard('1232354')).toBeTruthy();
+                      })
+                  })
+                  
+
+            describe("Test updateAccountSchema()",()=>
+            {
+                test("Ensures that savedCard is removed return true",()=>
+            {
+                expect(testUser.updateAccountSchema(testUser.getAccountSchema())).toBeDefined();
+                      })
+                  })
+})
+
+
+
+
+
+
+
+                    /*
 test('sets Card ID', () => {
     expect(user.setCardID).toHaveReturned();
 })
