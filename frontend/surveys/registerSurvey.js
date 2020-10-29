@@ -5,7 +5,7 @@ class RegisterSurvey extends Survey{
 		super();
 
 		//console.log(this.getAllFuncs());
-
+		
 
 	}
 
@@ -89,6 +89,10 @@ class RegisterSurvey extends Survey{
 		return `Calm down ${this.nameify(this.getAnswer("public.firstName"))}, we're making your account look pretty`;
 	}
 
+	hasSpecialChars(str){
+		return /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(str);
+	}
+
 	getPages(){
 		return [
 			{
@@ -123,8 +127,8 @@ class RegisterSurvey extends Survey{
 				nameify: true,
 				color:"#9575CD",
 				validate: async (answer) => { 
-					if(answer.length < 3){
-						return "Your last name must be at least 3 characters!";
+					if(answer.length < 2){
+						return "Your last name must be at least 2 characters!";
 					}
 					return true;
 				}
@@ -137,9 +141,9 @@ class RegisterSurvey extends Survey{
 				key: "email",
 				color: "#FFAB91",
 				validate: async (answer) => {
-					if(!(this.validEmail(answer))){
-						return "You must supply a valid email!";
-					}
+					if(!(this.validEmail(answer)))return "You must supply a valid email!";
+					let request = await this.post("email-exists", {email: answer});
+					if(request.result) return "This email is taken!";
 					return true;
 				}
 			},
@@ -176,6 +180,7 @@ class RegisterSurvey extends Survey{
 				color: "#8C9EFF",
 				validate: async (answer) => {
 					if(answer.length<4)return "This URL is too short!"
+					if(this.hasSpecialChars(answer))return "Your URL can only contain letters!";
 					let request = await this.post("slug-exists", {slug: answer});
 					if(request.result)return "This URL is taken!";
 					return true;
@@ -191,6 +196,7 @@ class RegisterSurvey extends Survey{
 				data: [{attr: {"value": "Business"}}, {attr: {"value":"Personal"}}],
 				validate: async (answer) => true
 			},
+		
 
 		]
 	}

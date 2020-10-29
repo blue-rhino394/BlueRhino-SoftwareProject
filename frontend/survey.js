@@ -4,7 +4,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 0;
+		this.pageIndex = 1;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 		this.pageStop = 0;
@@ -177,6 +177,7 @@ class Survey {
 
 	//this method returns a method that fills the answer of current question with your previously supplied answer when 
 	getRefill(inputType){
+		/*
 		let inputs = {
 			question : (answer) => {
 				$("#questionText").val(answer);
@@ -187,7 +188,9 @@ class Survey {
 		} 
 		let result = inputs[inputType];
 		//if theres nothing in the refill for it, return nothign 
-		if(result==undefined) return ()=>{};
+		if(result==undefined) return ()=>{};*/
+		if(!inputType instanceof Array)inputType = [inputType];
+		//for(let input of in)
 		return result;
 	}
 
@@ -203,6 +206,12 @@ class Survey {
 					keypress: (e) => {
 						if(e.which === 13 && !this.animating) this.selected($(e.target).val());
 					}
+				},
+
+				data:{
+					refill:(me, answer) =>{
+						me.val(answer);
+					}
 				}
 			}).attr("autocomplete", "off"),
 
@@ -215,6 +224,12 @@ class Survey {
 				on: {
 					keypress: (e) => {
 						if(e.which === 13 && !this.animating) this.selected($(e.target).val());
+					}
+				},
+
+				data:{
+					refill:(me, answer) =>{
+						me.val(answer);
 					}
 				}
 			}),
@@ -238,6 +253,11 @@ class Survey {
 						$(e.target).focus();
 					},
 					
+				},
+				data:{
+					refill:(me, answer) =>{
+
+					}
 				}
 			}),
 
@@ -245,6 +265,12 @@ class Survey {
 				id: "welcomeText",
 				
 				
+
+				data:{
+					refill:(me, answer) =>{
+						me.val(answer);
+					}
+				}
 			}),
 
 			option: $("<input/>", {
@@ -255,6 +281,14 @@ class Survey {
 
 						//console.log("okefw");
 						if(!this.animating)this.selected($(e.target).attr("value"))
+					},
+				},
+
+				data:{
+					refill:(me, answer) =>{
+						if(answer==me.val()){
+							me.addClass("surveyButtonHover");
+						}
 					}
 				}
 			}),
@@ -283,19 +317,20 @@ class Survey {
 
 			let inputs = this.getInput(this.currentPage.type);
 
-			
-
+		
 			let elements = [
 				$("<h1/>").text(this.currentPage.question),
 				$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
 			];
 
 			elements = elements.concat(inputs);
-		
+
+
 
 			$("#content").html(elements);
 	
 
+			//refill answers with values
 			
 
 			//this dynamically calls the items in the data array  
@@ -313,7 +348,12 @@ class Survey {
 				}
 			}
 
-			this.getRefill(this.currentPage.type)(this.currentPage.answer);
+			for(const input of inputs){
+				input.data("refill")(input, this.currentPage.answer);
+			}
+
+			//this.getRefill(this.currentPage.type)(this.currentPage.answer);
+		//	this.getRefill(this.currentPage.type);
 		}else{
 			$("#content").html([
 				$("<h1/>").attr("id", "finalMessage").text(this.getCompletedMessage()),

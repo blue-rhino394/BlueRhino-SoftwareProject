@@ -124,10 +124,25 @@ class CardSurvey extends Survey{
 				id: "questionText",
 				//¿¿¿ no, like, why the FUCK does this have to use a CSS grid ???
 				css: {display: "flex"},
+				data:{
+					refill:(me, answer) =>{
+						if(answer.length > 0){
+							for(const tag of answer){
+								$("#tagInput").before(this.getTag(tag));
+							}
+							$("#tagInput").attr("placeholder","");
+							$("#tagInput").focus();
+						}
+					}
+				},
 				html: $("<input/>",{
 					type: "text",
+					id: "tagInput",
 					placeholder: "Type your tags seperated by a comma and press enter",
 					"class": "surveryQuestionGhost",
+
+
+
 					on: {
 						keypress: (e) => {
 							//alert(e.which);
@@ -167,7 +182,8 @@ class CardSurvey extends Survey{
 								if(this.currentPage.answer.length==0)me.attr("placeholder", "Indecisive, are we?");
 							}
 							
-						}
+						},
+
 					}
 				})
 				
@@ -252,20 +268,60 @@ class CardSurvey extends Survey{
 					type:"button", 
 					id:"finished", 
 					click: (e) => {
-						console.log(this.currentPage.answer);
-						this.nextPage()
+						//console.log(this.currentPage.answer);
+						//this.nextPage();
+						this.selected(this.currentPage.answer);
 					}
 				}).attr("class", "surveyButton").val("Finished").css("marginTop","20px"),
 
-			]
-
+			],
+			data:{
+				refill:(me, answer) =>{
+					if(answer.length>0){
+						
+						let newHtml = []
+						for(const field of answer){
+							
+							newHtml.push(this.bigText(field.key, 0));
+							newHtml.push($("<div/>").text(":").css({"float": "left", "fontSize": "1.17em", "marginLeft":"5px", "marginRight":"10px"}))
+							newHtml.push(this.bigText(field.value, 1))
+							newHtml.push($("<br>").css("clear", "both"))
+						
+						}
 			
-		}).css("position", "fixed")
+						$("#cardBuilder").html(newHtml);
+						$("#cardBuilder").append(this.getQualificationPair());
+					}
+				}
+			}
+			
+		},
+
+		
+		).css("position", "fixed")
 	}
 
 	getSocialBuilder(){
 		return $("<div/>", {
+			data: {
+				refill:(me, answer) => {
+						if(answer.length>0){
+						
+						let newHtml = []
+						for(const field of answer){
+							
+							newHtml.push(this.bigText(field.key, 0));
+							newHtml.push($("<div/>").text(":").css({"float": "left", "fontSize": "1.17em", "marginLeft":"5px", "marginRight":"10px"}))
+							newHtml.push(this.bigText(field.value, 1))
+							newHtml.push($("<br>").css("clear", "both"))
+						
+						}
 			
+						$("#cardBuilder").html(newHtml);
+						$("#cardBuilder").append(this.getQualificationPair());
+					}
+				}
+			},
 			html: [
 				$("<div/>", {
 					id : "socialBuilder",
@@ -278,7 +334,10 @@ class CardSurvey extends Survey{
 						console.log(this.currentPage.answer);
 						this.nextPage()
 					}
-				}).attr("class", "surveyButton").val("Finished").css("marginTop","20px"),
+				},
+
+
+				).attr("class", "surveyButton").val("Finished").css("marginTop","20px"),
 
 			]
 
@@ -340,7 +399,10 @@ class CardSurvey extends Survey{
 				type: "cardBuilder",
 				data: [],
 				key: "cardProperties",
-				validate: async (answer) => true
+				validate: async (answer) => {
+					if(answer.length < 1)return "Don't be so modest! Add at least one qualification.";
+					return true;
+				}
 			
 			},
 

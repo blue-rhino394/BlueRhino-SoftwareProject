@@ -242,8 +242,10 @@ img {
 	padding: 0px;
 	margin: 0px;
 	
+	display: flex;
 	align-items: center;
- 	display: flex;
+	
+ 	
  	justify-content: center;
 
 	overflow: hidden;
@@ -329,6 +331,10 @@ img {
 
 }
 
+.surveyButtonHover{
+	background-color: rgba(255, 255, 255, 0.3);
+	cursor: pointer;
+}
 
 .surveyButton:hover{
 	background-color: rgba(255, 255, 255, 0.3);
