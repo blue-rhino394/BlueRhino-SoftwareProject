@@ -3,6 +3,7 @@ import { userSchema } from "../interfaces/userSchema";
 import { accountStatus } from "../enum/accountStatus";
 import { databaseWrapper } from "../databaseWrapper";
 import { userAccountSchema } from "../interfaces/userAccountSchema";
+import { savedCard } from "../interfaces/savedCard";
 
 
 
@@ -14,7 +15,7 @@ describe("User Testing 1", () => {
 
     // The user to test with
     var testUser: user = undefined;
-
+    const savedCard='123243';
     // The user schema used to create the test user
     const newUserSchema: userAccountSchema = {
         email: "fakeemailthatshouldneverexist@brhino.org",
@@ -26,6 +27,8 @@ describe("User Testing 1", () => {
             profilePictureURL: "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
         }
     }
+
+
 
 
     
@@ -87,8 +90,8 @@ describe("User Testing 1", () => {
     });
     
     test("Ensures getSavedCard() returns something defined", () =>{
-    expect(testUser.getSavedCard('1232354')).toBeDefined();
-})
+        expect(testUser.getSavedCard(savedCard)).toBeDefined;
+    })
 test("Ensures that getAllSaveCards() returns something defined",()=>
 {
     expect(testUser.getAllSavedCards()).toBeDefined();
@@ -154,7 +157,7 @@ describe ("Test setCardID()",() =>{
 
 test("Ensures that tryPassword() is defined",()=>
 {
-    expect(testUser.tryPassword(newUserSchema.passwordHash)).toBeTruthy();
+    expect(testUser.tryPassword(testUser.getAccountSchema().passwordHash)).toBeDefined();
 })
 
 describe("Test addSavedCard()",()=>
