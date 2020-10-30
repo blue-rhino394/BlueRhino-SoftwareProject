@@ -12,6 +12,7 @@ describe("User Testing 1", () => {
 
   // The user to test with
   var testUser: user = undefined;
+  // The saved card to test with
   const savedCard = "123243";
   // The user schema used to create the test user
   const newUserSchema: userAccountSchema = {
@@ -165,10 +166,9 @@ describe("User Testing 1", () => {
   });
 
   describe("Test updateAccountSchema()", () => {
-    test("Ensures that savedCard is removed return true", () => {
+    test("Ensures that getAccountSchema is defined", () => {
       expect(
-        testUser.updateAccountSchema(testUser.getAccountSchema())
-      ).toBeDefined();
+        testUser.updateAccountSchema(testUser.getAccountSchema())).toBeDefined();
     });
   });
 });
