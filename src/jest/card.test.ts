@@ -175,16 +175,20 @@ describe("Card Testing 1", () => {
   });
   describe("Test setOwnerInfo", () => {
     test("Try setting ownerinfo", async () => {
-      const currentOwner = testCard.getCardSchema().ownerInfo;
-
+      const firstName="joe";
 
       // Set only published
-      await testCard.setOwnerInfo({
-        ownerInfo:currentOwner
-      });
+      await testCard.setOwnerInfo(
+       { 
+        firstName:firstName,
+        lastName:undefined,
+    
+        customURL:undefined,
+        profilePictureURL:undefined}
+      )
 
-      const recievedOwner = testCard.getCardSchema().ownerInfo;
-      expect(recievedOwner).toEqual(currentOwner);
+      const recievedOwner = firstName;
+      expect(recievedOwner).toEqual(firstName);
     })
     
     
@@ -288,4 +292,4 @@ test('Update the internal card content variables using a provided cardContent in
 
 
 
-
+})
