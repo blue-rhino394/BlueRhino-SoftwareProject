@@ -42,7 +42,6 @@ afterAll(async () => {
 
   // Remove the test user from the database
   await databaseWrapper.deleteUser(testUser.getUUID());
-
 });
 
 describe("Card Testing 1", () => {
@@ -62,8 +61,8 @@ describe("Card Testing 1", () => {
     layout: {
       background: "#c7ddff",
       fontColor: "#05152e",
-    }
-  }
+    },
+  };
 
   //
   //  Setup / Teardown
@@ -175,55 +174,61 @@ describe("Card Testing 1", () => {
   });
   describe("Test setOwnerInfo", () => {
     test("Try setting ownerinfo", async () => {
-      const firstName="joe";
+      const firstName = "joe";
 
       // Set only published
-      await testCard.setOwnerInfo(
-       { 
-        firstName:firstName,
-        lastName:undefined,
-    
-        customURL:undefined,
-        profilePictureURL:undefined}
-      )
+      await testCard.setOwnerInfo({
+        firstName: firstName,
+        lastName: undefined,
+
+        customURL: undefined,
+        profilePictureURL: undefined,
+      });
 
       const recievedOwner = firstName;
       expect(recievedOwner).toEqual(firstName);
-    })
-    
-    
+    });
+
     describe("Test Stats", () => {
-      
       test("Ensures that addStatView() is defined", () => {
-      expect(testCard.addStatView(testCard.getCardStats().cardViews[1])).toBeDefined();
-    })
-  })
-  test("Ensures that addStatFavorite() is defined", () => {
-    expect(testCard.addStatFavorite(testCard.getCardStats().favorites[1])).toBeDefined();
-  })
-  test("Ensures that removeStatFavorite() is defined", () => {
-    expect(testCard.removeStatFavorite(testCard.getCardStats().favorites[1])).toBeDefined();
-  })
-test("Ensures that addStatMemo() is defined", () => {
-  expect(testCard.addStatMemo(testCard.getCardStats().memos[1])).toBeDefined();
-})
+        expect(
+          testCard.addStatView(testCard.getCardStats().cardViews[1])
+        ).toBeDefined();
+      });
 
-test("Ensures that removeStatMemo() is defined", () => {
-  expect(testCard.removeStatMemo(testCard.getCardStats().memos[1])).toBeDefined();
-})
+      test("Ensures that addStatFavorite() is defined", () => {
+        expect(
+          testCard.addStatFavorite(testCard.getCardStats().favorites[1])
+        ).toBeDefined();
+      });
+      test("Ensures that removeStatFavorite() is defined", () => {
+        expect(
+          testCard.removeStatFavorite(testCard.getCardStats().favorites[1])
+        ).toBeDefined();
+      });
+      test("Ensures that addStatMemo() is defined", () => {
+        expect(
+          testCard.addStatMemo(testCard.getCardStats().memos[1])
+        ).toBeDefined();
+      });
 
-describe("Test Utility Methods", () => {
+      test("Ensures that removeStatMemo() is defined", () => {
+        expect(
+          testCard.removeStatMemo(testCard.getCardStats().memos[1])
+        ).toBeDefined();
+      });
+    });
+    describe("Test Utility Methods", () => {
+      test("Ensures that hasTags() has tags", () => {
+        expect(testCard.hasTags(content.tags)).toBeDefined();
+      });
+      test("Ensures that hasText() has text", () => {
+        expect(testCard.hasText("Joe Mama")).toBeDefined();
+      });
+    });
+  });
 
-  test("Ensures that hasTags() has tags", () => {
-    expect(testCard.hasTags(content.tags)).toBeDefined();
-  })
-  test("Ensures that hasText() has text", () => {
-    expect(testCard.hasText("Joe Mama")).toBeDefined();
-  })
-})
-})
-
-/*
+  /*
 
 
 test("get ID", () => {
@@ -288,8 +293,4 @@ test('Update the internal card content variables using a provided cardContent in
     expect(card.createJsonLayoutUpdateData).toHaveReturned();
 })
 */
-
-
-
-
-})
+});
