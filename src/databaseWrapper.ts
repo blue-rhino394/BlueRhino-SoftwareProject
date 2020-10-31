@@ -774,7 +774,7 @@ class databaseWrapperClass {
 
 
     //
-    //  Gettters
+    //  Getters
     //
 
     public getPageCount(): number {

@@ -1,3 +1,4 @@
+import { card } from "../card";
 import { databaseWrapper } from "../databaseWrapper";
 import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { user } from "../user";
@@ -12,13 +13,6 @@ test("Verify we're connected to MongoDB", async () => {
 
     expect(connectedResult).toBeTruthy();
 });
-
-
-
-
-
-
-
 
 test("Try creating a user", async () => {
 
@@ -62,13 +56,82 @@ test("Try creating a user that already exists", async () => {
 
 
 
+test("Testing deleteUSer() to deleteUSer by UUID", async () => {
+
+  const userID: string = "23213432";
+  
+  const result = await dbwrapper.deleteOne({uuid:userID} );
+
+  it('tests error with promises', () => {
+    expect.assertions(result);
+    return dbwrapper.removeCard.catch(e =>expect(e).toEqual({error: 'No Card by this ID', })
+    )
+  })
+  expect(userID).toBeDefined();
+  it('works with async/await and resolves', async () => {
+    expect.assertions(result);
+   expect(dbwrapper.deleteUser(userID)).toBeDefined();
+  });
+})
+   
+
+test("Testing deleteCard() to deletCard by cardID", async () => {
+
+  const cardID: string = "23213432";
+  
+  const result = await dbwrapper.deleteOne({cardID:cardID} );
+
+  it('tests error with promises', () => {
+    expect.assertions(result);
+    return dbwrapper.removeCard.catch(e =>expect(e).toEqual({error: 'No Card by this ID', })
+    )
+  })
+  expect(cardID).toBeDefined();
+  it('works with async/await and resolves', async () => {
+    expect.assertions(result);
+   expect(dbwrapper.deleteCard(cardID)).toBeDefined();
+  })
+  
+
+
+test("Get user from user id to exist", async()=>{
+  const userID: string = "23213432";
+  const ExisitingUser: user = await dbwrapper.findone({uuid:userID});
+
+expect(ExisitingUser).toEqual(userID);
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+})
+
+
+
+
+
+
 
 
 
 
 
 /*
-
 describe("insert", () => {
   let connection;
   let db;
