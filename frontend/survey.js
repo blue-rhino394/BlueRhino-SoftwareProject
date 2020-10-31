@@ -4,7 +4,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 1;
+		this.pageIndex = 0;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 		this.pageStop = 0;
