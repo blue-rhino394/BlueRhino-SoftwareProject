@@ -483,8 +483,73 @@ class databaseWrapperClass {
             }
         });
 
+        // Remove this card from users' savedCards array
+        await this.removeCardFromAllSavedCards(cardIDToDelete);
 
         return outputError;
+    }
+
+    // Removes a card from every user's savedCards list that has this card
+    public async removeCardFromAllSavedCards(cardIDToRemove): Promise<void> {
+
+        // An array of UUID's to be populated with the
+        // database query below.
+        var usersWithThisCardSaved: string[] = [];
+
+
+        // Run the mongoDB operation
+        await this.runMongoOperation(async (database) => {
+
+            // Get user collection from database
+            var userCollection = await database.collection("users");
+
+            // Query defining that we only want
+            // to find users that have this
+            // cardID in their savedCards array
+            const query = {
+                "savedCards": {
+                    "cardID" : cardIDToRemove
+                }
+            }
+
+            // Projection defining that we only want to get
+            // back the UUID of this user
+            const projection = {
+                _id: 0,
+                uuid: 1,
+            }
+
+            const options = {
+                projection: projection
+            }
+
+
+            // Run find operation
+            const searchCursor = await userCollection.find(query, options);
+
+            // Store users into array
+            await searchCursor.forEach((userFound) => {
+                usersWithThisCardSaved.push(userFound.uuid);
+            });
+        });
+
+
+        // Loop through each user that has this card saved...
+        //
+        // Future note - this is not parallelized. It probably could be,
+        // though you'd need to be careful about race conditions!
+        for (const uuid of usersWithThisCardSaved) {
+
+            // Get the user from the database
+            const requestedUser: user = await this.getUser(uuid);
+
+            // If they actually exist...
+            if (requestedUser) {
+
+                // Remove the saved card!
+                await requestedUser.removeSavedCard(cardIDToRemove);
+            }
+        }
     }
 
     // Finds a card in the database by ID
