@@ -461,6 +461,8 @@ class databaseWrapperClass {
     public async deleteCard(cardIDToDelete): Promise<string> {
         var outputError: string = "Unknown Error";
 
+        console.log("Running delete card");
+
         // Run the mongoDB operation
         await this.runMongoOperation(async (database) => {
 
@@ -493,6 +495,8 @@ class databaseWrapperClass {
     //
     // Returns the UUID's of each user effected
     public async removeCardFromAllSavedCards(cardIDToRemove): Promise<string[]> {
+
+        console.log("Running remove from saved cards");
 
         // An array of UUID's to be populated with the
         // database query below.
@@ -541,6 +545,8 @@ class databaseWrapperClass {
         // Future note - this is not parallelized. It probably could be,
         // though you'd need to be careful about race conditions!
         for (const uuid of usersWithThisCardSaved) {
+
+            console.log("Removing saved card from " + uuid);
 
             // Get the user from the database
             const requestedUser: user = await this.getUser(uuid);
