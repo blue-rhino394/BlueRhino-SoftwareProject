@@ -523,6 +523,7 @@ class databaseWrapperClass {
             const projection = {
                 _id: 0,
                 uuid: 1,
+                savedCards: 1
             }
 
             const options = {
