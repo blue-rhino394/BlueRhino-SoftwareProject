@@ -490,7 +490,9 @@ class databaseWrapperClass {
     }
 
     // Removes a card from every user's savedCards list that has this card
-    public async removeCardFromAllSavedCards(cardIDToRemove): Promise<void> {
+    //
+    // Returns the UUID's of each user effected
+    public async removeCardFromAllSavedCards(cardIDToRemove): Promise<string[]> {
 
         // An array of UUID's to be populated with the
         // database query below.
@@ -550,6 +552,9 @@ class databaseWrapperClass {
                 await requestedUser.removeSavedCard(cardIDToRemove);
             }
         }
+
+
+        return usersWithThisCardSaved;
     }
 
     // Finds a card in the database by ID
