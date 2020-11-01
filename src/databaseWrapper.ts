@@ -513,17 +513,14 @@ class databaseWrapperClass {
             // to find users that have this
             // cardID in their savedCards array
             const query = {
-                "savedCards": {
-                    "cardID" : cardIDToRemove
-                }
+                "savedCards.cardID": cardIDToRemove
             }
 
             // Projection defining that we only want to get
             // back the UUID of this user
             const projection = {
                 _id: 0,
-                uuid: 1,
-                savedCards: 1
+                uuid: 1
             }
 
             const options = {
