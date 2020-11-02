@@ -762,61 +762,104 @@ class databaseWrapperClass {
                 var cardCollection = await database.collection("cards");
 
 
+                //
+                //  Setup Projection Aggregation
+                //
+                var projectAggregation = {};
 
-                var query = { };
+                // Remove the mongoDB document ID 
+                projectAggregation["_id"] = 0;
 
-                // Use mongoDB's search function.
-                // Does NOT use partial matching.
-                //query["$text"] = {
-                //    $search: requestedQuery.textQuery,
-                //    $caseSensitive: false,
-                //}
+                // Ensure the cardID is returned
+                projectAggregation["cardID"] = 1;
 
-                // Use REGEX for partial matching
-                query["$or"] = [
-                    { "ownerInfo.firstName": { $regex: requestedQuery.textQuery, $options: "i" }},
-                    { "ownerInfo.lastName": { $regex: requestedQuery.textQuery, $options: "i" } },
-                    { "ownerInfo.customURL": { $regex: requestedQuery.textQuery, $options: "i" } },
-                    { "content.tags": { $regex: requestedQuery.textQuery, $options: "i" } },
-                    { "content.cardProperties": { $regex: requestedQuery.textQuery, $options: "i" } }
-                ]
+                // Ensure the card's published status is returned
+                projectAggregation["content.published"] = 1;
 
+                // Construct a new field ownerInfo.fullName that
+                // consists of firstName and lastName, seperated by a space
+                projectAggregation["ownerInfo.fullName"] = {
+                    $concat: ["$ownerInfo.firstName", " ", "$ownerInfo.lastName"]
+                }
 
-                // Only search through published cards
-                //query["content.published"] = true;
-                
-                // If we're using tags in our search...
+                // If we have tags - require that content.tags
+                // is returned.
                 if (requestedQuery.tags.length > 0) {
-                    // Search for cards that contain all of our required tags
-                    query["content.tags"] = {
+                    projectAggregation["content.tags"] = 1;
+                }
+
+
+
+
+
+                //
+                //  Setup Match Aggregation
+                //
+
+                var matchAggregation = {};
+
+                // Match cards where the fullName parameter contains our textQuery somewhere.
+                // (case insensitive)
+                matchAggregation["ownerInfo.fullName"] = {
+                    $regex: requestedQuery.textQuery,
+                    $options: "i"
+                }
+
+                // Match cards that are published
+                //matchAggregation["content.published"] = true;
+
+                // If we have tags - Require that matched cards
+                // have all of our requested tags.
+                if (requestedQuery.tags.length > 0) {
+                    matchAggregation["content.tags"] = {
                         $all: requestedQuery.tags
                     }
                 }
 
 
-                const projection = {
-                    _id: 0,
-                    cardID: 1,
+
+
+
+
+                //
+                //  Aggregate!
+                //
+                const cursor = cardCollection.aggregate([
+                    {
+                        $project: projectAggregation
+                    },
+                    {
+                        $match: matchAggregation
+                    },
+                    {
+                        $skip: requestedQuery.pageNumber * cardsPerPage
+                    },
+                    {
+                        $limit: cardsPerPage
+                    }
+                ]);
+
+
+
+
+
+
+
+
+                // Manually iterate through
+                // AggregationCursor because
+                // for some reason the mongoDB
+                // implementation doesn't
+                // have a forEach process
+                // like it's other cursors do...
+
+                var cursorLocation = await cursor.next();
+
+                while (cursorLocation) {
+
+                    resultIDs.push(cursorLocation["cardID"]);
+                    cursorLocation = await cursor.next();
                 }
-
-                // Restrict the database return results so that:
-                //  * we skip to the page provided in requestedQuery.pageNumber
-                //  * we ONLY get the uuid
-                const options = {
-                    skip: requestedQuery.pageNumber * cardsPerPage,
-                    //limit: cardsPerPage,
-
-                    projection: projection
-                }
-
-                // Execute search using the above query and options
-                const cursor = cardCollection.find(query, options);
-
-
-                // Add each UUID to the list
-                await cursor.forEach((card) => {
-                    resultIDs.push(card.cardID);
-                });
             });
         }
 

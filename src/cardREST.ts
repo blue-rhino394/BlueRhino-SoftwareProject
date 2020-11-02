@@ -806,60 +806,31 @@ export function defineCardREST(app: Application): void {
             query.pageNumber = 0;
         }
 
-        // Split the text query up into words
-        const wordQuery: string[] = query.textQuery.split(" ");
-        var foundCardIDMap = new Map<string, boolean>();
 
-        // Loop through each word query
-        for (var i = 0; i < wordQuery.length; i++) {
 
-            // If this word is not empty
-            if (wordQuery[i] || query.isMyCards) {
+        var foundCardIDs: string[] = [];
 
-                // Search the database using this word
-                const results = await searchDatabase(req, {
-                    textQuery: wordQuery[i],
-                    tags: query.tags,
-                    isMyCards: query.isMyCards,
-                    pageNumber: query.pageNumber
-                });
+        // If we're supposed to be searching through the user's cards
+        if (query.isMyCards) {
 
-                // If this is our first query
-                if (i == 0) {
+            // If the user is logged in...
+            if (req.session.uuid) {
+                // Get the user from the database
+                const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
 
-                    // Use these results to populate our foundCardIDMap
-                    results.forEach((value) => {
-                        foundCardIDMap.set(value, true);
-                    });
-                }
-                // If this is anything other than our first query...
-                else {
-
-                    // Loop through our existing found card map and...
-                    foundCardIDMap.forEach((value, key) => {
-
-                        // If this card is still to be included...
-                        if (value) {
-                            // If this card is not in our next search..
-                            if (!results.includes(key)) {
-                                // Mark it as not to be included.
-                                foundCardIDMap.set(key, false);
-                            }
-                        }
-                    });
+                // If this user actually exists...
+                if (requestedUser) {
+                    // Search the database for cards using this query
+                    foundCardIDs = await databaseWrapper.searchQuery(query, requestedUser);
                 }
             }
-            
         }
-        
-        // Then, filter out our card map into an array using only
-        // the cardIDs with their value set to true!
-        var filteredCardIDs: string[] = [];
-        foundCardIDMap.forEach((value, key) => {
-            if (value) {
-                filteredCardIDs.push(key);
-            }
-        });
+        // Otherwise... Search through the whole database.
+        else {
+            // Search the database for cards using this query
+            foundCardIDs = await databaseWrapper.searchQuery(query);
+        }
+
 
 
         // Create array to hold schemas in
@@ -868,11 +839,7 @@ export function defineCardREST(app: Application): void {
         // Loop through the found card ID's and pack the cards into 
         // the foundCards array
         var processedCardCount = 0;
-        for (const cardID of filteredCardIDs) {
-
-            if (processedCardCount >= databaseWrapper.getPageCount()) {
-                break;
-            }
+        for (const cardID of foundCardIDs) {
 
             const foundCard = await databaseWrapper.getCard(cardID);
 
@@ -1022,34 +989,4 @@ async function logViewStatOnCard(cardToUse: card, uuidToLog: string): Promise<vo
     // Let's log this stat!
 
     await cardToUse.addStatView(uuidToLog);
-}
-
-
-
-async function searchDatabase(req: Request, query: searchQuery): Promise<string[]> {
-    
-    var foundCardIDs: string[] = [];
-
-    // If we're supposed to be searching through the user's cards
-    if (query.isMyCards) {
-
-        // If the user is logged in...
-        if (req.session.uuid) {
-            // Get the user from the database
-            const requestedUser: user = await databaseWrapper.getUser(req.session.uuid);
-
-            // If this user actually exists...
-            if (requestedUser) {
-                // Search the database for cards using this query
-                foundCardIDs = await databaseWrapper.searchQuery(query, requestedUser);
-            }
-        }
-    }
-    // Otherwise... Search through the whole database.
-    else {
-        // Search the database for cards using this query
-        foundCardIDs = await databaseWrapper.searchQuery(query);
-    }
-
-    return foundCardIDs;
 }
