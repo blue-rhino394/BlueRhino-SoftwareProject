@@ -13,6 +13,7 @@ import { card } from "./card";
 import { databaseCacheManager } from "./databaseCacheManager";
 import { savedCard } from "./interfaces/savedCard";
 import { reservedRoutes } from "./reservedRoutes";
+import { filterXSS } from "xss";
 
 
 class databaseWrapperClass {
@@ -106,6 +107,13 @@ class databaseWrapperClass {
 
         // Force new email to lowercase
         newAccountSchema.email = newAccountSchema.email.toLowerCase();
+
+        // Filter against XSS attacks
+        newAccountSchema.public.firstName = filterXSS(newAccountSchema.public.firstName);
+        newAccountSchema.public.lastName = filterXSS(newAccountSchema.public.lastName);
+
+
+
 
         // Run the mongoDB operation
         await this.runMongoOperation(async function(database) {
@@ -399,6 +407,30 @@ class databaseWrapperClass {
             // Bail out!
             return null;
         }
+
+
+        // Filter against XSS attacks on tags
+        for (var i = 0; i < newContent.tags.length; i++) {
+            newContent.tags[i] = filterXSS(newContent.tags[i]);
+        }
+
+        // Filter against XSS attacks on social media links
+        for (var i = 0; i < newContent.socialMediaLinks.length; i++) {
+            newContent.socialMediaLinks[i] = filterXSS(newContent.socialMediaLinks[i]);
+        }
+
+        // Filter against XSS attacks on card properties
+        for (const property of newContent.cardProperties) {
+            property.key = filterXSS(property.key);
+            property.value = filterXSS(property.value);
+        }
+
+        // Filter against XSS attacks on layout
+        newContent.layout.background = filterXSS(newContent.layout.background);
+        newContent.layout.fontColor = filterXSS(newContent.layout.fontColor);
+
+
+
 
 
         // Run the mongoDB operation

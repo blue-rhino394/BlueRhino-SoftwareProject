@@ -6,6 +6,7 @@ import { PassThrough } from "stream";
 import { databaseWrapper } from "./databaseWrapper";
 import bcrypt from "bcrypt";
 import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
+import { filterXSS } from "xss";
 
 export class user {
 
@@ -425,11 +426,11 @@ export class user {
 
     private updateInternalAccountPublicSchema(accountPublicSchemaUpdate: userAccountPublicSchema): void {
         if (accountPublicSchemaUpdate.firstName != undefined) {
-            this.firstName = accountPublicSchemaUpdate.firstName;
+            this.firstName = filterXSS(accountPublicSchemaUpdate.firstName);
         }
 
         if (accountPublicSchemaUpdate.lastName != undefined) {
-            this.lastName = accountPublicSchemaUpdate.lastName;
+            this.lastName = filterXSS(accountPublicSchemaUpdate.lastName);
         }
 
         if (accountPublicSchemaUpdate.customURL != undefined) {

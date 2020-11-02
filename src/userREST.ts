@@ -14,6 +14,7 @@ import util from "util";
 import { emailWrapper } from "./emailWrapper";
 import { accountStatus } from "./enum/accountStatus";
 import { reservedRoutes } from "./reservedRoutes";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 export function defineUserREST(app: Application): void {
 

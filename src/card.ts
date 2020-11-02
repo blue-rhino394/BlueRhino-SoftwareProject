@@ -473,14 +473,30 @@ export class card {
         }
 
         if (updateContent.tags != undefined) {
+            // Filter against XSS attacks on tags
+            for (var i = 0; i < updateContent.tags.length; i++) {
+                updateContent.tags[i] = filterXSS(updateContent.tags[i]);
+            }
+
             this.contentTags = updateContent.tags;
         }
 
         if (updateContent.socialMediaLinks != undefined) {
+            // Filter against XSS attacks on social media links
+            for (var i = 0; i < updateContent.socialMediaLinks.length; i++) {
+                updateContent.socialMediaLinks[i] = filterXSS(updateContent.socialMediaLinks[i]);
+            }
+
             this.contentSocialMediaLinks = updateContent.socialMediaLinks;
         }
 
         if (updateContent.cardProperties != undefined) {
+            // Filter against XSS attacks on card properties
+            for (const property of updateContent.cardProperties) {
+                property.key = filterXSS(property.key);
+                property.value = filterXSS(property.value);
+            }
+
             this.contentCardProperties = cardPropertyArrayToMap(updateContent.cardProperties);
         }
 
@@ -493,11 +509,11 @@ export class card {
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalCardLayout(updateLayout: cardLayout): void {
         if (updateLayout.background != undefined) {
-            this.layoutBackground = updateLayout.background;
+            this.layoutBackground = filterXSS(updateLayout.background);
         }
 
         if (updateLayout.fontColor != undefined) {
-            this.layoutFontColor = updateLayout.fontColor;
+            this.layoutFontColor = filterXSS(updateLayout.fontColor);
         }
     }
 
