@@ -2,19 +2,31 @@ class View {
 
 	async render(){
 
-		//<link rel="import" href="http://example.com/elements.html">
-		//$("#head").append('<link rel="import" href="/components/test.html">');
-		
+	
 		this.data = await this.getData();
+
 		let view = await this.loadImport(this.getView());
+		page.components = [];
+
 		$("#content").html(view);
 		
-		for (let [key, component] of Object.entries(this.getComponents())) {
 
-			component.render(key); 
+		
+		for (let [key, component] of Object.entries(this.getComponents())) {
+			try{
+				
+				component.render(key); 
+			}catch(err){
+				console.error(err);
+				new ErrorComponent(err).render(key);
+			}
 		}
-		
-		
+	
+	}
+
+
+	getTitle(){
+		return false;
 	}
 
 	
@@ -34,22 +46,55 @@ class View {
 
 class HomeView extends View{
 
+	constructor(slug=""){
+		super();
+		if(slug=="")slug = "/"+page.user.public.customURL;
+		//if(slug=="")slug = "mhewitt836";
+		
+		this.slug = slug;
+	}
+
 	getView(){
 		return "home";
 	}
 
-	async getData(){
-		return new Promise(resolve => {
-    		$.post(`/api/get-card`, (data) => resolve(data.card));
-  		});
+	getTitle(){
+		return "Passport.";
 	}
+
 
 	getComponents(){
 
 		return {
-			"main" : new Card(this.data)
+			"side" : (page.user!=false) ? new Search("Saved Cards", "myCards") : new Login(),
+			"main" : new CardViewer(this.slug),
+			"navBar" : new NavBar()
 		}
 	}
+
+
+}
+
+class SearchView extends View{
+
+	getView(){
+		return "search";
+	}
+
+	getTitle(){
+		return "Search";
+	}
+
+
+	getComponents(){
+
+		return {
+			"side" : new Search("Search"),
+			"main" : new CardViewer("search"),
+			"navBar" : new NavBar()
+		}
+	}
+
 
 
 }
@@ -60,11 +105,17 @@ class LoginView extends View{
 		return "login";
 	}
 
+	getTitle(){
+		return "Passport.";
+	}
+
 	getComponents(){
 
 		return {
 			"side" : new Login(),
-			"main" : new Search(true),
+			"main" : new Search("Search", "light"),
+			"navBar" : new NavBar(),
+			"hotMain" : new HotCards()
 		}
 	}
 

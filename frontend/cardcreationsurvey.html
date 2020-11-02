@@ -1,0 +1,26 @@
+<html>
+	<head id="head">
+		<link rel="stylesheet" href="/style.css">
+		<meta charset="utf-8">
+ 
+		<title>Card Survey</title>
+	</head>
+	<body id="body" class="survey" >
+			<div class="surveyContent" id="contentHolder">
+				<div class="surveyContentHolder" id="content"></div>
+			</div>
+	</body>
+
+</html>
+
+	<script  src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/survey.js"></script>
+	<script type="text/javascript" src="/surveys/cardSurvey.js"></script>
+	<script type="text/javascript" src="/surveys/registerSurvey.js"></script>
+	<script  type="text/javascript" >
+		$("#body").hide();
+		$("#body").fadeIn(2000);
+		var survey = new CardSurvey();		
+		survey.start();
+	</script>

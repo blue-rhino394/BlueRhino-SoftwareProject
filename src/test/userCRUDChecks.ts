@@ -6,11 +6,13 @@ const testAccountSchema: userAccountSchema = {
     email: "test@test.cool",
     passwordHash: "bonk",
 
-    firstName: "Testy",
-    lastName: "McTest",
+    public: {
+        firstName: "Testy",
+        lastName: "McTest",
 
-    customURL: "test-slug",
-    profilePictureURL: "https://ui-avatars.com/api/?name=Testy+McTest"
+        customURL: "test-slug",
+        profilePictureURL: "https://ui-avatars.com/api/?name=Testy+McTest"
+    }
 }
 
 
@@ -55,7 +57,7 @@ async function runChecks() {
     console.log(`By ID (Should be ${newUser.getUUID()}): ${userByID.getUUID()}`);
 
     // Get the user by slug (should work!)
-    const userBySlug = await getBySlug(testAccountSchema.customURL);
+    const userBySlug = await getBySlug(testAccountSchema.public.customURL);
     console.log(`By Slug (Should be ${newUser.getUUID()}): ${userBySlug.getUUID()}`);
 
     // Get the user by email (should work!)
@@ -71,7 +73,7 @@ async function runChecks() {
     console.log(`By ID (Should be null): ${emptyUser2}`);
 
     // Try to get the user by slug (should fail)
-    const emptyUser3 = await getBySlug(testAccountSchema.customURL);
+    const emptyUser3 = await getBySlug(testAccountSchema.public.customURL);
     console.log(`By Slug (Should be null): ${emptyUser3}`);
 
     // Try to get the user by email (should fail)

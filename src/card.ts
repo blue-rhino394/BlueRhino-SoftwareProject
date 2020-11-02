@@ -3,6 +3,7 @@ import { cardContent, cardPropertyArrayToMap, cardPropertyMapToArray } from "./i
 import { databaseWrapper } from "./databaseWrapper";
 import { cardLayout } from "./interfaces/cardLayout";
 import { cardStats, socialArrayToMap, socialMapToArray } from "./interfaces/cardStats";
+import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
 
 
 
@@ -18,8 +19,9 @@ export class card {
     // Card Schema
     private cardID: string;
     private ownerID: string;
-    private firstName: string;
-    private lastName: string;
+
+    // Owner Information
+    private ownerInfo: userAccountPublicSchema;
 
     // Card Content
     private contentPublished: boolean;
@@ -51,8 +53,7 @@ export class card {
     private initializeInternalCardSchema(newCardSchema: cardSchema) {
         this.cardID = newCardSchema.cardID;
         this.ownerID = newCardSchema.ownerID;
-        this.firstName = newCardSchema.firstName;
-        this.lastName = newCardSchema.lastName;
+        this.ownerInfo = newCardSchema.ownerInfo;
 
         this.initializeInternalCardContent(newCardSchema.content);
         this.initializeInternalCardStats(newCardSchema.stats);
@@ -107,8 +108,7 @@ export class card {
         const output: cardSchema = {
             cardID: this.cardID,
             ownerID: this.ownerID,
-            firstName: this.firstName,
-            lastName: this.lastName,
+            ownerInfo: this.ownerInfo,
 
             content: this.getCardContent(),
             stats: this.getCardStats()
@@ -160,13 +160,13 @@ export class card {
     //
 
     // Updates the content of this card using the parameters defined in contentUpdate
-    public setCardContent(contentUpdate: cardContent): void {
+    public async setCardContent(contentUpdate: cardContent): Promise<void> {
 
         // Update the card in memory
         this.updateInternalCardContent(contentUpdate);
 
         // Update the card in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -177,10 +177,44 @@ export class card {
             // Create options explicitly saying that we do NOT want to upsert (create new data if it doesn't exist)
             const options = { upsert: false }
 
-            // Create the update data, saying that we want to set content to the var contentUpdate
+            // Create the update data, saying that we want to set content our content schema
             const updateData = {
                 $set: {
-                    content: this.createJsonContentUpdateData(contentUpdate)
+                    content: this.getCardContent()
+                }
+            };
+
+            // Apply update operation!
+            const updateResult = await cardCollection.updateOne(filter, updateData, options);
+
+
+            // If we wanted to check if it actually updated something at this point,
+            // we would check to see if updateResult.modifiedCount is greater than zero!
+        });
+    }
+
+
+    public async setOwnerInfo(ownerInfoUpdate: userAccountPublicSchema): Promise<void> {
+
+        // Set the owner info in memory
+        this.updateInternalOwnerInfo(ownerInfoUpdate);
+
+        // Set the owner info in the database
+        await databaseWrapper.runMongoOperation(async (database) => {
+
+            // Get card collection from database
+            var cardCollection = await database.collection("cards");
+
+            // Create a filter indicating that we want THIS card
+            const filter = { cardID: this.getID() }
+
+            // Create options explicitly saying that we DO want to upsert (create new data if it doesn't exist)
+            const options = { upsert: true }
+
+            // Create the update data, saying that we want to set owner info to the var ownerInfoUpdate
+            const updateData = {
+                $set: {
+                    ownerInfo: this.ownerInfo
                 }
             };
 
@@ -195,65 +229,63 @@ export class card {
 
 
 
-
-
     //
     //  Stats
     //
 
     // VIEWS - Adds a uuid to the views stat on this card
-    public addStatView(uuidToAdd: string): void {
-        this.addStat(statType.cardViews, uuidToAdd);
+    public async addStatView(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.cardViews, uuidToAdd);
     }
 
     // VIEWS - Removes a uuid from the views stat on this card
-    public removeStatView(uuidToRemove: string): void {
-        this.removeStat(statType.cardViews, uuidToRemove);
+    public async removeStatView(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.cardViews, uuidToRemove);
     }
 
 
     // SAVES - Adds a uuid to the saves stat on this card
-    public addStatSave(uuidToAdd: string): void {
-        this.addStat(statType.saves, uuidToAdd);
+    public async addStatSave(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.saves, uuidToAdd);
     }
 
     // SAVES - Removes a uuid from the saves stat on this card
-    public removeStatSave(uuidToRemove: string): void {
-        this.removeStat(statType.saves, uuidToRemove);
+    public async removeStatSave(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.saves, uuidToRemove);
     }
 
 
     // FAVORITES - Adds a uuid to the favorites stat on this card
-    public addStatFavorite(uuidToAdd: string): void {
-        this.addStat(statType.favorites, uuidToAdd);
+    public async addStatFavorite(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.favorites, uuidToAdd);
     }
 
     // FAVORITES - Removes a uuid from the favorites stat on this card
-    public removeStatFavorite(uuidToRemove: string): void {
-        this.removeStat(statType.favorites, uuidToRemove);
+    public async removeStatFavorite(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.favorites, uuidToRemove);
     }
 
 
     // MEMOS - Adds a uuid to the memos stat on this card
-    public addStatMemo(uuidToAdd: string): void {
-        this.addStat(statType.memos, uuidToAdd);
+    public async addStatMemo(uuidToAdd: string): Promise<void> {
+        await this.addStat(statType.memos, uuidToAdd);
     }
 
     // MEMOS - Removes a uuid from the memos stat on this card
-    public removeStatMemo(uuidToRemove: string): void {
-        this.removeStat(statType.memos, uuidToRemove);
+    public async removeStatMemo(uuidToRemove: string): Promise<void> {
+        await this.removeStat(statType.memos, uuidToRemove);
     }
 
 
 
     // HELPER METHOD - Adds a uuid to a specified stat on this card
-    private addStat(type: statType, uuidToAdd: string): void {
+    private async addStat(type: statType, uuidToAdd: string): Promise<void> {
 
         // Get the correct stat property from this card schema.stats
         var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has already been logged...
-        if (uuidToAdd in statArray) {
+        if (statArray.includes(uuidToAdd)) {
             // BOUNCE!
             return;
         }
@@ -264,7 +296,7 @@ export class card {
         statArray.push(uuidToAdd);
 
         // Add to the stat array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -290,13 +322,13 @@ export class card {
     }
 
     // HELPER METHOD - Removes a uuid from a specified stat on this card
-    private removeStat(type: statType, uuidToRemove: string): void {
+    private async removeStat(type: statType, uuidToRemove: string): Promise<void> {
 
         // Get the correct stat property from this card schema.stats
         var statArray: string[] = this.statMap.get(type);
 
         // If this uuid has NOT already been logged...
-        if (!(uuidToRemove in statArray)) {
+        if (!statArray.includes(uuidToRemove)) {
             // BOUNCE!
             return;
         }
@@ -307,7 +339,7 @@ export class card {
         this.statMap.set(type, statArray.filter(function (value, index, arr) { return value != uuidToRemove }));
 
         // Remove from the stat array in the database
-        databaseWrapper.runMongoOperation(async (database) => {
+        await databaseWrapper.runMongoOperation(async (database) => {
 
             // Get card collection from database
             var cardCollection = await database.collection("cards");
@@ -338,22 +370,22 @@ export class card {
         switch (type) {
             case statType.cardViews:
                 return {
-                    "content.stats.cardViews": uuid
+                    "stats.cardViews": uuid
                 }
 
             case statType.saves:
                 return {
-                    "content.stats.saves": uuid
+                    "stats.saves": uuid
                 }
 
             case statType.favorites:
                 return {
-                    "content.stats.favorites": uuid
+                    "stats.favorites": uuid
                 }
 
             case statType.memos:
                 return {
-                    "content.stats.memos": uuid
+                    "stats.memos": uuid
                 }
 
             default:
@@ -377,6 +409,56 @@ export class card {
     //  Utility Methods
     //
 
+    // If the tags passed in are inside
+    // the list of tags on this card,
+    // return true
+    public hasTags(tagsToCheck: string[]): boolean {
+        return tagsToCheck.every((tag) => {
+            return this.contentTags.indexOf(tag) !== -1;
+        })
+    }
+
+    // If this card contains a text value
+    // equal to textToCheck,
+    // return true
+    public hasText(textToCheck: string): boolean {
+
+        const processedTextQuery: string = textToCheck.toLowerCase();
+
+        // If this text is in the firstName
+        if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        // If this text is in the lastName
+        if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        // If this text is in the customURL
+        if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
+            return true;
+        }
+
+        // If this text is in an element of tags
+        if (this.contentTags.some(function (tag) { return tag.includes(processedTextQuery) })) {
+            return true;
+        }
+
+        // If this text is in an element of cardProperties
+        this.contentCardProperties.forEach((value, key) => {
+
+            if (value.includes(processedTextQuery) || key.includes(processedTextQuery)) {
+                return true;
+            }
+        });
+
+
+
+        return false;
+    }
+
+
 
     //
     //  Internal Update Methods
@@ -386,23 +468,39 @@ export class card {
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalCardContent(updateContent: cardContent): void {
 
-        if (updateContent.published != null) {
+        if (updateContent.published != undefined) {
             this.contentPublished = updateContent.published;
         }
 
-        if (updateContent.tags != null) {
+        if (updateContent.tags != undefined) {
+            // Filter against XSS attacks on tags
+            for (var i = 0; i < updateContent.tags.length; i++) {
+                updateContent.tags[i] = filterXSS(updateContent.tags[i]);
+            }
+
             this.contentTags = updateContent.tags;
         }
 
-        if (updateContent.socialMediaLinks != null) {
+        if (updateContent.socialMediaLinks != undefined) {
+            // Filter against XSS attacks on social media links
+            for (var i = 0; i < updateContent.socialMediaLinks.length; i++) {
+                updateContent.socialMediaLinks[i] = filterXSS(updateContent.socialMediaLinks[i]);
+            }
+
             this.contentSocialMediaLinks = updateContent.socialMediaLinks;
         }
 
-        if (updateContent.cardProperties != null) {
+        if (updateContent.cardProperties != undefined) {
+            // Filter against XSS attacks on card properties
+            for (const property of updateContent.cardProperties) {
+                property.key = filterXSS(property.key);
+                property.value = filterXSS(property.value);
+            }
+
             this.contentCardProperties = cardPropertyArrayToMap(updateContent.cardProperties);
         }
 
-        if (updateContent.layout != null) {
+        if (updateContent.layout != undefined) {
             this.updateInternalCardLayout(updateContent.layout);
         }
     }
@@ -410,63 +508,36 @@ export class card {
     // Update the internal card layout variables using a provided cardLayout interface.
     // If properties of the interface are explicitly null, they will be ignored!
     private updateInternalCardLayout(updateLayout: cardLayout): void {
-        if (updateLayout.background != null) {
-            this.layoutBackground = updateLayout.background;
+        if (updateLayout.background != undefined) {
+            this.layoutBackground = filterXSS(updateLayout.background);
         }
 
-        if (updateLayout.fontColor != null) {
-            this.layoutFontColor = updateLayout.fontColor;
+        if (updateLayout.fontColor != undefined) {
+            this.layoutFontColor = filterXSS(updateLayout.fontColor);
         }
     }
 
 
 
-    //
-    //  Create Anonymous JSON Methods
-    //
 
-    // Takes in a cardContent interface and converts it to a typeless JSON object.
+    // Update the internal card content variables using a provided cardContent interface.
     // If properties of the interface are explicitly null, they will be ignored!
-    private createJsonContentUpdateData(contentUpdate: cardContent): any {
-        var output: Record<string, any> = {};
+    private updateInternalOwnerInfo(updateOwnerInfo: userAccountPublicSchema): void {
 
-        if (contentUpdate.published != null) {
-            output.published = contentUpdate.published;
+        if (updateOwnerInfo.firstName != undefined) {
+            this.ownerInfo.firstName = updateOwnerInfo.firstName;
         }
 
-        if (contentUpdate.tags != null) {
-            output.tags = contentUpdate.tags;
+        if (updateOwnerInfo.lastName != undefined) {
+            this.ownerInfo.lastName = updateOwnerInfo.lastName;
         }
 
-        if (contentUpdate.socialMediaLinks != null) {
-            output.socialMediaLinks = contentUpdate.socialMediaLinks;
+        if (updateOwnerInfo.customURL != undefined) {
+            this.ownerInfo.customURL = updateOwnerInfo.customURL;
         }
 
-        if (contentUpdate.cardProperties != null) {
-            output.cardProperties = contentUpdate.cardProperties;
+        if (updateOwnerInfo.profilePictureURL != undefined) {
+            this.ownerInfo.profilePictureURL = updateOwnerInfo.profilePictureURL;
         }
-
-        if (contentUpdate.layout != null) {
-            output.layout = this.createJsonLayoutUpdateData(contentUpdate.layout);
-        }
-
-
-        return output;
-    }
-
-    // Takes in a cardContent interface and converts it to a typeless JSON object.
-    // If properties of the interface are explicitly null, they will be ignored!
-    private createJsonLayoutUpdateData(layoutUpdate: cardLayout): any {
-        var output: Record<string, any> = {};
-
-        if (layoutUpdate.background != null) {
-            output.background = layoutUpdate.background;
-        }
-
-        if (layoutUpdate.fontColor != null) {
-            output.fontColor = layoutUpdate.fontColor;
-        }
-
-        return output;
     }
 }

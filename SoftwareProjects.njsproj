@@ -39,6 +39,9 @@
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <TypeScriptCompile Include="src\databaseCacheManager.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\card.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -48,7 +51,17 @@
     <TypeScriptCompile Include="src\databaseWrapper.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\emailWrapper.ts" />
     <TypeScriptCompile Include="src\enum\accountStatus.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\expressRoutes.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\cacheManager.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\expressSessions.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\interfaces\cardContent.ts">
@@ -93,6 +106,9 @@
     <TypeScriptCompile Include="src\interfaces\post\postToggleSaveResult.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\interfaces\registerUserAccountSchema.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\interfaces\savedCard.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -102,6 +118,9 @@
     <TypeScriptCompile Include="src\interfaces\socialMapElement.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\interfaces\userAccountPublicSchema.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\interfaces\userAccountSchema.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -109,10 +128,26 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\backendServer.ts" />
+    <TypeScriptCompile Include="src\reservedRoutes.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\removeCardsWithoutUsers.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\resizeProfilePictureURLs.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\verifyAllUsersAndPublishTheirCard.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\dummyData.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
+    <TypeScriptCompile Include="src\test\emailWrapperTest.ts" />
+    <TypeScriptCompile Include="src\test\databaseScripts\populateDatabaseWithDummies.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\setupDBIndexes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\userCRUDChecks.ts">
@@ -134,7 +169,14 @@
     <Folder Include="src\interfaces\" />
     <Folder Include="src\enum\" />
     <Folder Include="src\interfaces\post\" />
+    <Folder Include="src\jest\" />
     <Folder Include="src\test\" />
+    <Folder Include="src\test\databaseScripts\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\jest\card.test.ts" />
+    <Compile Include="src\jest\databaseWrapper.test.ts" />
+    <Compile Include="src\jest\user.test.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
