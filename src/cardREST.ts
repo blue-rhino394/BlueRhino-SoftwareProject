@@ -15,6 +15,7 @@ import { cardContent } from "./interfaces/cardContent";
 import { defineExpressRoutes } from "./expressRoutes";
 import { savedCard } from "./interfaces/savedCard";
 import { Request } from "express-serve-static-core";
+import { accountStatus } from "./enum/accountStatus";
 
 export function defineCardREST(app: Application): void {
 
@@ -207,12 +208,9 @@ export function defineCardREST(app: Application): void {
 
             var errorMessage: string = undefined;
 
-            // If we're missing the published parameter...
-            if (creationForm.published == undefined) {
-                errorMessage = "No published sent";
-            }
+
             // If we're missing the tags parameter...
-            else if (creationForm.tags == undefined) {
+            if (creationForm.tags == undefined) {
                 errorMessage = "No tags sent";
             }
             // If we're missing the socialMediaLinks parameter...
@@ -264,6 +262,20 @@ export function defineCardREST(app: Application): void {
             // is valid so...
             // Let's create this new card!
 
+
+            // If the published parameter is not defined...
+            if (creationForm.published == undefined) {
+                // Default to false
+                creationForm.published = false;
+            }
+
+            // Otherwise - if this user's account is not verified...
+            else if (requestedUser.getAccountStatus() == accountStatus.EmailVerification) {
+                // Force published to false
+                creationForm.published = false;
+            }
+
+
             // Create a new card
             const newCard: card = await databaseWrapper.createCard(requestedUser.getUUID(), creationForm);
 
@@ -311,6 +323,15 @@ export function defineCardREST(app: Application): void {
 
             // Pack the body of the request into an update form
             const updateForm: cardContent = req.body;
+
+            // If this user's account is not verified...
+            if (requestedUser.getAccountStatus() == accountStatus.EmailVerification) {
+                // If the update form is trying to publish the card...
+                if (updateForm.published) {
+                    // Force published to false
+                    updateForm.published = false;
+                }
+            }
 
             // Update the card!
             await requestedCard.setCardContent(updateForm);
