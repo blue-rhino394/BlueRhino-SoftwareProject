@@ -131,11 +131,20 @@
     <TypeScriptCompile Include="src\reservedRoutes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\removeCardsWithoutUsers.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\resizeProfilePictureURLs.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\verifyAllUsersAndPublishTheirCard.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\dummyData.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\emailWrapperTest.ts" />
-    <TypeScriptCompile Include="src\test\populateDatabaseWithDummies.ts">
+    <TypeScriptCompile Include="src\test\databaseScripts\populateDatabaseWithDummies.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\setupDBIndexes.ts">
@@ -162,6 +171,7 @@
     <Folder Include="src\interfaces\post\" />
     <Folder Include="src\jest\" />
     <Folder Include="src\test\" />
+    <Folder Include="src\test\databaseScripts\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\jest\card.test.ts" />
