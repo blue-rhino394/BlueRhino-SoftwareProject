@@ -135,6 +135,16 @@ export function defineUserREST(app: Application): void {
         }
 
 
+        // If we haven't had an error yet...
+        // Check to see if the provided email is formatted correctly
+        if (!errorMessage) {
+
+            // If the provided email is invalid...
+            if (!isValidEmail(registrationForm.email)) {
+                errorMessage = "Invalid email sent";
+            }
+        }
+
 
         // If we've haven't had an error yet...
         // Check to see if the provided email is already in use
@@ -606,4 +616,21 @@ export function defineUserREST(app: Application): void {
         };
         res.send(responseData);
     });
+}
+
+
+
+
+
+
+function isValidEmail(emailToCheck: string): boolean {
+    const mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    const matchResults = emailToCheck.match(mailformat);
+
+    if (!matchResults) {
+        return false;
+    }
+    else {
+        return matchResults.length == 1;
+    }
 }
