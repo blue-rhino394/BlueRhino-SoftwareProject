@@ -75,8 +75,9 @@ describe("Card Testing 1", () => {
 
   // Destroy testCard after tests finish
   afterAll(async () => {
-    await testUser.setCardID("");
-    await databaseWrapper.deleteCard(testUser.getCardID());
+    
+      await databaseWrapper.deleteCard(testUser.getCardID());
+      await testUser.setCardID("");
   });
 
   //
