@@ -1,10 +1,10 @@
-﻿import { userAccountSchema } from "../interfaces/userAccountSchema";
-import { databaseWrapper } from "../databaseWrapper";
-import { user } from "../user";
+﻿import { userAccountSchema } from "../../interfaces/userAccountSchema";
+import { databaseWrapper } from "../../databaseWrapper";
+import { user } from "../../user";
 import bcrypt from "bcrypt";
-import { cardContent, cardPropertyMapToArray } from "../interfaces/cardContent";
-import { cardLayout } from "../interfaces/cardLayout";
-import { card } from "../card";
+import { cardContent, cardPropertyMapToArray } from "../../interfaces/cardContent";
+import { cardLayout } from "../../interfaces/cardLayout";
+import { card } from "../../card";
 
 
 
