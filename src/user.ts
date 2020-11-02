@@ -106,7 +106,24 @@ export class user {
     }
 
     public getAllSavedCards(): savedCard[] {
-        return Array.from(this.savedCards.values());
+
+        // Turn the values from our savedCards Map into an array
+        const savedCardsArray: savedCard[] = Array.from(this.savedCards.values());
+
+        // Sort the array first by if it's favorited, then by alphabetical order
+        const sortedSavedCardsArray: savedCard[] = savedCardsArray.sort((cardA, cardB) => {
+            if (cardA.favorited && !cardB.favorited) {
+                return -1;
+            }
+            else if (!cardA.favorited && cardB.favorited) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        });
+
+        return sortedSavedCardsArray;
     }
 
     public getAccountStatus(): accountStatus {
