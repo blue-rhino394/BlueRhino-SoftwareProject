@@ -52,6 +52,15 @@ class CPigeon {
         return false;
     }
 
+     getFavorite(cardId) {
+        if(this.user==false)return false;
+        for(const card of this.user.savedCards){
+             //console.log(card.cardID+" vs "+cardId);
+            if(card.cardID == cardId)return card.favorited;
+
+        }
+        return false;
+    }
 
     getMemo(cardId) {
         if(this.user==false)return false;
@@ -72,6 +81,21 @@ class CPigeon {
                  $(memo).text("");
             }
         }
+    }
+
+
+    updateFavorites(id, favorited){
+        for(let component of this.components){
+            if(component.constructor.name=="Card" && component.card.cardID==id){
+                component.favorited = favorited;
+                if(component.favorited){
+                    $("#"+component.starId).attr("class", "fa fa-star").show();
+                }else{
+                   $("#"+component.starId).hide();
+                }
+            }
+        }
+
     }
 
 

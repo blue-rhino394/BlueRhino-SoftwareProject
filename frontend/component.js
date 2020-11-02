@@ -699,7 +699,10 @@ class Card extends Component{
 		this.myCard = this.card.ownerID == page.user.uuid;
 
 		this.waitingForSave = false;
+		this.waitingForFavorite = false;
 		
+		this.favorited = page.getFavorite(this.card.cardID);
+
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.ownerInfo.firstName, this.card.content.socialMediaLinks),
@@ -763,7 +766,7 @@ class Card extends Component{
 		}
 	}
 
-	async toggleSaveCard(target){
+	async toggleSaveCard(target, backend=true){
 		if(this.waitingForSave)return;
 
 		if(page.user == false){
@@ -782,33 +785,38 @@ class Card extends Component{
 		}
 
 		target.text(this.toggleSaveWord(saveWord));
-		let saveResult = await this.awaitPost("toggle-save", {cardID: this.card.cardID});
-		if(saveResult.error!=""){
-			let saveWord = target.text();
-			target.text(this.toggleSaveWord(saveWord));
-			alert("An error occoured when attempting to save this card: "+saveResult.error);
-		}else{
-			//refresh feed if successful 
-			
-			if(target.text()=="UnSave"){
-				let cardVal = {cardID: this.card.cardID, favorited: "false", memo:""};
-				page.user.savedCards.push(cardVal);
-
+		if(backend){
+			let saveResult = await this.awaitPost("toggle-save", {cardID: this.card.cardID});
+			if(saveResult.error!=""){
+				let saveWord = target.text();
+				target.text(this.toggleSaveWord(saveWord));
+				alert("An error occoured when attempting to save this card: "+saveResult.error);
 			}else{
-				for(let i =0 ; i<page.user.savedCards.length; i++){
-					if(page.user.savedCards[i].cardID == this.card.cardID){
-						page.user.savedCards.splice(i,1);
-						break;
-					}
-				}
-				page.updateMemos(this.card.cardID, false);
-			}
-			let savedCardComponent = page.getComponent("Search");
-			if(savedCardComponent!= false && savedCardComponent.myCards){
-				savedCardComponent.showResults("");
-			}
+				//refresh feed if successful 
+				
+				if(target.text()=="UnSave"){
+					let cardVal = {cardID: this.card.cardID, favorited: "false", memo:""};
+					page.user.savedCards.push(cardVal);
 
-			//console.log(savedCardComponent);
+				}else{
+					for(let i =0 ; i<page.user.savedCards.length; i++){
+						if(page.user.savedCards[i].cardID == this.card.cardID){
+							page.user.savedCards.splice(i,1);
+							break;
+						}
+					}
+					page.updateFavorites(this.card.cardID, false);
+					page.updateMemos(this.card.cardID, false);
+				}
+				let savedCardComponent = page.getComponent("Search");
+				if(savedCardComponent!= false && savedCardComponent.myCards){
+					savedCardComponent.showResults("");
+				}
+
+				//console.log(savedCardComponent);
+			}
+		}else{
+
 		}
 		this.waitingForSave = false;
 	}
@@ -832,7 +840,35 @@ class Card extends Component{
   		return Math.floor(Math.random() * Math.floor(max));
 	}
 
+	async toggleFavorite(){
+		if(this.waitingForFavorite)return;
+		this.waitingForFavorite = true; 
+		this.favorited = !this.favorited;
+		$("#"+this.starId).attr("class", "fa fa-star").show();
+		
 
+		
+		let results = await this.awaitPost("toggle-favorite", {"cardID": this.card.cardID});
+		for(let card of page.user.savedCards){
+				if(card.cardID == this.card.cardID){
+					//alert("Y");
+					card.favorited = this.favorited;
+				}
+			}
+			if(!page.hasSaved(this.card.cardId)){
+			this.toggleSaveCard($("#"+this.saveId), false);
+		}
+		if(!results.error==""){
+			alert("error favoriting: "+results.error);
+			this.favorited = !this.favorited;
+		}else{
+			
+			page.updateFavorites(this.card.cardID, this.favorited);
+			let savedCardComponent = page.getComponent("Search");
+			if(savedCardComponent.myCards)savedCardComponent.showResults("");
+		}
+		this.waitingForFavorite = false;
+	}
 
 	getContent(){
 		//create content div
@@ -854,11 +890,30 @@ class Card extends Component{
 		}));
 
 		//add first and last name heading to card
-		content.append($("<div/>", {
+		this.starId = "star-"+this.card.cardID+"-"+this.getRandomInt(99999);
+		let nameDiv = $("<div/>", {
 			"class": "name",
-			html: $(`<${heading}/>`).text(`${this.user.firstName} ${this.user.lastName}`)	
-		}));
-
+			html: [
+				$(`<${heading}/>`).text(`${this.user.firstName} ${this.user.lastName}`), 
+				$('<i class="far fa-star"/>', {
+				}).css("margin-bottom","5px").css("margin-left","5px").css("color", "#f5da2a").css("cursor","pointer").attr("id", this.starId).mouseenter((e)=>{
+					if(!this.favorited)$(e.target).attr("class", "fa fa-star");
+					//this.attr("class", "fa fa-star")
+				}).mouseleave((e)=>{
+					if(!this.favorited)$(e.target).attr("class", "far fa-star");
+					//this.attr("class", "fa fa-star")
+				}).click((e)=>this.toggleFavorite(e)).hide()
+			]
+		}).mouseenter( ()=>$("#"+this.starId).show() ).mouseleave( ()=>{if(!this.favorited)$("#"+this.starId).hide()} );
+		content.append(nameDiv)
+		//this.favorited=true;
+		if(this.favorited){
+			//alert("wef");
+			nameDiv.show();
+			//nameDiv.contents().show().contents().attr("class", "fa fa-star");
+			console.log($(nameDiv.contents()[1]).show().attr("class", "fa fa-star"));
+			//console.log($("#"+this.starId).attr("id"))
+		}
 		//add card properties
 		this.propId = "props-"+this.card.cardID+"-"+this.getRandomInt(99999);
 		let props = $("<div/>").attr("id", this.propId).attr("class", "properties");
@@ -879,9 +934,11 @@ class Card extends Component{
 
 		//add card buttons
 		let buttons = $("<div/>").attr("class", "buttons");
+		this.saveId= "save-"+this.card.cardID+"-"+this.getRandomInt(99999);
 		for(const button of this.getButtons()){
 			let link = $("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))});
 			if((button=="Settings" && this.light) || (this.myCard && button=="Save")) continue;
+			if(button=="Save")link.attr("id", this.saveId);
 			if(button=="Settings" )buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
 			buttons.append(link);
 			
