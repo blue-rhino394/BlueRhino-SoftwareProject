@@ -173,6 +173,9 @@ export class card {
             throw new Error("Cannot pass null");
         }
 
+
+
+
         // Update the card in memory
         this.updateInternalCardContent(contentUpdate);
 
