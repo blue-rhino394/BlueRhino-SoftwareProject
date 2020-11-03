@@ -193,7 +193,7 @@ export class card {
         });
     }
 
-
+    // Sets the owner info of this card using the parameters defined in ownerInfoUpdate
     public async setOwnerInfo(ownerInfoUpdate: userAccountPublicSchema): Promise<void> {
 
         // Set the owner info in memory
@@ -418,40 +418,56 @@ export class card {
         })
     }
 
-    // If this card contains a text value
-    // equal to textToCheck,
-    // return true
+    // Return true if firstName or lastName includes textToCheck
+    //  (NOT CASE SENSITIVE)
     public hasText(textToCheck: string): boolean {
 
         const processedTextQuery: string = textToCheck.toLowerCase();
 
-        // If this text is in the firstName
-        if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
+
+        // Combine firstName and lastName with a space, to mimic our
+        // database search algo
+        const firstNameAndLastName = this.ownerInfo.firstName + " " + this.ownerInfo.lastName;
+
+
+        // If textToCheck is in the combined firstName and lastName....
+        if (firstNameAndLastName.toLowerCase().includes(processedTextQuery)) {
             return true;
         }
 
-        // If this text is in the lastName
-        if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
-            return true;
-        }
+        
 
-        // If this text is in the customURL
-        if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
-            return true;
-        }
 
-        // If this text is in an element of tags
-        if (this.contentTags.some(function (tag) { return tag.includes(processedTextQuery) })) {
-            return true;
-        }
+        //  The code below is no longer considered
+        //  accurate to our search definition.
+        //  
+        //  It is being preserved for potential future use.
+        //
+        //// If this text is in the firstName
+        //if (this.ownerInfo.firstName.toLowerCase().includes(processedTextQuery)) {
+        //    return true;
+        //}
+        //// If this text is in the lastName
+        //if (this.ownerInfo.lastName.toLowerCase().includes(processedTextQuery)) {
+        //    return true;
+        //}
+        //// If this text is in the customURL
+        //if (this.ownerInfo.customURL.toLowerCase().includes(processedTextQuery)) {
+        //    return true;
+        //}
 
-        // If this text is in an element of cardProperties
-        this.contentCardProperties.forEach((value, key) => {
+        //// If this text is in an element of tags
+        //if (this.contentTags.some(function (tag) { return tag.includes(processedTextQuery) })) {
+        //    return true;
+        //}
 
-            if (value.includes(processedTextQuery) || key.includes(processedTextQuery)) {
-                return true;
-            }
-        });
+        //// If this text is in an element of cardProperties
+        //this.contentCardProperties.forEach((value, key) => {
+
+        //    if (value.includes(processedTextQuery) || key.includes(processedTextQuery)) {
+        //        return true;
+        //    }
+        //});
 
 
 
