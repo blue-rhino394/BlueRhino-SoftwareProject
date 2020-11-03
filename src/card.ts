@@ -4,7 +4,7 @@ import { databaseWrapper } from "./databaseWrapper";
 import { cardLayout } from "./interfaces/cardLayout";
 import { cardStats, socialArrayToMap, socialMapToArray } from "./interfaces/cardStats";
 import { userAccountPublicSchema } from "./interfaces/userAccountPublicSchema";
-
+import { filterXSS } from "xss";
 
 
 enum statType {
