@@ -163,14 +163,12 @@ export class card {
     // Updates the content of this card using the parameters defined in contentUpdate
     public async setCardContent(contentUpdate: cardContent): Promise<void> {
 
-        //  Error checking...
-        //
-        //
-        if (contentUpdate == undefined) {
-            throw new Error("Cannot pass undefined");
-        }
-        else if (contentUpdate == null) {
+        // Check for a falsy input parameter
+        if (contentUpdate === null) {
             throw new Error("Cannot pass null");
+        }
+        else if (contentUpdate === undefined) {
+            throw new Error("Cannot pass undefined");
         }
 
 
