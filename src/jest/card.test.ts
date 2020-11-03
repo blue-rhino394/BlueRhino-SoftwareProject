@@ -324,7 +324,66 @@ describe("Get Card Testing", () => {
         
 });
 
+describe("Set Card Testing", () => {
 
+    //
+    //  Settings
+    //
+
+    // The card to test with
+    var testCard: card = undefined;
+
+    // The content used to create it
+    const content: cardContent = {
+        published: false,
+        tags: ["Testing Card", "Super Cool"],
+        socialMediaLinks: [],
+        cardProperties: [],
+        layout: {
+            background: "#c7ddff",
+            fontColor: "#05152e"
+        }
+    }
+
+
+
+    //
+    //  Setup / Teardown
+    //
+
+    // Create testCard before tests run
+    beforeAll(async () => {
+        testCard = await databaseWrapper.createCard(testUser.getUUID(), content);
+
+        // If we couldn't create a card for some reason...
+        if (!testCard) {
+            throw new Error("Failed to create testing card...");
+        }
+    });
+
+    // Destroy testCard after tests finish
+    afterAll(async () => {
+        await databaseWrapper.deleteCard(testUser.getCardID());
+        await testUser.setCardID("");
+    });
+
+
+
+    //
+    //  Tests
+    //
+
+    describe("Test setCardContent()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            expect(function () { testCard.setCardContent(undefined); }).toThrow(new Error("Cannot pass undefinded"));
+            
+        });
+
+       
+
+    });
+
+});
 
 
 
