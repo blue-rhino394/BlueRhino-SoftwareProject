@@ -5,13 +5,16 @@ import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { cardSchema } from "../interfaces/cardSchema";
 import { cardContent } from "../interfaces/cardContent";
 
+
 // The user to test with
 //      POPULATE IN BEFORE ALL
 //      REMOVED IN AFTER ALL
 var testUser: user = undefined;
 
+
 // Before any tests execute...
 beforeAll(async () => {
+
     //
     //  Register test user
     //
@@ -25,26 +28,33 @@ beforeAll(async () => {
             firstName: "joe",
             lastName: "mama",
 
-            customURL:
-                "brhinotestaccount-joemama-brhinotestaccount-dontactuallyusethis",
-            profilePictureURL:
-                "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6",
-        },
-    };
+            customURL: "brhinotestaccount-joemama-brhinotestaccount-dontactuallyusethis",
+            profilePictureURL: "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
+        }
+    }
 
     // Actually register the test user
     testUser = await databaseWrapper.createUser(newUserAccount);
-});
+}); 
 
 afterAll(async () => {
+
     //
     //  Remove Test User
+    //
 
     // Remove the test user from the database
     await databaseWrapper.deleteUser(testUser.getUUID());
 });
 
+
+
+
+
+
+
 describe("Card Testing 1", () => {
+
     //
     //  Settings
     //
@@ -60,9 +70,11 @@ describe("Card Testing 1", () => {
         cardProperties: [],
         layout: {
             background: "#c7ddff",
-            fontColor: "#05152e",
-        },
-    };
+            fontColor: "#05152e"
+        }
+    }
+
+
 
     //
     //  Setup / Teardown
@@ -75,71 +87,22 @@ describe("Card Testing 1", () => {
 
     // Destroy testCard after tests finish
     afterAll(async () => {
-
         await databaseWrapper.deleteCard(testUser.getCardID());
         await testUser.setCardID("");
     });
+
+
 
     //
     //  Tests
     //
 
-    test("Ensure getID() to return some cardid", async () => {
+    test("Ensure getID() returns something not empty", async () => {
         expect(testCard.getID()).toBeTruthy();
-    });
-    test("Ensure getOwnerID() to return some ownerid", async () => {
-        expect(testCard.getOwnerUUID()).toBeTruthy();
-    });
-
-    test("Ensure getCardSchemaID() to return some cardschema", async () => {
-        expect(testCard.getCardSchema()).toBeTruthy();
-    });
-
-    describe("Testing CardContent()", () => {
-        test("Ensure that tags is defined", () => {
-            expect(testCard.getCardContent().tags).toBeDefined();
-        });
-        test("Ensure that socialMediaLinks is defined", () => {
-            expect(testCard.getCardContent().socialMediaLinks).toBeDefined();
-        });
-        test("Ensure that cardProperties is defined", () => {
-            expect(testCard.getCardContent().cardProperties).toBeDefined();
-        });
-        test("Ensure that layout is defined", () => {
-            expect(testCard.getCardContent().layout).toBeDefined();
-        });
-    });
-
-    describe("Testing getCardLayout()", () => {
-        test("Ensure that cardlayout background is defined", () => {
-            expect(testCard.getCardLayout().background).toBeDefined();
-        });
-        test("Ensure that cardlayout fontcolor is defined", () => {
-            expect(testCard.getCardLayout().fontColor).toBeDefined();
-        });
-    });
-
-    describe("Testing getCardStats()", () => {
-        test("Ensure that cardstats cardviews is defined", () => {
-            expect(testCard.getCardStats().cardViews).toBeDefined();
-        });
-        test("Ensure that cardstats saves is defined", () => {
-            expect(testCard.getCardStats().saves).toBeDefined();
-        });
-
-        test("Ensure that cardstats favorites is defined", () => {
-            expect(testCard.getCardStats().favorites).toBeDefined();
-        });
-
-        test("Ensure that cardstats memos is defined", () => {
-            expect(testCard.getCardStats().memos).toBeDefined();
-        });
-        test("Ensure that cardstats social is defined", () => {
-            expect(testCard.getCardStats().social).toBeDefined();
-        });
     });
 
     describe("Test setContent", () => {
+
         test("Try setting published", async () => {
             const currentPublished = testCard.getCardContent().published;
             const newPublishedValue = !currentPublished;
@@ -150,8 +113,9 @@ describe("Card Testing 1", () => {
                 tags: undefined,
                 socialMediaLinks: undefined,
                 cardProperties: undefined,
-                layout: undefined,
+                layout: undefined
             });
+
 
             const recievedPublishedValue = testCard.getCardContent().published;
             expect(recievedPublishedValue).toEqual(newPublishedValue);
@@ -166,66 +130,15 @@ describe("Card Testing 1", () => {
                 tags: newTags,
                 socialMediaLinks: undefined,
                 cardProperties: undefined,
-                layout: undefined,
+                layout: undefined
             });
 
             const recievedTags = testCard.getCardContent().tags;
             expect(recievedTags).toEqual(newTags);
         });
     });
-    describe("Test setOwnerInfo", () => {
-        test("Try setting ownerinfo", async () => {
-            const firstName = "joe";
-
-            // Set only published
-            await testCard.setOwnerInfo({
-                firstName: firstName,
-                lastName: undefined,
-
-                customURL: undefined,
-                profilePictureURL: undefined,
-            });
-
-            const recievedOwner = firstName;
-            expect(recievedOwner).toEqual(firstName);
-        });
-
-        describe("Test Stats", () => {
-            test("Ensures that addStatView() is defined", () => {
-                expect(
-                    testCard.addStatView(testCard.getCardStats().cardViews[1])
-                ).toBeDefined();
-            });
-
-            test("Ensures that addStatFavorite() is defined", () => {
-                expect(
-                    testCard.addStatFavorite(testCard.getCardStats().favorites[1])
-                ).toBeDefined();
-            });
-            test("Ensures that removeStatFavorite() is defined", () => {
-                expect(
-                    testCard.removeStatFavorite(testCard.getCardStats().favorites[1])
-                ).toBeDefined();
-            });
-            test("Ensures that addStatMemo() is defined", () => {
-                expect(
-                    testCard.addStatMemo(testCard.getCardStats().memos[1])
-                ).toBeDefined();
-            });
-
-            test("Ensures that removeStatMemo() is defined", () => {
-                expect(
-                    testCard.removeStatMemo(testCard.getCardStats().memos[1])
-                ).toBeDefined();
-            });
-        });
-        describe("Test Utility Methods", () => {
-            test("Ensures that hasTags() has tags", () => {
-                expect(testCard.hasTags(content.tags)).toBeDefined();
-            });
-            test("Ensures that hasText() has text", () => {
-                expect(testCard.hasText("Joe Mama")).toBeDefined();
-            });
-        });
-    });
 });
+
+
+
+
