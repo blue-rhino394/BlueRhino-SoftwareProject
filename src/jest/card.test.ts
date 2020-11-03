@@ -4,6 +4,8 @@ import { user } from "../user";
 import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { cardSchema } from "../interfaces/cardSchema";
 import { cardContent } from "../interfaces/cardContent";
+import { cardPropertyElement } from "../interfaces/cardPropertyElement";
+import { cardLayout } from "../interfaces/cardLayout";
 
 
 // The user to test with
@@ -382,7 +384,7 @@ describe("Set Card Testing", () => {
             await expect(testCard.setCardContent(null)).rejects.toThrow(new Error("Cannot pass null"));
         });
 
-        test("Try setting published", async () => {
+        test("Ensure that setting only published works", async () => {
             const currentPublished = testCard.getCardContent().published;
             const newPublishedValue = !currentPublished;
 
@@ -395,50 +397,114 @@ describe("Set Card Testing", () => {
                 layout: undefined
             });
 
-
             const recievedPublishedValue = testCard.getCardContent().published;
             expect(recievedPublishedValue).toEqual(newPublishedValue);
+        });
+
+        test("Ensure that setting only tags works", async () => {
+            const newTags: string[] = ["New Tags", "Way Cooler To Test"];
+
+            // Set only tags
+            await testCard.setCardContent({
+                published: undefined,
+                tags: newTags,
+                socialMediaLinks: undefined,
+                cardProperties: undefined,
+                layout: undefined
+            });
+
+            const recievedTags = testCard.getCardContent().tags;
+            expect(recievedTags).toEqual(newTags);
+        });
+
+        test("Ensure that setting only socialMediaLinks works", async () => {
+            const newSocial: string[] = ["https://instgram.com"];
+
+            // Set only Social Media Links
+            await testCard.setCardContent({
+                published: undefined,
+                tags: undefined,
+                socialMediaLinks: newSocial,
+                cardProperties: undefined,
+                layout: undefined
+            });
+
+            const recievedSocial = testCard.getCardContent().socialMediaLinks;
+            expect(recievedSocial).toEqual(newSocial);
+        });
+
+        test("Ensure that setting only cardProperties works", async () => {
+            const newProperties: cardPropertyElement[] = [
+                { key: "bla bla key", value: "bla value" },
+                { key: "another key", value: "bla value" },
+                { key: "wow, three keys?", value: "THIS VALUE is cool" }
+            ];
+
+            // Set only Social Media Links
+            await testCard.setCardContent({
+                published: undefined,
+                tags: undefined,
+                socialMediaLinks: undefined,
+                cardProperties: newProperties,
+                layout: undefined
+            });
+
+            const recievedProperties = testCard.getCardContent().cardProperties;
+            expect(recievedProperties).toEqual(newProperties);
+        });
+
+        test("Ensure that setting only layout works", async () => {
+            const newlayout: cardLayout =
+            {
+                background: "#c7ddff",
+                fontColor: "#05152e"
+            };
+
+            // Set only Social Media Links
+            await testCard.setCardContent({
+                published: undefined,
+                tags: undefined,
+                socialMediaLinks: undefined,
+                cardProperties: undefined,
+                layout: newlayout
+            });
+
+            const recievedlayout = testCard.getCardContent().layout;
+            expect(recievedlayout).toEqual(newlayout);
+        });
+
+        test("Ensure that setting multiple fields works", async () => {
+            const newlayout: cardLayout =
+            {
+                background: "#c7ddff",
+                fontColor: "#05152e"
+            };
+
+            const newProperties: cardPropertyElement[] = [
+                { key: "bla bla key", value: "bla value" },
+                { key: "another key", value: "bla value" },
+                { key: "wow, three keys?", value: "THIS VALUE is cool" }
+            ];
+
+            const newSocial: string[] = ["https://instgram.com"];
+
+            const currentPublished = testCard.getCardContent().published;
+            const newPublishedValue = !currentPublished;
+
+            // Set only Social Media Links
+            await testCard.setCardContent({
+                published: newPublishedValue,
+                tags: undefined,
+                socialMediaLinks: newSocial,
+                cardProperties: newProperties,
+                layout: newlayout
+            });
+
+            const recievedlayout = testCard.getCardContent().layout;
+            expect(recievedlayout).toEqual(newlayout);
         });
 
     });
 
 });
 
-
-
-//describe("Test setContent", () => {
-
-//    test("Try setting published", async () => {
-//        const currentPublished = testCard.getCardContent().published;
-//        const newPublishedValue = !currentPublished;
-
-//        // Set only published
-//        await testCard.setCardContent({
-//            published: newPublishedValue,
-//            tags: undefined,
-//            socialMediaLinks: undefined,
-//            cardProperties: undefined,
-//            layout: undefined
-//        });
-
-
-//        const recievedPublishedValue = testCard.getCardContent().published;
-//        expect(recievedPublishedValue).toEqual(newPublishedValue);
-//    });
-
-//    test("Try setting tags", async () => {
-//        const newTags: string[] = ["New Tags", "Way Cooler To Test"];
-
-//        // Set only tags
-//        await testCard.setCardContent({
-//            published: undefined,
-//            tags: newTags,
-//            socialMediaLinks: undefined,
-//            cardProperties: undefined,
-//            layout: undefined
-//        });
-
-//        const recievedTags = testCard.getCardContent().tags;
-//        expect(recievedTags).toEqual(newTags);
-//    });
-//});
