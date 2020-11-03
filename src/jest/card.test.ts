@@ -375,11 +375,11 @@ describe("Set Card Testing", () => {
 
     describe("Test setCardContent()", () => {
         test("Expect error when undefined is passed in", async () => {
-            expect(async function () { await testCard.setCardContent(undefined); }).toThrow(new Error("Cannot pass undefinded"));
+            expect( await testCard.setCardContent(undefined) ).toThrow(new Error("Cannot pass undefinded"));
         });
 
         test("Expect error when null is passed in", async () => {
-            expect(async function () { await testCard.setCardContent(null); }).toThrow(new Error("Cannot pass null"));
+            expect(await testCard.setCardContent(null) ).toThrow(new Error("Cannot pass null"));
         });
 
         test("Try setting published", async () => {
