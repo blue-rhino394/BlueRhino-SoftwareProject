@@ -172,6 +172,17 @@ import { cardContent } from "../interfaces/cardContent";
                 expect(recievedcontent).toEqual(recievedCardContent);
             });
 
+            test("Ensure stats is equal to getCardStats()", async () => {
+                const recievedstats = testCard.getCardSchema().stats;
+                const recievedCardStats = testCard.getCardStats();
+                expect(recievedstats).toEqual(recievedCardStats);
+            });
+
+            test("Ensure that ownerInfo is equal to ownerInfo of constructor's input schema", async () => {
+                const recievedownerinfo = testCard.getCardSchema().ownerInfo;
+                
+            });
+
         });
 
         describe("Test getCardContent()", () => {
