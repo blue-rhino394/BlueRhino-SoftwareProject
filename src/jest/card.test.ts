@@ -35,6 +35,11 @@ beforeAll(async () => {
 
     // Actually register the test user
     testUser = await databaseWrapper.createUser(newUserAccount);
+
+    // If we failed to create a testing user...
+    if (!testUser) {
+        throw new Error("Failed to create testing user...");
+    }
 }); 
 
 afterAll(async () => {
@@ -83,6 +88,11 @@ describe("Card Testing 1", () => {
     // Create testCard before tests run
     beforeAll(async () => {
         testCard = await databaseWrapper.createCard(testUser.getUUID(), content);
+
+        // If we couldn't create a card for some reason...
+        if (!testCard) {
+            throw new Error("Failed to create testing card...");
+        }
     });
 
     // Destroy testCard after tests finish
