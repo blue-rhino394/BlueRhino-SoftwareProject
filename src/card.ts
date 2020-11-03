@@ -61,6 +61,7 @@ export class card {
 
     // Populate internal variables related to cardContent
     private initializeInternalCardContent(newCardContent: cardContent) {
+        this.contentPublished = newCardContent.published;
         this.contentTags = newCardContent.tags;
         this.contentSocialMediaLinks = newCardContent.socialMediaLinks;
         this.contentCardProperties = cardPropertyArrayToMap(newCardContent.cardProperties);
