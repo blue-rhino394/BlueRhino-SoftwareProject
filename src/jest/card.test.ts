@@ -5,6 +5,7 @@ import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { cardSchema } from "../interfaces/cardSchema";
 import { cardContent } from "../interfaces/cardContent";
 
+
     // The user to test with
     //      POPULATE IN BEFORE ALL
     //      REMOVED IN AFTER ALL
@@ -55,7 +56,7 @@ import { cardContent } from "../interfaces/cardContent";
 
 
 
-    describe("Card Testing 1", () => {
+    describe("Get Card Testing", () => {
 
         //
         //  Settings
@@ -104,50 +105,128 @@ import { cardContent } from "../interfaces/cardContent";
         //  Tests
         //
 
-
-        test("Ensure getID() returns something not empty", async () => {
-            expect(testCard.getID()).toBeTruthy();
-        });
-
-        describe("Test setContent", () => {
-
-            test("Try setting published", async () => {
-                const currentPublished = testCard.getCardContent().published;
-                const newPublishedValue = !currentPublished;
-
-                // Set only published
-                await testCard.setCardContent({
-                    published: newPublishedValue,
-                    tags: undefined,
-                    socialMediaLinks: undefined,
-                    cardProperties: undefined,
-                    layout: undefined
-                });
-
-
-                const recievedPublishedValue = testCard.getCardContent().published;
-                expect(recievedPublishedValue).toEqual(newPublishedValue);
+        describe("Test getID()", () => {
+            test("Ensure getID() returns something not empty", async () => {
+                expect(testCard.getID()).toBeTruthy();
             });
 
-            test("Try setting tags", async () => {
-                const newTags: string[] = ["New Tags", "Way Cooler To Test"];
-
-                // Set only tags
-                await testCard.setCardContent({
-                    published: undefined,
-                    tags: newTags,
-                    socialMediaLinks: undefined,
-                    cardProperties: undefined,
-                    layout: undefined
-                });
-
-                const recievedTags = testCard.getCardContent().tags;
-                expect(recievedTags).toEqual(newTags);
+            test("Ensure getID() does not change", async () => {
+                
             });
+
+            test("Ensure getID() is equal to CardID of constructor input schema", async () => {
+                
+            });
+
         });
+
+        describe("Test getOwnerUUID()", () => {
+            test("Ensure getOwnerUUID() returns something not empty", async () => {
+                expect(testCard.getOwnerUUID()).toBeTruthy();
+            });
+
+            test("Ensure getOwnerUUID() does not change", async () => {
+
+            });
+
+            test("Ensure getOwnerUUID() is equal to CardID of constructor input schema", async () => {
+
+            });
+
+        });
+
+        describe("Test getCardSchema()", () => {
+            test("Ensure getCardSchema() returns something not empty", async () => {
+                expect(testCard.getCardSchema()).toBeTruthy();
+            });
+
+            test("Ensure cardID returns something not empty", async () => {
+                expect(testCard.getCardSchema().cardID).toBeTruthy();
+            });
+
+            test("Ensure ownerID returns something not empty", async () => {
+                expect(testCard.getCardSchema().ownerID).toBeTruthy();
+            });
+
+            test("Ensure ownerinfo returns something not empty", async () => {
+                expect(testCard.getCardSchema().ownerInfo).toBeTruthy();
+            });
+
+            test("Ensure content returns something not empty", async () => {
+                expect(testCard.getCardSchema().content).toBeTruthy();
+            });
+
+            test("Ensure stats returns something not empty", async () => {
+                expect(testCard.getCardSchema().stats).toBeTruthy();
+            });
+
+            test("Ensure ownerID is equal to getOwnerUUID()", async () => {
+                const recievedownerID = testCard.getCardSchema().ownerID;
+                const recievedOwnerUUID = testCard.getOwnerUUID();
+                expect(recievedownerID).toEqual(recievedOwnerUUID);
+            });
+
+            test("Ensure content is equal to getCardContent()", async () => {
+                const recievedcontent = testCard.getCardSchema().content;
+                const recievedCardContent = testCard.getCardContent();
+                expect(recievedcontent).toEqual(recievedCardContent);
+            });
+
+        });
+
+        describe("Test getCardContent()", () => {
+
+        });
+
+        describe("Test getCardLayout()", () => {
+
+        });
+
+        describe("Test getCardStats()", () => {
+            
+        });
+
+       
+        
     });
 
 
 
 
 
+//describe("Test setContent", () => {
+
+//    test("Try setting published", async () => {
+//        const currentPublished = testCard.getCardContent().published;
+//        const newPublishedValue = !currentPublished;
+
+//        // Set only published
+//        await testCard.setCardContent({
+//            published: newPublishedValue,
+//            tags: undefined,
+//            socialMediaLinks: undefined,
+//            cardProperties: undefined,
+//            layout: undefined
+//        });
+
+
+//        const recievedPublishedValue = testCard.getCardContent().published;
+//        expect(recievedPublishedValue).toEqual(newPublishedValue);
+//    });
+
+//    test("Try setting tags", async () => {
+//        const newTags: string[] = ["New Tags", "Way Cooler To Test"];
+
+//        // Set only tags
+//        await testCard.setCardContent({
+//            published: undefined,
+//            tags: newTags,
+//            socialMediaLinks: undefined,
+//            cardProperties: undefined,
+//            layout: undefined
+//        });
+
+//        const recievedTags = testCard.getCardContent().tags;
+//        expect(recievedTags).toEqual(newTags);
+//    });
+//});
