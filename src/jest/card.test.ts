@@ -334,16 +334,45 @@ describe("Set Card Testing", () => {
 
     // The card to test with
     var testCard: card = undefined;
+    var testCard2: card = undefined;
 
     // The content used to create it
     const content: cardContent = {
         published: false,
-        tags: ["Testing Card", "Super Cool"],
+        tags: [],
         socialMediaLinks: [],
         cardProperties: [],
         layout: {
-            background: "#c7ddff",
-            fontColor: "#05152e"
+            background: "#c7ddfd",
+            fontColor: "#05152f"
+        }
+    }
+
+    const newcardSchema: cardSchema = {
+        cardID: "003261564641",
+        ownerID: "0032610452564642",
+        ownerInfo: {
+            firstName: "Test",
+            lastName: "testing",
+            customURL: "https://brhino.org/testing",
+            profilePictureURL: "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
+        },
+        content: {
+            published: true,
+            tags: [],
+            socialMediaLinks: ["https://instgram.com"],
+            cardProperties: [],
+            layout: {
+                background: "#c7ddff",
+                fontColor: "#05152e"
+            }
+        },
+        stats: {
+            cardViews: [],
+            saves: [],
+            favorites: [],
+            memos: [],
+            social: []
         }
     }
 
@@ -354,17 +383,19 @@ describe("Set Card Testing", () => {
     //
 
     // Create testCard before tests run
-    beforeAll(async () => {
+    beforeEach(async () => {
         testCard = await databaseWrapper.createCard(testUser.getUUID(), content);
 
         // If we couldn't create a card for some reason...
         if (!testCard) {
             throw new Error("Failed to create testing card...");
         }
+
+        testCard2 = new card(newcardSchema);
     });
 
     // Destroy testCard after tests finish
-    afterAll(async () => {
+    afterEach(async () => {
         await databaseWrapper.deleteCard(testUser.getCardID());
         await testUser.setCardID("");
     });
@@ -440,7 +471,7 @@ describe("Set Card Testing", () => {
                 { key: "wow, three keys?", value: "THIS VALUE is cool" }
             ];
 
-            // Set only Social Media Links
+            // Set only card porperties
             await testCard.setCardContent({
                 published: undefined,
                 tags: undefined,
@@ -460,7 +491,7 @@ describe("Set Card Testing", () => {
                 fontColor: "#05152e"
             };
 
-            // Set only Social Media Links
+            // Set only layout
             await testCard.setCardContent({
                 published: undefined,
                 tags: undefined,
@@ -473,38 +504,452 @@ describe("Set Card Testing", () => {
             expect(recievedlayout).toEqual(newlayout);
         });
 
-        test("Ensure that setting multiple fields works", async () => {
-            const newlayout: cardLayout =
-            {
-                background: "#c7ddff",
-                fontColor: "#05152e"
-            };
-
-            const newProperties: cardPropertyElement[] = [
-                { key: "bla bla key", value: "bla value" },
-                { key: "another key", value: "bla value" },
-                { key: "wow, three keys?", value: "THIS VALUE is cool" }
-            ];
+        test("Ensure that setting multiple fields for CardContent works", async () => {
+            const newlayout: cardLayout = { background: "#c7ddff", fontColor: "#05152e" };
 
             const newSocial: string[] = ["https://instgram.com"];
 
             const currentPublished = testCard.getCardContent().published;
             const newPublishedValue = !currentPublished;
 
-            // Set only Social Media Links
+            // Set multiple fields
             await testCard.setCardContent({
                 published: newPublishedValue,
                 tags: undefined,
                 socialMediaLinks: newSocial,
-                cardProperties: newProperties,
+                cardProperties: undefined,
                 layout: newlayout
             });
 
-            const recievedlayout = testCard.getCardContent().layout;
-            expect(recievedlayout).toEqual(newlayout);
+            expect(testCard.getCardContent()).toEqual(testCard2.getCardContent());
+        });
+
+    });
+
+    describe("Test setOwnerInfo()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.setOwnerInfo(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.setOwnerInfo(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that setting firstName works", async () => {
+            const newfirstName: string = "testing";
+
+            // Set only firstname
+            await testCard.setOwnerInfo({
+                firstName: newfirstName,
+                lastName: undefined,
+                customURL: undefined,
+                profilePictureURL: undefined
+            });
+
+            const recievedfirstName = testCard.getCardSchema().ownerInfo.firstName;
+            expect(recievedfirstName).toEqual(newfirstName);
+        });
+
+        test("Ensure that setting lastName works", async () => {
+            const newlastName: string = "testing";
+
+            // Set only lastname
+            await testCard.setOwnerInfo({
+                firstName: undefined,
+                lastName: newlastName,
+                customURL: undefined,
+                profilePictureURL: undefined
+            });
+
+            const recievedlastName = testCard.getCardSchema().ownerInfo.lastName;
+            expect(recievedlastName).toEqual(newlastName);
+        });
+
+        test("Ensure that setting customURL works", async () => {
+            const newcustomURL: string = "https://brhino.org/testing";
+
+            // Set only customURL
+            await testCard.setOwnerInfo({
+                firstName: undefined,
+                lastName: undefined,
+                customURL: newcustomURL,
+                profilePictureURL: undefined
+            });
+
+            const recievedcustomURL = testCard.getCardSchema().ownerInfo.customURL;
+            expect(recievedcustomURL).toEqual(newcustomURL);
+        });
+
+        test("Ensure that setting profilePictureURL works", async () => {
+            const newprofileURL: string = "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+
+            // Set only ProfilePictureURL
+            await testCard.setOwnerInfo({
+                firstName: undefined,
+                lastName: undefined,
+                customURL: undefined,
+                profilePictureURL: newprofileURL
+            });
+
+            const recievedprofileURL = testCard.getCardSchema().ownerInfo.profilePictureURL;
+            expect(recievedprofileURL).toEqual(newprofileURL);
+        });
+
+        test("Ensure that setting multiple fields for OwnerInfo works", async () => {
+            const newprofileURL: string = "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+            const newcustomURL: string = "https://brhino.org/testing";
+            const newlastName: string = "testing";
+
+            // Set multiple fields
+            await testCard.setOwnerInfo({
+                firstName: undefined,
+                lastName: newlastName,
+                customURL: newcustomURL,
+                profilePictureURL: newprofileURL
+            });
+
+            expect(testCard.getCardSchema().ownerInfo).toEqual(testCard2.getCardSchema().ownerInfo);
         });
 
     });
 
 });
 
+describe("Stat Testing", () => {
+
+    //
+    //  Settings
+    //
+
+    // The card to test with
+    var testCard: card = undefined;
+
+    // The content used to create it
+    const content: cardContent = {
+        published: false,
+        tags: [],
+        socialMediaLinks: [],
+        cardProperties: [],
+        layout: {
+            background: "#c7ddfd",
+            fontColor: "#05152f"
+        }
+    }
+
+
+    //
+    //  Setup / Teardown
+    //
+
+    // Create testCard before tests run
+    beforeAll(async () => {
+        testCard = await databaseWrapper.createCard(testUser.getUUID(), content);
+
+        // If we couldn't create a card for some reason...
+        if (!testCard) {
+            throw new Error("Failed to create testing card...");
+        }
+
+    });
+
+    // Destroy testCard after tests finish
+    afterAll(async () => {
+        await databaseWrapper.deleteCard(testUser.getCardID());
+        await testUser.setCardID("");
+    });
+
+    describe("Test addStatView()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.addStatView(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.addStatView(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that adding a view actually works", async () => {
+            const newstatView: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+
+            // Add cardViews
+            await testCard.addStatView(newstatView);
+
+            expect(testCard.getCardStats().cardViews).toEqual([newstatView]);
+        });
+
+        test("Ensure that multiple views are not added for the same ID", async () => {
+            const newstatView: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatView1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            // Add cardViews
+            await testCard.addStatView(newstatView);
+            await testCard.addStatView(newstatView1);
+
+            expect(testCard.getCardStats().cardViews).toEqual([newstatView]);
+        });
+
+        test("Ensure that multiple views can be added with different ID's", async () => {
+            const newstatView: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatView1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            const newstatArray: string[] = [ newstatView, newstatView1];
+            // Add cardViews
+            await testCard.addStatView(newstatView);
+            await testCard.addStatView(newstatView1);
+
+            expect(testCard.getCardStats().cardViews).toEqual(newstatArray);
+        });
+
+    });
+
+    describe("Test removeStatView()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.removeStatView(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.removeStatView(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that removing a view actually works", async () => {
+            const newstatView: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatView1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove cardViews
+            await testCard.removeStatView(newstatView);
+
+            expect(testCard.getCardStats().cardViews).toEqual([newstatView1]);
+        });
+
+        test("Ensure that removing a view actually works", async () => {
+            const newstatView: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6ca";
+            const newstatView1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove cardViews
+            await testCard.removeStatView(newstatView);
+
+            expect(testCard.getCardStats().cardViews).toEqual([newstatView1]);
+        });
+
+    });
+
+    describe("Test addStatSave()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.addStatSave(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.addStatSave(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that adding a save actually works", async () => {
+            const newstatSave: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+
+            // Add Card Saves
+            await testCard.addStatSave(newstatSave);
+
+            expect(testCard.getCardStats().saves).toEqual([newstatSave]);
+        });
+
+        test("Ensure that multiple saves are not added for the same ID", async () => {
+            const newstatSave: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatSave1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            // Add Card Saves
+            await testCard.addStatSave(newstatSave);
+            await testCard.addStatSave(newstatSave1);
+
+            expect(testCard.getCardStats().saves).toEqual([newstatSave]);
+        });
+
+        test("Ensure that multiple views can be added with different ID's", async () => {
+            const newstatSave: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatSave1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            const newstatArray: string[] = [newstatSave, newstatSave1];
+            // Add Card Saves
+            await testCard.addStatSave(newstatSave);
+            await testCard.addStatSave(newstatSave1);
+
+            expect(testCard.getCardStats().saves).toEqual(newstatArray);
+        });
+
+    });
+
+    describe("Test removeStatSave()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.removeStatSave(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.removeStatSave(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that removing a save actually works", async () => {
+            const newstatSave: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatSave1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove Card Save
+            await testCard.removeStatSave(newstatSave);
+
+            expect(testCard.getCardStats().saves).toEqual([newstatSave1]);
+        });
+
+        test("Expect NO ERROR if you try to remove a save that does not exist", async () => {
+            const newstatSave: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6ca";
+            const newstatSave1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove Card Save
+            await testCard.removeStatSave(newstatSave);
+
+            expect(testCard.getCardStats().saves).toEqual([newstatSave1]);
+        });
+
+    });
+
+    describe("Test addStatMemo()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.addStatMemo(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.addStatMemo(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that adding a memo actually works", async () => {
+            const newstatMemo: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+
+            // Add card Memos
+            await testCard.addStatMemo(newstatMemo);
+
+            expect(testCard.getCardStats().memos).toEqual([newstatMemo]);
+        });
+
+        test("Ensure that multiple memos are not added for the same ID", async () => {
+            const newstatMemo: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatMemo1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            // Add card Memos
+            await testCard.addStatMemo(newstatMemo);
+            await testCard.addStatMemo(newstatMemo1);
+
+            expect(testCard.getCardStats().memos).toEqual([newstatMemo]);
+        });
+
+        test("Ensure that multiple memos can be added w/ different ID's", async () => {
+            const newstatMemo: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatMemo1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            const newstatArray: string[] = [newstatMemo, newstatMemo1];
+            // Add card Memos
+            await testCard.addStatMemo(newstatMemo);
+            await testCard.addStatMemo(newstatMemo1);
+
+            expect(testCard.getCardStats().memos).toEqual(newstatArray);
+        });
+
+    });
+
+    describe("Test removeStatMemo()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.removeStatMemo(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.removeStatMemo(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that removing a memo actually works", async () => {
+            const newstatMemo: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatMemo1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove card memos
+            await testCard.removeStatMemo(newstatMemo);
+
+            expect(testCard.getCardStats().memos).toEqual([newstatMemo1]);
+        });
+
+        test("Expect NO ERROR if you try to remove a memo that does not exist", async () => {
+            const newstatMemo: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6ca";
+            const newstatMemo1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove card memos
+            await testCard.removeStatMemo(newstatMemo);
+
+            expect(testCard.getCardStats().memos).toEqual([newstatMemo1]);
+        });
+
+    });
+
+    describe("Test addStatFavorite()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.addStatFavorite(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.addStatFavorite(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that adding a memo actually works", async () => {
+            const newstatFavorite: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+
+            // Add card Memos
+            await testCard.addStatFavorite(newstatFavorite);
+
+            expect(testCard.getCardStats().favorites).toEqual([newstatFavorite]);
+        });
+
+        test("Ensure that multiple memos are not added for the same ID", async () => {
+            const newstatFavorite: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatFavorite1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            // Add card Memos
+            await testCard.addStatFavorite(newstatFavorite);
+            await testCard.addStatFavorite(newstatFavorite1);
+
+            expect(testCard.getCardStats().favorites).toEqual([newstatFavorite]);
+        });
+
+        test("Ensure that multiple memos can be added w/ different ID's", async () => {
+            const newstatFavorite: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatFavorite1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            const newstatArray: string[] = [newstatFavorite, newstatFavorite1];
+            // Add card Memos
+            await testCard.addStatFavorite(newstatFavorite);
+            await testCard.addStatFavorite(newstatFavorite1);
+
+            expect(testCard.getCardStats().favorites).toEqual(newstatArray);
+        });
+
+    });
+
+    describe("Test removeStatFavorite()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.removeStatFavorite(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.removeStatFavorite(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that removing a memo actually works", async () => {
+            const newstatFavorite: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cf";
+            const newstatFavorite1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove card memos
+            await testCard.removeStatFavorite(newstatFavorite);
+
+            expect(testCard.getCardStats().favorites).toEqual([newstatFavorite1]);
+        });
+
+        test("Expect NO ERROR if you try to remove a memo that does not exist", async () => {
+            const newstatFavorite: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6ca";
+            const newstatFavorite1: string = "c9f1f93c-47c7-4bae-84b6-222585e5d6cd";
+            // Remove card memos
+            await testCard.removeStatFavorite(newstatFavorite);
+
+            expect(testCard.getCardStats().favorites).toEqual([newstatFavorite1]);
+        });
+
+    });
+
+    describe("Test hasTags()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testCard.hasTags(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testCard.hasTags(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+      
+
+
+    });
+
+});

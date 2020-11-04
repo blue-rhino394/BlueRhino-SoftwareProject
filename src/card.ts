@@ -208,6 +208,14 @@ export class card {
     // Sets the owner info of this card using the parameters defined in ownerInfoUpdate
     public async setOwnerInfo(ownerInfoUpdate: userAccountPublicSchema): Promise<void> {
 
+        // Check for a falsy input parameter
+        if (ownerInfoUpdate === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (ownerInfoUpdate === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the owner info in memory
         this.updateInternalOwnerInfo(ownerInfoUpdate);
 
@@ -247,44 +255,116 @@ export class card {
 
     // VIEWS - Adds a uuid to the views stat on this card
     public async addStatView(uuidToAdd: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToAdd === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToAdd === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.addStat(statType.cardViews, uuidToAdd);
     }
 
     // VIEWS - Removes a uuid from the views stat on this card
     public async removeStatView(uuidToRemove: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToRemove === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToRemove === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.removeStat(statType.cardViews, uuidToRemove);
     }
 
 
     // SAVES - Adds a uuid to the saves stat on this card
     public async addStatSave(uuidToAdd: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToAdd === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToAdd === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.addStat(statType.saves, uuidToAdd);
     }
 
     // SAVES - Removes a uuid from the saves stat on this card
     public async removeStatSave(uuidToRemove: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToRemove === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToRemove === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.removeStat(statType.saves, uuidToRemove);
     }
 
 
     // FAVORITES - Adds a uuid to the favorites stat on this card
     public async addStatFavorite(uuidToAdd: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToAdd === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToAdd === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.addStat(statType.favorites, uuidToAdd);
     }
 
     // FAVORITES - Removes a uuid from the favorites stat on this card
     public async removeStatFavorite(uuidToRemove: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToRemove === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToRemove === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.removeStat(statType.favorites, uuidToRemove);
     }
 
 
     // MEMOS - Adds a uuid to the memos stat on this card
     public async addStatMemo(uuidToAdd: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToAdd === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToAdd === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.addStat(statType.memos, uuidToAdd);
     }
 
     // MEMOS - Removes a uuid from the memos stat on this card
     public async removeStatMemo(uuidToRemove: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (uuidToRemove === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (uuidToRemove === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         await this.removeStat(statType.memos, uuidToRemove);
     }
 
@@ -425,6 +505,15 @@ export class card {
     // the list of tags on this card,
     // return true
     public hasTags(tagsToCheck: string[]): boolean {
+
+        // Check for a falsy input parameter
+        if (tagsToCheck === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (tagsToCheck === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         return tagsToCheck.every((tag) => {
             return this.contentTags.indexOf(tag) !== -1;
         })
@@ -433,6 +522,14 @@ export class card {
     // Return true if firstName or lastName includes textToCheck
     //  (NOT CASE SENSITIVE)
     public hasText(textToCheck: string): boolean {
+
+        // Check for a falsy input parameter
+        if (textToCheck === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (textToCheck === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
 
         const processedTextQuery: string = textToCheck.toLowerCase();
 
