@@ -102,7 +102,29 @@ class databaseWrapperClass {
     // Creates a new user in the database
     public async createUser(newAccountSchema: userAccountSchema): Promise<user> {
 
-        var outputUUID: string = "";
+
+        //  Error checking...
+        //
+        //
+        if (newAccountSchema === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (newAccountSchema === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (!newAccountSchema.email) {
+            throw new Error("User schema's email paramater can not be falsy");
+        }
+        else if (!newAccountSchema.passwordHash) {
+            throw new Error("User schema's passwordHash paramater can not be falsy");
+        }
+        else if (!newAccountSchema.public) {
+            throw new Error("User schema's public paramater can not be falsy");
+        }
+
+
+
+
         var outputUserSchema: userSchema;
 
         // Force new email to lowercase
@@ -141,18 +163,20 @@ class databaseWrapperClass {
                     savedCards: []                      // saved cards should be empty (they haven't been able to save any yet!)
                 }
 
-                outputUserSchema = newUser;
+                
 
                 // Add the new user to the database
                 const operationResult = await userCollection.insertOne(newUser);
 
                 // If the user was actually inserted...
                 if (operationResult.insertedCount != 0) {
-                    outputUUID = newUser.uuid;
+                    // Cache the output schema!
+                    outputUserSchema = newUser;
                 }
             }
         });
 
+        // If we never cached the output schema in the above method...
         if (!outputUserSchema) {
             return null;
         }

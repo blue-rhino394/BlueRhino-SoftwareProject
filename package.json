@@ -9,7 +9,7 @@
     "jest": "jest"
   },
   "description": "SoftwareProjects",
-  "author": "Marc Fervil",
+  "author": "Blue Rhino",
   "main": "app.js",
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
