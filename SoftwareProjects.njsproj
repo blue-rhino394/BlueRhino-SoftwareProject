@@ -128,6 +128,21 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\backendServer.ts" />
+    <TypeScriptCompile Include="src\jest\card\cardConstructor.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardGetters.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardSetters.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardStats.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardUtilities.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\reservedRoutes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -170,11 +185,11 @@
     <Folder Include="src\enum\" />
     <Folder Include="src\interfaces\post\" />
     <Folder Include="src\jest\" />
+    <Folder Include="src\jest\card\" />
     <Folder Include="src\test\" />
     <Folder Include="src\test\databaseScripts\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\jest\card.test.ts" />
     <Compile Include="src\jest\databaseWrapper.test.ts" />
     <Compile Include="src\jest\user.test.ts" />
   </ItemGroup>
