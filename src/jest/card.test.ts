@@ -6,7 +6,7 @@ import { cardSchema } from "../interfaces/cardSchema";
 import { cardContent } from "../interfaces/cardContent";
 import { cardPropertyElement } from "../interfaces/cardPropertyElement";
 import { cardLayout } from "../interfaces/cardLayout";
-
+import { v4 } from "uuid";
 
 // The user to test with
 //      POPULATE IN BEFORE ALL
@@ -23,12 +23,12 @@ beforeAll(async () => {
 
     // Create user account schema
     const newUserAccount: userAccountSchema = {
-        email: "fakeemailthatshouldneverexist@brhino.org",
+        email: v4(),
         passwordHash: "blablabla",
         public: {
             firstName: "Test",
             lastName: "User",
-            customURL: "fakeemailthatshouldneverexistslug",
+            customURL: v4(),
             profilePictureURL: "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
         }
     }
@@ -938,18 +938,65 @@ describe("Stat Testing", () => {
 
     });
 
-    describe("Test hasTags()", () => {
-        test("Expect error when undefined is passed in", async () => {
-            await expect(testCard.hasTags(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
-        });
+});
 
-        test("Expect error when null is passed in", async () => {
-            await expect(testCard.hasTags(null)).rejects.toThrow(new Error("Cannot pass null"));
-        });
 
-      
+describe("Test hasTags()", () => {
+        //
+    //  Settings
+    //
 
+    // The card to test with
+    var testCard: card = undefined;
+
+    // The content used to create it
+    const content: cardContent = {
+        published: false,
+        tags: [],
+        socialMediaLinks: [],
+        cardProperties: [],
+        layout: {
+            background: "#c7ddfd",
+            fontColor: "#05152f"
+        }
+    }
+
+
+    //
+    //  Setup / Teardown
+    //
+
+    // Create testCard before tests run
+    beforeAll(async () => {
+        testCard = await databaseWrapper.createCard(testUser.getUUID(), content);
+
+        // If we couldn't create a card for some reason...
+        if (!testCard) {
+            throw new Error("Failed to create testing card...");
+        }
 
     });
+
+    // Destroy testCard after tests finish
+    afterAll(async () => {
+        await databaseWrapper.deleteCard(testUser.getCardID());
+        await testUser.setCardID("");
+    });
+
+    //
+    // Test
+    //
+
+    test("Expect error when undefined is passed in", () => {
+        expect(() => { testCard.hasTags(undefined); }).toThrow(new Error("Cannot pass undefined"));
+    });
+
+    test("Expect error when null is passed in", () => {
+        expect(() => { testCard.hasTags(null); }).toThrow(new Error("Cannot pass null"));
+
+    });
+
+
+
 
 });
