@@ -514,7 +514,7 @@ class databaseWrapperClass {
     }
 
     // Deletes a card from the database by ID
-    public async deleteCard(cardIDToDelete): Promise<string> {
+    public async deleteCard(cardIDToDelete: string): Promise<string> {
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
@@ -548,7 +548,7 @@ class databaseWrapperClass {
     // Removes a card from every user's savedCards list that has this card
     //
     // Returns the UUID's of each user effected
-    public async removeCardFromAllSavedCards(cardIDToRemove): Promise<string[]> {
+    public async removeCardFromAllSavedCards(cardIDToRemove: string): Promise<string[]> {
 
         // An array of UUID's to be populated with the
         // database query below.
