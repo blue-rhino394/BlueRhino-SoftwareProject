@@ -193,6 +193,19 @@ class databaseWrapperClass {
     // Deletes a user by ID
     public async deleteUser(uuidToDelete: string): Promise<string> {
 
+        //  Error checking...
+        //
+        //
+        if (uuidToDelete === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (uuidToDelete === null) {
+            throw new Error("Cannot pass null");
+        }
+
+
+
+
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
