@@ -470,6 +470,52 @@ class databaseWrapperClass {
 
     // Creates a card in the database
     public async createCard(cardOwnerID: string, newContent: cardContent): Promise<card> {
+
+
+        //  Error checking...
+        //
+        //
+        if (cardOwnerID === undefined) {
+            throw new Error("cardOwnerID cannot be undefined");
+        }
+        else if (cardOwnerID === null) {
+            throw new Error("cardOwnerID cannot be null");
+        }
+        else if (cardOwnerID === "") {
+            throw new Error("cardOwnerID cannot be empty");
+        }
+        else if (newContent === undefined) {
+            throw new Error("newContent cannot be undefined");
+        }
+        else if (newContent === null) {
+            throw new Error("newContent cannot be null");
+        }
+        else if (!newContent.tags) {
+            throw new Error("newContent.tags cannot be falsy");
+        }
+        else if (!newContent.socialMediaLinks) {
+            throw new Error("newContent.socialMediaLinks cannot be falsy");
+        }
+        else if (!newContent.cardProperties) {
+            throw new Error("newContent.cardProperties cannot be falsy");
+        }
+        else if (!newContent.layout) {
+            throw new Error("newContent.layout cannot be falsy");
+        }
+        else if (newContent.layout.background === undefined) {
+            throw new Error("newContent.layout.background cannot be undefined");
+        }
+        else if (newContent.layout.background === null) {
+            throw new Error("newContent.layout.background cannot be null");
+        }
+        else if (newContent.layout.fontColor === undefined) {
+            throw new Error("newContent.layout.fontColor cannot be undefined");
+        }
+        else if (newContent.layout.fontColor === null) {
+            throw new Error("newContent.layout.fontColor cannot be null");
+        }
+
+
         var outputCardSchema: cardSchema;
 
         // Get the owner of this card
