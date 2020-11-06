@@ -2,7 +2,8 @@
 import { userAccountSchema } from "../../interfaces/userAccountSchema";
 import { user } from "../../user";
 import { generateRandomUserAccountSchema } from "./utilityMethods";
-
+import { reservedRoutes } from "../../reservedRoutes";
+import { v4 } from "uuid";
 
 
 
@@ -146,8 +147,48 @@ describe("databaseWrapper.createUser()", () => {
 
             expect(anotherNewUser).toBe(null);
 
+
             // clean up
             await databaseWrapper.deleteUser(legitNewUser.getUUID());
+        });
+
+        test("Expect null if user with provided slug already exists", async () => {
+
+            // Create a new user
+            const legitNewUserAccountSchema = generateRandomUserAccountSchema();
+            const legitNewUser: user = await databaseWrapper.createUser(legitNewUserAccountSchema);
+
+            // Try to create another user but using the previous user's email
+            const anotherNewUserAccountSchema = generateRandomUserAccountSchema();
+            anotherNewUserAccountSchema.public.customURL = legitNewUserAccountSchema.public.customURL;
+            const anotherNewUser: user = await databaseWrapper.createUser(anotherNewUserAccountSchema);
+
+            expect(anotherNewUser).toBe(null);
+
+
+            // clean up
+            await databaseWrapper.deleteUser(legitNewUser.getUUID());
+        });
+
+        test("Expect null if a reserved route is already using the provided slug", async () => {
+
+
+            // Create a random route name and reserve it for testing
+            const newRoute = v4();
+            reservedRoutes.addRoute(newRoute);
+
+            // Generate new account schema and set it's slug to the route we reserved above
+            const newUserAccountSchema = generateRandomUserAccountSchema();
+            newUserAccountSchema.public.customURL = newRoute;
+
+            // Try to create a user with this schema
+            const newUser: user = await databaseWrapper.createUser(newUserAccountSchema);
+
+            expect(newUser).toBe(null);
+
+
+            // clean up
+            reservedRoutes.removeRoute(newRoute);
         });
     });
 
