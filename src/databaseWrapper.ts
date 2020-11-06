@@ -236,6 +236,19 @@ class databaseWrapperClass {
 
     // Finds a user in the database by ID
     public async getUser(userUUID: string): Promise<user> {
+
+        //  Error checking...
+        //
+        //
+        if (userUUID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userUUID === null) {
+            throw new Error("Cannot pass null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this user exists in the cache manager,
         // return them!!
