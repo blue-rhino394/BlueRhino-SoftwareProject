@@ -131,6 +131,26 @@ describe("databaseWrapper.createUser()", () => {
         });
     });
 
+    describe("Expect Null", () => {
+
+        test("Expect null if user with provided email already exists", async () => {
+
+            // Create a new user
+            const legitNewUserAccountSchema = generateRandomUserAccountSchema();
+            const legitNewUser: user = await databaseWrapper.createUser(legitNewUserAccountSchema);
+
+            // Try to create another user but using the previous user's email
+            const anotherNewUserAccountSchema = generateRandomUserAccountSchema();
+            anotherNewUserAccountSchema.email = legitNewUserAccountSchema.email;
+            const anotherNewUser: user = await databaseWrapper.createUser(anotherNewUserAccountSchema);
+
+            expect(anotherNewUser).toBe(null);
+
+            // clean up
+            await databaseWrapper.deleteUser(legitNewUser.getUUID());
+        });
+    });
+
     describe("User Creation", () => {
 
         test("Expect return result's accountSchema to equal provided accountSchema", async () => {
