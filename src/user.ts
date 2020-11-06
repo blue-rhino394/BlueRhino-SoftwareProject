@@ -142,6 +142,14 @@ export class user {
 
     public async setCardID(newCardID: string): Promise<void> {
 
+        // Check for a falsy input parameter
+        if (newCardID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newCardID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the cardID in memory
         this.cardID = newCardID;
 
@@ -174,6 +182,15 @@ export class user {
     }
 
     public async setAccountStatus(newAccountStatus: accountStatus): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (newAccountStatus === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newAccountStatus === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the account status in memory
         this.currentAccountStatus = newAccountStatus;
 
@@ -206,6 +223,15 @@ export class user {
     }
 
     public async setVerificationCode(newVerificationCode: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (newVerificationCode === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newVerificationCode === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the verification code in memory
         this.verificationCode = newVerificationCode;
 
