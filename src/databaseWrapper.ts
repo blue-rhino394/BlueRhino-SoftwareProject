@@ -122,7 +122,16 @@ class databaseWrapperClass {
             throw new Error("User schema's public paramater can not be falsy");
         }
 
+        // If the user is trying to register an account with a reserved slug...
+        if (reservedRoutes.hasRoute(newAccountSchema.public.customURL)) {
+            return null;
+        }
 
+        // If the user is trying to register an account with an existing slug...
+        const existingUser: user = await databaseWrapper.getUserBySlug(newAccountSchema.public.customURL);
+        if (existingUser) {
+            return null;
+        }
 
 
         var outputUserSchema: userSchema;
@@ -303,6 +312,16 @@ class databaseWrapperClass {
     // Finds a user in the database by their slug
     public async getUserBySlug(userSlug: string): Promise<user> {
 
+        //  Error checking...
+        //
+        //
+        if (userSlug === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userSlug === null) {
+            throw new Error("Cannot pass null");
+        }
+
         // CHECK THE RESERVED ROTUES FIRST
         // If we're trying to find a user using a RESERVED ROUTE,
         // that means that there should IN NO WAY be a user at this slug.
@@ -373,6 +392,16 @@ class databaseWrapperClass {
 
     // Finds a user in the database by their email
     public async getUserByEmail(userEmail: string): Promise<user> {
+
+        //  Error checking...
+        //
+        //
+        if (userEmail === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userEmail === null) {
+            throw new Error("Cannot pass null");
+        }
 
         userEmail = userEmail.toLowerCase();
 
