@@ -4,6 +4,7 @@ import { accountStatus } from "../enum/accountStatus";
 import { databaseWrapper } from "../databaseWrapper";
 import { userAccountSchema } from "../interfaces/userAccountSchema";
 import { savedCard } from "../interfaces/savedCard";
+import bcrypt from "bcrypt";
 
 // The user to test with
 //      POPULATE IN BEFORE ALL
@@ -17,12 +18,13 @@ beforeAll(async () => {
     //  Register test user
     //
 
-    
 
+    const phash = await bcrypt.hashSync("blablabla", 10);
+    
     // The user schema used to create the test user
     const newUserSchema: userAccountSchema = {
         email: "fakeemailthatshouldneverexist@brhino.org",
-        passwordHash: "blablabla",
+        passwordHash: phash,
         public: {
             firstName: "Test",
             lastName: "User",
@@ -377,6 +379,7 @@ describe("Testing SavedCard Functions", () => {
 
         test("Ensure that setting favorite to true works", async () => {
             const newCardID: string = "003261564859";
+            await testUser.addSavedCard(newCardID);
             const newfavorited: boolean = true;
             const updateCheck: boolean =
                 await testUser.updateSavedCard({
@@ -402,16 +405,222 @@ describe("Testing SavedCard Functions", () => {
         test("Ensure that setting memo to empty string works", async () => {
             const newCardID: string = "003261564641";
             const newmemo: string = "";
-            const newfavorited: boolean = false;
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: undefined,
+                    memo: newmemo
+                });
+            expect(testUser.getSavedCard(newCardID).memo).toEqual(newmemo);
+        });
+
+        test("Ensure that setting memo to a non-empty string works", async () => {
+            const newCardID: string = "003261564641";
+            const newmemo: string = "Hello this is text";
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: undefined,
+                    memo: newmemo
+                });
+            expect(testUser.getSavedCard(newCardID).memo).toEqual(newmemo);
+        });
+
+        test("Ensure that setting favorite and memo at the same time works", async () => {
+            const newCardID: string = "003261564641";
+            const newmemo: string = "Hello this is text";
+            const newfavorited: boolean = true;
             const updateCheck: boolean =
                 await testUser.updateSavedCard({
                     cardID: newCardID,
                     favorited: newfavorited,
                     memo: newmemo
                 });
-            expect(testUser.getSavedCard(newCardID).memo).toEqual(newmemo);
+            expect(testUser.getSavedCard(newCardID).memo && testUser.getSavedCard(newCardID).favorited).toEqual(newmemo && newfavorited);
         });
 
+    });
+
+    describe("Test removeSavedCard()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testUser.removeSavedCard(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testUser.removeSavedCard(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Expect false when a cardID is passed in that is not saved", async () => {
+            const newCardID: string = "113261564485";
+            const removeCheck: boolean = await testUser.removeSavedCard(newCardID);
+            expect(removeCheck).toEqual(false);
+        });
+
+        test("Expect true when a cardID is passed in that IS saved", async () => {
+            const newCardID: string = "003261564641";
+            const removeCheck: boolean = await testUser.removeSavedCard(newCardID);
+            expect(removeCheck).toEqual(true);
+        });
+
+        test("Expect false when a cardID is passed in that has already been removed from the saved list", async () => {
+            const newCardID: string = "003261564641";
+            const removeCheck: boolean = await testUser.removeSavedCard(newCardID);
+            expect(removeCheck).toEqual(false);
+        });
+
+    });
+
+});
+
+describe("Testing updateAccountSchema()", () => {
+
+    describe("Test updateAccountSchema()", () => {
+
+        const newSchema: userAccountSchema = {
+            email: "fakeemailthatshouldneverexist@brhino.org",
+            passwordHash: "4645651561",
+            public: {
+                firstName: "Testing",
+                lastName: "Testing",
+                customURL: "TestingTesting",
+                profilePictureURL: "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
+            }
+        }
+
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testUser.updateAccountSchema(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testUser.updateAccountSchema(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Ensure that setting passwordHash works", async () => {
+            const newpHash: string = "4645651561";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: newpHash,
+                public: undefined
+            });
+            expect(testUser.getAccountSchema().passwordHash).toEqual(newpHash);
+        });
+
+        test("Ensure that setting public.firstName works", async () => {
+            const newfirstname: string = "Testing";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: undefined,
+                public: {
+                    firstName: newfirstname,
+                    lastName: undefined,
+                    customURL: undefined,
+                    profilePictureURL: undefined
+                }
+            });
+            expect(testUser.getAccountSchema().public.firstName).toEqual(newfirstname);
+        });
+
+        test("Ensure that setting public.lastName works", async () => {
+            const newlastname: string = "Testing";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: undefined,
+                public: {
+                    firstName: undefined,
+                    lastName: newlastname,
+                    customURL: undefined,
+                    profilePictureURL: undefined
+                }
+            });
+            expect(testUser.getAccountSchema().public.lastName).toEqual(newlastname);
+        });
+
+        test("Ensure that setting public.customURL works", async () => {
+            const newURL: string = "TestingTesting";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: undefined,
+                public: {
+                    firstName: undefined,
+                    lastName: undefined,
+                    customURL: newURL,
+                    profilePictureURL: undefined
+                }
+            });
+            expect(testUser.getAccountSchema().public.customURL).toEqual(newURL);
+        });
+
+        test("Ensure that setting public.customURL works", async () => {
+            const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: undefined,
+                public: {
+                    firstName: undefined,
+                    lastName: undefined,
+                    customURL: undefined,
+                    profilePictureURL: newprofileURL
+                }
+            });
+            expect(testUser.getAccountSchema().public.profilePictureURL).toEqual(newprofileURL);
+        });
+
+        test("Ensure that setting multiple fields works", async () => {
+            const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+            const newURL: string = "TestingTesting";
+            const newlastname: string = "Testing";
+            const newpHash: string = "4645651561";
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: newpHash,
+                public: {
+                    firstName: undefined,
+                    lastName: newlastname,
+                    customURL: newURL,
+                    profilePictureURL: newprofileURL
+                }
+            });
+            expect(testUser.getAccountSchema()).toEqual(newSchema);
+        });
+
+        test("Ensure that setting no fields doesn't throw", async () => {
+            testUser.updateAccountSchema({
+                email: undefined,
+                passwordHash: undefined,
+                public: {
+                    firstName: undefined,
+                    lastName: undefined,
+                    customURL: undefined,
+                    profilePictureURL: undefined
+                }
+            });
+            expect(testUser.getAccountSchema()).toBeTruthy();
+        });
+
+    });
+
+});
+
+describe("Test tryPassword()", async () => {
+
+    
+
+    test("Expect error when undefined is passed in", async () => {
+        await expect(testUser.tryPassword(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+    });
+
+    test("Expect error when null is passed in", async () => {
+        await expect(testUser.tryPassword(null)).rejects.toThrow(new Error("Cannot pass null"));
+    });
+
+    test("Ensure that setting no fields doesn't throw", async () => {
+        const newpHash: string = "4645651561";
+        expect(testUser.tryPassword(newpHash)).toEqual(false);
+    });
+
+    test("Expect true when a correct password is passed in", async () => {
+        const newpHash = "blablabla";
+        expect(testUser.tryPassword(newpHash)).toEqual(true);
     });
 
 });

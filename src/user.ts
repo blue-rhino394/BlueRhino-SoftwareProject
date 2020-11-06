@@ -271,6 +271,15 @@ export class user {
     //
 
     public tryPassword(password: string): boolean {
+
+        // Check for a falsy input parameter
+        if (password === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (password === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         return bcrypt.compareSync(password, this.passwordHash);
     }
 
@@ -424,6 +433,15 @@ export class user {
     }
 
     public async updateAccountSchema(accountSchemaUpdate: userAccountSchema): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (accountSchemaUpdate === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (accountSchemaUpdate === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Update the account schema in memory
         this.updateInternalAccountSchema(accountSchemaUpdate);
 
