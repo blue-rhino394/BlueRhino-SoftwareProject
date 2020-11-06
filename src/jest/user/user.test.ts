@@ -156,32 +156,32 @@ describe("Testing User Getters", () => {
             expect(testUser.getAllSavedCards()).toBeTruthy();
         });
 
-        //test("Ensure that return result sorts favorites to a lower index than non-favorites", async () => {
-        //    testUser.addSavedCard("45612156");
-        //    testUser.addSavedCard("45562251");
-        //    testUser.addSavedCard("45612456");
-        //    await testUser.updateSavedCard({
-        //        cardID: "45612456",
-        //        favorited: true,
-        //        memo: undefined
-        //    });
-        //    const newSavedArray: savedCard[] = testUser.getAllSavedCards();
-        //    var Favorited: boolean = false;
-        //    var unsorted: boolean = false;
-        //    var i;
-        //    if (newSavedArray.length < 1) {
-        //        unsorted = false;
-        //    }
-        //    for (i = 0; newSavedArray.length; i++) {
-        //        if (i = 0) {
-        //            Favorited = newSavedArray[i].favorited;
-        //        }
-        //        if (Favorited == true && newSavedArray[i].favorited == false) {
-        //            unsorted = true;
-        //        }
-        //    }
-        //    expect(unsorted == true);
-        //});
+        test("Ensure that return result sorts favorites to a lower index than non-favorites", async () => {
+            testUser.addSavedCard("45612156");
+            testUser.addSavedCard("45562251");
+            testUser.addSavedCard("45612456");
+            await testUser.updateSavedCard({
+                cardID: "45612156",
+                favorited: true,
+                memo: undefined
+            });
+            const newSavedArray: savedCard[] = testUser.getAllSavedCards();
+            var Favorited: boolean = false;
+            var unsorted: boolean = false;
+            var i;
+            if (newSavedArray.length < 1) {
+                unsorted = false;
+            }
+            for (i = 0; i<newSavedArray.length; i++) {
+                if (i === 0) {
+                    Favorited = newSavedArray[i].favorited;
+                }
+                if (Favorited === true && newSavedArray[i].favorited === false) {
+                    unsorted = true;
+                }
+            }
+            expect(unsorted == true);
+        });
 
     });
 
