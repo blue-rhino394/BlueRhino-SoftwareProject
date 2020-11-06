@@ -1,16 +1,17 @@
-import { user } from "../user";
-import { userSchema } from "../interfaces/userSchema";
-import { accountStatus } from "../enum/accountStatus";
-import { databaseWrapper } from "../databaseWrapper";
-import { userAccountSchema } from "../interfaces/userAccountSchema";
-import { savedCard } from "../interfaces/savedCard";
+import { user } from "../../user";
+import { userSchema } from "../../interfaces/userSchema";
+import { accountStatus } from "../../enum/accountStatus";
+import { databaseWrapper } from "../../databaseWrapper";
+import { userAccountSchema } from "../../interfaces/userAccountSchema";
+import { savedCard } from "../../interfaces/savedCard";
 import bcrypt from "bcrypt";
+import { v4 } from "uuid";
 
 // The user to test with
 //      POPULATE IN BEFORE ALL
 //      REMOVED IN AFTER ALL
 var testUser: user = undefined;
-
+var newSchema: userAccountSchema = undefined;
 
 beforeAll(async () => {
 
@@ -18,20 +19,19 @@ beforeAll(async () => {
     //  Register test user
     //
 
-
-    const phash = await bcrypt.hashSync("blablabla", 10);
-    
     // The user schema used to create the test user
     const newUserSchema: userAccountSchema = {
-        email: "fakeemailthatshouldneverexist@brhino.org",
-        passwordHash: phash,
+        email: v4(),
+        passwordHash: "blablabla",
         public: {
             firstName: "Test",
             lastName: "User",
-            customURL: "fakeemailthatshouldneverexistslug",
+            customURL: v4(),
             profilePictureURL: "https://ui-avatars.com/api/?name=Joe+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
         }
     }
+
+
 
 
     //
@@ -40,18 +40,35 @@ beforeAll(async () => {
 
     // Create testUser before tests run
 
-        testUser = await databaseWrapper.createUser(newUserSchema);
-    });
+    testUser = await databaseWrapper.createUser(newUserSchema);
 
-    // Destroy testUser after tests run
-    afterAll(async () => {
+    const newemail: string = testUser.getAccountSchema().email;
 
-        if (testUser.getCardID()) {
-            await databaseWrapper.deleteCard(testUser.getCardID());
+
+
+    newSchema = {
+        email: newemail,
+        passwordHash: "4645651561",
+        public: {
+            firstName: "Testing",
+            lastName: "Testing",
+            customURL: "TestingTesting",
+            profilePictureURL: "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
         }
+    }
 
-        await databaseWrapper.deleteUser(testUser.getUUID());
-    });
+
+});
+
+// Destroy testUser after tests run
+afterAll(async () => {
+
+    if (testUser.getCardID()) {
+        await databaseWrapper.deleteCard(testUser.getCardID());
+    }
+
+    await databaseWrapper.deleteUser(testUser.getUUID());
+});
 
 
 
@@ -134,28 +151,37 @@ describe("Testing User Getters", () => {
     });
 
     describe("Test getAllSavedCards()", () => {
+
         test("Ensure that return of method is truthy", () => {
             expect(testUser.getAllSavedCards()).toBeTruthy();
         });
-        //Need to add saved Cards, Need to come back to this, Brain will not work
-        test("Ensure that return result sorts favorites to a lower index than non-favorites", () => {
-            const newSavedArray: savedCard[] = testUser.getAllSavedCards();
-            var Favorited: boolean = false;
-            var unsorted: boolean = false;
-            var i;
-            if (newSavedArray.length < 1) {
-                unsorted = false;
-            }
-            for (i = 0; newSavedArray.length; i++) {
-                if (i = 0) {
-                    Favorited = newSavedArray[i].favorited;
-                }
-                if (Favorited == true && newSavedArray[i].favorited == false) {
-                    unsorted = true;
-                }
-            }
-            expect(unsorted == true);
-        });
+
+        //test("Ensure that return result sorts favorites to a lower index than non-favorites", async () => {
+        //    testUser.addSavedCard("45612156");
+        //    testUser.addSavedCard("45562251");
+        //    testUser.addSavedCard("45612456");
+        //    await testUser.updateSavedCard({
+        //        cardID: "45612456",
+        //        favorited: true,
+        //        memo: undefined
+        //    });
+        //    const newSavedArray: savedCard[] = testUser.getAllSavedCards();
+        //    var Favorited: boolean = false;
+        //    var unsorted: boolean = false;
+        //    var i;
+        //    if (newSavedArray.length < 1) {
+        //        unsorted = false;
+        //    }
+        //    for (i = 0; newSavedArray.length; i++) {
+        //        if (i = 0) {
+        //            Favorited = newSavedArray[i].favorited;
+        //        }
+        //        if (Favorited == true && newSavedArray[i].favorited == false) {
+        //            unsorted = true;
+        //        }
+        //    }
+        //    expect(unsorted == true);
+        //});
 
     });
 
@@ -307,19 +333,19 @@ describe("Testing SavedCard Functions", () => {
 
         test("Expect false when a cardID is passed in that is not saved", async () => {
             const newCardID: string = "003261564485";
-            const updateCheck: boolean = 
-            await testUser.updateSavedCard({
-                cardID: newCardID,
-                favorited: undefined,
-                memo: undefined
-            });
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: undefined,
+                    memo: undefined
+                });
             expect(updateCheck).toBeFalsy();
         });
 
         test("Expect setting favorite to true to return true", async () => {
             const newfavorited: boolean = true;
             const newCardID: string = "003261564641";
-            const updateCheck: boolean = 
+            const updateCheck: boolean =
                 await testUser.updateSavedCard({
                     cardID: newCardID,
                     favorited: newfavorited,
@@ -474,153 +500,163 @@ describe("Testing SavedCard Functions", () => {
 
 describe("Testing updateAccountSchema()", () => {
 
-    describe("Test updateAccountSchema()", () => {
-
-        const newSchema: userAccountSchema = {
-            email: "fakeemailthatshouldneverexist@brhino.org",
-            passwordHash: "4645651561",
-            public: {
-                firstName: "Testing",
-                lastName: "Testing",
-                customURL: "TestingTesting",
-                profilePictureURL: "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
-            }
-        }
-
-        test("Expect error when undefined is passed in", async () => {
-            await expect(testUser.updateAccountSchema(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
-        });
-
-        test("Expect error when null is passed in", async () => {
-            await expect(testUser.updateAccountSchema(null)).rejects.toThrow(new Error("Cannot pass null"));
-        });
-
-        test("Ensure that setting passwordHash works", async () => {
-            const newpHash: string = "4645651561";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: newpHash,
-                public: undefined
-            });
-            expect(testUser.getAccountSchema().passwordHash).toEqual(newpHash);
-        });
-
-        test("Ensure that setting public.firstName works", async () => {
-            const newfirstname: string = "Testing";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: undefined,
-                public: {
-                    firstName: newfirstname,
-                    lastName: undefined,
-                    customURL: undefined,
-                    profilePictureURL: undefined
-                }
-            });
-            expect(testUser.getAccountSchema().public.firstName).toEqual(newfirstname);
-        });
-
-        test("Ensure that setting public.lastName works", async () => {
-            const newlastname: string = "Testing";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: undefined,
-                public: {
-                    firstName: undefined,
-                    lastName: newlastname,
-                    customURL: undefined,
-                    profilePictureURL: undefined
-                }
-            });
-            expect(testUser.getAccountSchema().public.lastName).toEqual(newlastname);
-        });
-
-        test("Ensure that setting public.customURL works", async () => {
-            const newURL: string = "TestingTesting";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: undefined,
-                public: {
-                    firstName: undefined,
-                    lastName: undefined,
-                    customURL: newURL,
-                    profilePictureURL: undefined
-                }
-            });
-            expect(testUser.getAccountSchema().public.customURL).toEqual(newURL);
-        });
-
-        test("Ensure that setting public.customURL works", async () => {
-            const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: undefined,
-                public: {
-                    firstName: undefined,
-                    lastName: undefined,
-                    customURL: undefined,
-                    profilePictureURL: newprofileURL
-                }
-            });
-            expect(testUser.getAccountSchema().public.profilePictureURL).toEqual(newprofileURL);
-        });
-
-        test("Ensure that setting multiple fields works", async () => {
-            const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
-            const newURL: string = "TestingTesting";
-            const newlastname: string = "Testing";
-            const newpHash: string = "4645651561";
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: newpHash,
-                public: {
-                    firstName: undefined,
-                    lastName: newlastname,
-                    customURL: newURL,
-                    profilePictureURL: newprofileURL
-                }
-            });
-            expect(testUser.getAccountSchema()).toEqual(newSchema);
-        });
-
-        test("Ensure that setting no fields doesn't throw", async () => {
-            testUser.updateAccountSchema({
-                email: undefined,
-                passwordHash: undefined,
-                public: {
-                    firstName: undefined,
-                    lastName: undefined,
-                    customURL: undefined,
-                    profilePictureURL: undefined
-                }
-            });
-            expect(testUser.getAccountSchema()).toBeTruthy();
-        });
-
-    });
-
-});
-
-describe("Test tryPassword()", async () => {
-
-    
-
     test("Expect error when undefined is passed in", async () => {
-        await expect(testUser.tryPassword(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        await expect(testUser.updateAccountSchema(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
     });
 
     test("Expect error when null is passed in", async () => {
-        await expect(testUser.tryPassword(null)).rejects.toThrow(new Error("Cannot pass null"));
+        await expect(testUser.updateAccountSchema(null)).rejects.toThrow(new Error("Cannot pass null"));
+    });
+
+    test("Ensure that setting passwordHash works", async () => {
+        const newpHash: string = "4645651561";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: newpHash,
+            public: undefined
+        });
+        expect(testUser.getAccountSchema().passwordHash).toEqual(newpHash);
+    });
+
+    test("Ensure that setting public.firstName works", async () => {
+        const newfirstname: string = "Testing";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: undefined,
+            public: {
+                firstName: newfirstname,
+                lastName: undefined,
+                customURL: undefined,
+                profilePictureURL: undefined
+            }
+        });
+        expect(testUser.getAccountSchema().public.firstName).toEqual(newfirstname);
+    });
+
+    test("Ensure that setting public.lastName works", async () => {
+        const newlastname: string = "Testing";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: undefined,
+            public: {
+                firstName: undefined,
+                lastName: newlastname,
+                customURL: undefined,
+                profilePictureURL: undefined
+            }
+        });
+        expect(testUser.getAccountSchema().public.lastName).toEqual(newlastname);
+    });
+
+    test("Ensure that setting public.customURL works", async () => {
+        const newURL: string = "TestingTesting";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: undefined,
+            public: {
+                firstName: undefined,
+                lastName: undefined,
+                customURL: newURL,
+                profilePictureURL: undefined
+            }
+        });
+        expect(testUser.getAccountSchema().public.customURL).toEqual(newURL);
+    });
+
+    test("Ensure that setting public.customURL works", async () => {
+        const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: undefined,
+            public: {
+                firstName: undefined,
+                lastName: undefined,
+                customURL: undefined,
+                profilePictureURL: newprofileURL
+            }
+        });
+        expect(testUser.getAccountSchema().public.profilePictureURL).toEqual(newprofileURL);
+    });
+
+    test("Ensure that setting multiple fields works", async () => {
+        const newprofileURL: string = "https://ui-avatars.com/api/?name=Testing+Testing&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6";
+        const newURL: string = "TestingTesting";
+        const newlastname: string = "Testing";
+        const newpHash: string = "4645651561";
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: newpHash,
+            public: {
+                firstName: undefined,
+                lastName: newlastname,
+                customURL: newURL,
+                profilePictureURL: newprofileURL
+            }
+        });
+        expect(testUser.getAccountSchema()).toEqual(newSchema);
     });
 
     test("Ensure that setting no fields doesn't throw", async () => {
+        testUser.updateAccountSchema({
+            email: undefined,
+            passwordHash: undefined,
+            public: {
+                firstName: undefined,
+                lastName: undefined,
+                customURL: undefined,
+                profilePictureURL: undefined
+            }
+        });
+        expect(testUser.getAccountSchema()).toBeTruthy();
+    });
+
+
+
+});
+
+describe("Test tryPassword()", () => {
+
+    var testUser1;
+    beforeEach(async () => {
+
+        const phash = bcrypt.hashSync("blablabla", 1);
+
+        // The user schema used to create the test user
+        const newUser: userAccountSchema = {
+            email: v4(),
+            passwordHash: phash,
+            public: {
+                firstName: "blablabla",
+                lastName: "User",
+                customURL: v4(),
+                profilePictureURL: "https://ui-avatars.com/api/?name=something+Mama&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
+            }
+        }
+        testUser1 = await databaseWrapper.createUser(newUser);
+    });
+
+    afterEach(async () => {
+
+        if (testUser1.getCardID()) {
+            await databaseWrapper.deleteCard(testUser1.getCardID());
+        }
+
+        await databaseWrapper.deleteUser(testUser1.getUUID());
+    });
+
+
+    test("Expect false when non-truthy password is passed in", async () => {
+        expect(testUser.tryPassword(undefined)).toEqual(false);
+    });
+
+    test("Expect false when an incorrect password is passed in", async () => {
         const newpHash: string = "4645651561";
         expect(testUser.tryPassword(newpHash)).toEqual(false);
     });
 
     test("Expect true when a correct password is passed in", async () => {
-        const newpHash = "blablabla";
-        expect(testUser.tryPassword(newpHash)).toEqual(true);
+        const newpHash: string = "blablabla";
+        expect(testUser1.tryPassword(newpHash)).toEqual(true);
     });
 
 });

@@ -274,10 +274,10 @@ export class user {
 
         // Check for a falsy input parameter
         if (password === null) {
-            throw new Error("Cannot pass null");
+            return false;
         }
         else if (password === undefined) {
-            throw new Error("Cannot pass undefined");
+            return false;;
         }
 
         return bcrypt.compareSync(password, this.passwordHash);
