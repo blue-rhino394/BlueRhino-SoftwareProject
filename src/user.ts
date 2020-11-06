@@ -276,6 +276,17 @@ export class user {
 
     public async addSavedCard(cardToAddID: string): Promise<savedCard> {
 
+        // Check for a falsy input parameter
+        if (cardToAddID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardToAddID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (cardToAddID === "") {
+            throw new Error("Cannot pass Empty String");
+        }
+
         // Construct savedCard interface
         const newSavedCard: savedCard = {
             cardID: cardToAddID,
@@ -320,6 +331,14 @@ export class user {
 
     public async updateSavedCard(cardUpdateForm: savedCard): Promise<boolean> {
 
+        // Check for a falsy input parameter
+        if (cardUpdateForm === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardUpdateForm === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // If we don't have this savedCard...
         if (!this.savedCards.has(cardUpdateForm.cardID)) {
             // ... bounce!
@@ -360,6 +379,14 @@ export class user {
     }
 
     public async removeSavedCard(cardToRemoveID: string): Promise<boolean> {
+
+        // Check for a falsy input parameter
+        if (cardToRemoveID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardToRemoveID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
 
         // Remove from data structure in memory
         const result = this.savedCards.delete(cardToRemoveID);
