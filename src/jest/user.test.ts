@@ -202,22 +202,22 @@ describe("Testing User Setters", () => {
 
     describe("Test setAccountStatus()", () => {
         test("Expect error when undefined is passed in", async () => {
-            await expect(testUser.setCardID(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+            await expect(testUser.setAccountStatus(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
         });
 
         test("Expect error when null is passed in", async () => {
-            await expect(testUser.setCardID(null)).rejects.toThrow(new Error("Cannot pass null"));
+            await expect(testUser.setAccountStatus(null)).rejects.toThrow(new Error("Cannot pass null"));
         });
 
         test("Ensure that setting account status to same value works", async () => {
-            const newStatus: accountStatus = 0;
-            testUser.setAccountStatus(newStatus)
+            const newStatus = accountStatus.Active;
+            await testUser.setAccountStatus(newStatus)
             expect(testUser.getAccountStatus()).toEqual(newStatus);
         });
 
         test("Ensure that setting account status to another value works", async () => {
-            const newStatus: accountStatus = 1;
-            testUser.setAccountStatus(newStatus)
+            const newStatus = accountStatus.EmailVerification;
+            await testUser.setAccountStatus(newStatus)
             expect(newStatus).toEqual(testUser.getAccountStatus());
         });
 
@@ -225,24 +225,193 @@ describe("Testing User Setters", () => {
 
     describe("Test setVerificationCode()", () => {
         test("Expect error when undefined is passed in", async () => {
-            await expect(testUser.setCardID(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+            await expect(testUser.setVerificationCode(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
         });
 
         test("Expect error when null is passed in", async () => {
-            await expect(testUser.setCardID(null)).rejects.toThrow(new Error("Cannot pass null"));
+            await expect(testUser.setVerificationCode(null)).rejects.toThrow(new Error("Cannot pass null"));
         });
 
         test("Ensure that setting verification code to an empty string works", async () => {
             const newCode: string = "";
-            testUser.setVerificationCode(newCode)
+            await testUser.setVerificationCode(newCode)
             expect(testUser.getVerificationCode()).toEqual(newCode);
         });
 
         test("Ensure that setting verification code to a non-empty string", async () => {
             const newCode: string = "1165156156165";
-            testUser.setVerificationCode(newCode)
+            await testUser.setVerificationCode(newCode)
             expect(testUser.getVerificationCode()).toEqual(newCode);
         });
 
     });
+});
+
+describe("Testing SavedCard Functions", () => {
+
+    describe("Test addSavedCard()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testUser.addSavedCard(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testUser.addSavedCard(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Expect error when empty string is passed in", async () => {
+            await expect(testUser.addSavedCard("")).rejects.toThrow(new Error("Cannot pass Empty String"));
+        });
+
+        test("Expect truthy value when non-saved cardID is passed in", () => {
+            expect(testUser.addSavedCard("003261564641")).toBeTruthy();
+        });
+
+        test("Expect return result's cardID to match passed in cardID", async () => {
+            const newCardID: string = "003261564641";
+            const newSavedCard = await testUser.addSavedCard(newCardID);
+            expect(newSavedCard.cardID).toEqual(newCardID);
+        });
+
+        test("Expect return result's favorited to be false", async () => {
+            const newfavorited: boolean = false;
+            const newCardID: string = "003261564641";
+            const newSavedCard = await testUser.addSavedCard(newCardID);
+            expect(newSavedCard.favorited).toEqual(newfavorited);
+        });
+
+        test("Expect return result's memo to be an empty string", async () => {
+            const newmemo: string = "";
+            const newCardID: string = "003261564641";
+            const newSavedCard = await testUser.addSavedCard(newCardID);
+            expect(newSavedCard.memo).toEqual(newmemo);
+        });
+
+        test("Expect STRICT equality when an already saved card's ID is passed in", async () => {
+            const newCardID: string = "003261564641";
+            const newSavedCard = await testUser.addSavedCard(newCardID);
+            expect(newSavedCard).toBe(testUser.getSavedCard(newCardID));
+        });
+
+    });
+
+    describe("Test updateSavedCard()", () => {
+        test("Expect error when undefined is passed in", async () => {
+            await expect(testUser.updateSavedCard(undefined)).rejects.toThrow(new Error("Cannot pass undefined"));
+        });
+
+        test("Expect error when null is passed in", async () => {
+            await expect(testUser.updateSavedCard(null)).rejects.toThrow(new Error("Cannot pass null"));
+        });
+
+        test("Expect false when a cardID is passed in that is not saved", async () => {
+            const newCardID: string = "003261564485";
+            const updateCheck: boolean = 
+            await testUser.updateSavedCard({
+                cardID: newCardID,
+                favorited: undefined,
+                memo: undefined
+            });
+            expect(updateCheck).toBeFalsy();
+        });
+
+        test("Expect setting favorite to true to return true", async () => {
+            const newfavorited: boolean = true;
+            const newCardID: string = "003261564641";
+            const updateCheck: boolean = 
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: undefined
+                });
+            expect(updateCheck).toEqual(true);
+        });
+
+        test("Expect setting favorite to false to return true", async () => {
+            const newfavorited: boolean = false;
+            const newCardID: string = "003261564641";
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: undefined
+                });
+            expect(updateCheck).toEqual(true);
+        });
+
+        test("Expect setting memo to empty string to return true", async () => {
+            const newmemo: string = "";
+            const newCardID: string = "003261564641";
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: undefined,
+                    memo: newmemo
+                });
+            expect(updateCheck).toEqual(true);
+        });
+
+        test("Expect setting memo to a non-empty string to return true", async () => {
+            const newmemo: string = "Hello this is text";
+            const newCardID: string = "003261564641";
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: undefined,
+                    memo: newmemo
+                });
+            expect(updateCheck).toEqual(true);
+        });
+
+        test("Expect setting favorite and memo at the same time to return true", async () => {
+            const newCardID: string = "003261564641";
+            const newmemo: string = "Hello this is text";
+            const newfavorited: boolean = false;
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: newmemo
+                });
+            expect(updateCheck).toEqual(true);
+        });
+
+        test("Ensure that setting favorite to true works", async () => {
+            const newCardID: string = "003261564859";
+            const newfavorited: boolean = true;
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: undefined
+                });
+            expect(testUser.getSavedCard(newCardID).favorited).toEqual(true);
+        });
+
+        test("Ensure that setting favorite to false works", async () => {
+            const newCardID: string = "003261564859";
+            const newfavorited: boolean = false;
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: undefined
+                });
+            expect(testUser.getSavedCard(newCardID).favorited).toEqual(false);
+        });
+
+        test("Ensure that setting memo to empty string works", async () => {
+            const newCardID: string = "003261564641";
+            const newmemo: string = "";
+            const newfavorited: boolean = false;
+            const updateCheck: boolean =
+                await testUser.updateSavedCard({
+                    cardID: newCardID,
+                    favorited: newfavorited,
+                    memo: newmemo
+                });
+            expect(testUser.getSavedCard(newCardID).memo).toEqual(newmemo);
+        });
+
+    });
+
 });
