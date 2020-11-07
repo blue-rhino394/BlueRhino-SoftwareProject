@@ -3,6 +3,8 @@ import { generateRandomCardContent, generateRandomUserAccountSchema } from "./ut
 import { v4 } from "uuid";
 import { card } from "../../card";
 import { user } from "../../user";
+import { unaryExpression } from "@babel/types";
+import { cardPropertyElement } from "../../interfaces/cardPropertyElement";
 
 
 
@@ -200,25 +202,181 @@ describe("databaseWrapper.createCard()", () => {
             await databaseWrapper.deleteCard(newCard.getID());
             await databaseWrapper.deleteUser(newUser.getUUID());
         });
+
+        test("Expect return result's getID to be populated", async () => {
+
+            // Create a new user to test with
+            const newAccountSchema = generateRandomUserAccountSchema();
+            const newUser: user = await databaseWrapper.createUser(newAccountSchema);
+
+            // Create a new card
+            const newCardContent = generateRandomCardContent();
+            const newCard: card = await databaseWrapper.createCard(newUser.getUUID(), newCardContent);
+
+
+            expect(newCard.getID()).toBeTruthy();
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
+            await databaseWrapper.deleteUser(newUser.getUUID());
+        });
     });
 
     describe("XSS Prevention Checking", () => {
 
+        var testUser: user = undefined;
 
 
         beforeAll(async () => {
 
+            // Create a new user to test with
+            const newAccountSchema = generateRandomUserAccountSchema();
+            testUser = await databaseWrapper.createUser(newAccountSchema);
         });
 
         afterAll(async () => {
 
+            await databaseWrapper.deleteUser(testUser.getUUID());
         });
 
 
 
         test("Expect XSS to be removed from tags", async () => {
 
+            // Create new card content and put XSS in the tags
+            const newCardContent = generateRandomCardContent();
+            newCardContent.tags.push("<script>alert('HEY YOU!');</script>");
+            newCardContent.tags.push("blabla<script>alert('This is XSS...');</script>");
 
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(testUser.getUUID(), newCardContent);
+
+            // Get the new card's tags and loop through them,
+            // expecting them not to have the script tag.
+            const newCardsTags = newCard.getCardContent().tags;
+            for (const tag of newCardsTags) {
+
+                expect(tag).not.toContain("<script>");
+                expect(tag).not.toContain("</script>");
+            }
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID()); 
+            await testUser.setCardID("");
+        });
+
+        test("Expect XSS to be removed from socialMediaLinks", async () => {
+
+            // Create new card content and put XSS in the socialMediaLinks
+            const newCardContent = generateRandomCardContent();
+            newCardContent.socialMediaLinks.push("<script>alert('HEY YOU!');</script>");
+            newCardContent.socialMediaLinks.push("blabla<script>alert('This is XSS...');</script>");
+
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(testUser.getUUID(), newCardContent);
+
+            // Get the new card's socialMediaLinks and loop through them,
+            // expecting them not to have the script tag.
+            const newCardsSocialMediaLinks = newCard.getCardContent().socialMediaLinks;
+            for (const link of newCardsSocialMediaLinks) {
+
+                expect(link).not.toContain("<script>");
+                expect(link).not.toContain("</script>");
+            }
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
+            await testUser.setCardID("");
+        });
+
+        test("Expect XSS to be removed from cardProperties", async () => {
+
+            // Create new card content and put XSS in the cardProperties
+            const newCardContent = generateRandomCardContent();
+
+            const badProperty1: cardPropertyElement = {
+                key: "<script>alert('THIS KEY IS ATTACKING YOU!!!');</script>",
+                value: "<script>alert('Man this value is awful sus');</script>"
+            };
+
+            const badProperty2: cardPropertyElement = {
+                key: "blabla<script>alert('Evil.. EVIL!!');</script>d",
+                value: "garbage<script>   alert('No value... JUST KIDDING. XSS VALUE!!');   </script>"
+            };
+
+            newCardContent.cardProperties.push(badProperty1);
+            newCardContent.cardProperties.push(badProperty2);
+
+
+
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(testUser.getUUID(), newCardContent);
+
+            // Get the new card's cardProperties and loop through them,
+            // expecting them not to have the script tag.
+            const newCardsCardProperties = newCard.getCardContent().cardProperties;
+            for (const cardProp of newCardsCardProperties) {
+
+                expect(cardProp.key).not.toContain("<script>");
+                expect(cardProp.key).not.toContain("</script>");
+
+                expect(cardProp.value).not.toContain("<script>");
+                expect(cardProp.value).not.toContain("</script>");
+            }
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
+            await testUser.setCardID("");
+        });
+
+        test("Expect XSS to be removed from layout.background", async () => {
+
+            // Create new card content and put XSS in the layout.background
+            const newCardContent = generateRandomCardContent();
+            newCardContent.layout.background = "<script>alert('HEY YOU!');</script>";
+
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(testUser.getUUID(), newCardContent);
+
+            // Get the new card's layout.background
+            const newCardsLayoutBackground = newCard.getCardContent().layout.background;
+
+
+
+            expect(newCardsLayoutBackground).not.toContain("<script>");
+            expect(newCardsLayoutBackground).not.toContain("</script>");
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
+            await testUser.setCardID("");
+        });
+
+        test("Expect XSS to be removed from layout.fontColor", async () => {
+
+            // Create new card content and put XSS in the layout.fontColor
+            const newCardContent = generateRandomCardContent();
+            newCardContent.layout.fontColor = "<script>alert('HEY YOU!');</script>";
+
+            // Create a new card
+            const newCard: card = await databaseWrapper.createCard(testUser.getUUID(), newCardContent);
+
+            // Get the new card's layout.fontColor
+            const newCardsLayoutFontColor = newCard.getCardContent().layout.fontColor;
+
+
+
+            expect(newCardsLayoutFontColor).not.toContain("<script>");
+            expect(newCardsLayoutFontColor).not.toContain("</script>");
+
+
+            // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
+            await testUser.setCardID("");
         });
     });
 });
