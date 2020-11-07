@@ -645,8 +645,12 @@ describe("Test tryPassword()", () => {
     });
 
 
-    test("Expect false when non-truthy password is passed in", async () => {
+    test("Expect false when undefined password is passed in", async () => {
         expect(testUser.tryPassword(undefined)).toEqual(false);
+    });
+
+    test("Expect false when null password is passed in", async () => {
+        expect(testUser.tryPassword(null)).toEqual(false);
     });
 
     test("Expect false when an incorrect password is passed in", async () => {
