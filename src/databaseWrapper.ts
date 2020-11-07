@@ -881,6 +881,18 @@ class databaseWrapperClass {
     // Searches for cards in the database using a query
     public async searchQuery(requestedQuery: searchQuery, currentUser?: user): Promise<string[]> {
 
+        //  Error checking...
+        //
+        //
+        if (requestedQuery === undefined) {
+            throw new Error("requestedQuery cannot be undefined");
+        }
+        else if (requestedQuery === null) {
+            throw new Error("requestedQuery cannot be null");
+        }
+
+
+
         var resultIDs: string[] = [];
         const cardsPerPage: number = this.pageCount;
 
