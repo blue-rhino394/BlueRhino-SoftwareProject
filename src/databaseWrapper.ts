@@ -663,6 +663,17 @@ class databaseWrapperClass {
     // Returns the UUID's of each user effected
     public async removeCardFromAllSavedCards(cardIDToRemove: string): Promise<string[]> {
 
+        //  Error checking...
+        //
+        //
+        if (cardIDToRemove === undefined) {
+            throw new Error("cardIDToRemove cannot be undefined");
+        }
+        else if (cardIDToRemove === null) {
+            throw new Error("cardIDToRemove cannot be null");
+        }
+
+
         // An array of UUID's to be populated with the
         // database query below.
         var usersWithThisCardSaved: string[] = [];
