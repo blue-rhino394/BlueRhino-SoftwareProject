@@ -737,6 +737,19 @@ class databaseWrapperClass {
 
     // Finds a card in the database by ID
     public async getCard(requestedCardID: string): Promise<card> {
+
+        //  Error checking...
+        //
+        //
+        if (requestedCardID === undefined) {
+            throw new Error("requestedCardID cannot be undefined");
+        }
+        else if (requestedCardID === null) {
+            throw new Error("requestedCardID cannot be null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this card exists in the cache manager,
         // return it!!
@@ -789,6 +802,19 @@ class databaseWrapperClass {
 
     // Finds a card in the database by slug
     public async getCardBySlug(requestedCardSlug: string): Promise<card> {
+
+        //  Error checking...
+        //
+        //
+        if (requestedCardSlug === undefined) {
+            throw new Error("requestedCardSlug cannot be undefined");
+        }
+        else if (requestedCardSlug === null) {
+            throw new Error("requestedCardSlug cannot be null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this card exists in the cache manager,
         // return it!!
