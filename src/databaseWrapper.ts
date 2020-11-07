@@ -616,6 +616,18 @@ class databaseWrapperClass {
 
     // Deletes a card from the database by ID
     public async deleteCard(cardIDToDelete: string): Promise<string> {
+
+        //  Error checking...
+        //
+        //
+        if (cardIDToDelete === undefined) {
+            throw new Error("cardIDToDelete cannot be undefined");
+        }
+        else if (cardIDToDelete === null) {
+            throw new Error("cardIDToDelete cannot be null");
+        }
+
+
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
