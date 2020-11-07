@@ -145,10 +145,25 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\jest\databaseWrapper\createCard.test.ts" />
     <TypeScriptCompile Include="src\jest\databaseWrapper\createUser.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\deleteCard.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\jest\databaseWrapper\deleteUser.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getCard.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getCardBySlug.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\jest\databaseWrapper\getUser.test.ts" />
     <TypeScriptCompile Include="src\jest\databaseWrapper\getUserByEmail.test.ts" />
     <TypeScriptCompile Include="src\jest\databaseWrapper\getUserBySlug.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\removeCardFromAllSavedCards.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\searchQuery.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\jest\databaseWrapper\utilityMethods.ts" />
     <TypeScriptCompile Include="src\jest\databaseWrapper\verifyConnectedToMongoDB.test.ts" />
     <TypeScriptCompile Include="src\jest\user\userConstructor.test.ts">
