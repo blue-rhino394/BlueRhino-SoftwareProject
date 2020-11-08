@@ -4,7 +4,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 0;
+		this.pageIndex = 1;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 		this.pageStop = 0;
@@ -56,7 +56,7 @@ class Survey {
 	}
 
 	getCardBuilder(){
-		
+
 	}
 
 	getTagQuestion(){
@@ -114,7 +114,7 @@ class Survey {
 		});
 		$("#body").append(backdrop);
 
-		
+
 		let content = $("#contentHolder");
 		this.animating = true;
 		content.animate({ "left": "+="+((window.screen.width)) }, 1000, "easeInCubic", () => {
@@ -175,7 +175,7 @@ class Survey {
 		});
 	}
 
-	//this method returns a method that fills the answer of current question with your previously supplied answer when 
+	//this method returns a method that fills the answer of current question with your previously supplied answer when
 	getRefill(inputType){
 		/*
 		let inputs = {
@@ -185,9 +185,9 @@ class Survey {
 			password : (answer) => {
 				$("#passwordText").val(answer);
 			},
-		} 
+		}
 		let result = inputs[inputType];
-		//if theres nothing in the refill for it, return nothign 
+		//if theres nothing in the refill for it, return nothign
 		if(result==undefined) return ()=>{};*/
 		if(!inputType instanceof Array)inputType = [inputType];
 		//for(let input of in)
@@ -198,7 +198,7 @@ class Survey {
 		let inputs = {
 
 			question: $("<input/>", {
-				"class": "surveryQuestion", 
+				"class": "surveryQuestion",
 				type: "text",
 				id: "questionText",
 				placeholder: "Type your answer and press enter",
@@ -217,7 +217,7 @@ class Survey {
 
 
 			password: $("<input/>", {
-				"class": "surveryQuestion", 
+				"class": "surveryQuestion",
 				type: "password",
 				id: "passwordText",
 				placeholder: "Type your answer and press enter",
@@ -252,7 +252,7 @@ class Survey {
 					focusout:(e) => {
 						$(e.target).focus();
 					},
-					
+
 				},
 				data:{
 					refill:(me, answer) =>{
@@ -263,8 +263,8 @@ class Survey {
 
 			text: $("<div/>", {
 				id: "welcomeText",
-				
-				
+
+
 
 				data:{
 					refill:(me, answer) =>{
@@ -308,7 +308,7 @@ class Survey {
 		}
 		//console.log(results);
 		return results;
-		
+
 	}
 
 	setContent(pushState=true){
@@ -317,9 +317,9 @@ class Survey {
 
 			let inputs = this.getInput(this.currentPage.type);
 
-		
+
 			let elements = [
-				$("<h1/>").text(this.currentPage.question),
+				$("<h1/>").html(this.currentPage.question),
 				$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
 			];
 
@@ -328,19 +328,22 @@ class Survey {
 
 
 			$("#content").html(elements);
-	
+
 
 			//refill answers with values
-			
 
-			//this dynamically calls the items in the data array  
+
+			//this dynamically calls the items in the data array
 			if(!(this.currentPage.data==undefined)){
 				let index = 2;
 				for(let dataItem of this.currentPage.data){
 					for(var key in dataItem){
 						if (dataItem.hasOwnProperty(key)) {
 							let value = dataItem[key];
-
+							if(key=="start"){
+								value()
+								continue;
+							}
 							elements[index][key](value);
 						}
 					}
@@ -384,7 +387,7 @@ class Survey {
 	}
 
 	getPages(){
-		
+
 	}
 
 	completedMessage(){
@@ -416,6 +419,6 @@ window.onpopstate = function () {
 }
 
 //lock scrollbar into place since tabindex:0 don't know how to act right
-$(document).bind('scroll',function () { 
-      // window.scrollTo(0,0); 
+$(document).bind('scroll',function () {
+      // window.scrollTo(0,0);
   });

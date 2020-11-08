@@ -1,4 +1,4 @@
-class Component {
+	class Component {
 
 	post(endpoint, json={}, callback){
         $.ajax({
@@ -30,25 +30,25 @@ class Component {
 
 	render(locationId, fadeIn=false){
 		let content =  undefined;
-		
+
 		try{
 			let location = $("#"+locationId);
 			this.location = locationId;
 			page.components.push(this);
 			if(!fadeIn){
-				
+
 				content = this.getContent();
 				if(!content instanceof Array)content.css(this.getStyle());
-				
+
 				if(!this.replaceContainer()){
 					this.element = content.appendTo(location);
-					
+
 				}else{
 					this.element = location.html(content);
 				}
 				this.onRender();
 			}else{
-				
+
 				location.hide();
 				this.render(locationId);
 				//console.log("here");
@@ -58,7 +58,7 @@ class Component {
 			console.error(err);
 			new ErrorComponent(err).render(locationId);
 		}
-	
+
 		return content;
 	}
 
@@ -78,7 +78,7 @@ class Component {
 				});
 
         	});
-			
+
 		}
 	}
 
@@ -86,7 +86,7 @@ class Component {
 	onRender(){}
 	getStyle(){
 		return {
-			
+
 		}
 	}
 }
@@ -117,21 +117,21 @@ class Login extends Component{
 		if(response.error==""){
 
 			page.user = response;
-            
-			
+
+
 			if(page.getUrl()!="/"){
 				let x = await this.deRender(true);
-				
+
 				$("#SavedText").text("Saved Cards");
 				new Search("Saved Cards", "myCards").render(this.location, true);
 			}else{
 				page.navigate("/");
 			}
-			
+
 		}else{
 			alert(response.error);
 		}
-		
+
 	}
 
 	signUp(){
@@ -216,9 +216,9 @@ class MessageComponent extends Component{
 			}
 		}else{
 			span.html(this.message);
-			
+
 		}
-		
+
 		content.append(span);
 		return content;
 	}
@@ -226,7 +226,7 @@ class MessageComponent extends Component{
 }
 
 class CardViewer extends Component{
-	
+
 	constructor(slug){
 		super();
 		this.slug = slug;
@@ -276,7 +276,7 @@ class CardViewer extends Component{
 		//	console.log(page.user);
 			display.empty();
 			//$("#cardHeading").remove();
-			if(page.getUrl()=="/" || page.getUrl()=="/"+page.user.public.customURL){
+			if(page.user!=false && (page.getUrl()=="/" || page.getUrl()=="/"+page.user.public.customURL)){
 				//$(display).append($("<h1/>").text("You don't have a card!"));
 				$("#cardHeading").text("You don't have a card!");
 				let message = "If you want to create your card, click <a href='/create' style='padding-right:0px'>here</a>";
@@ -292,7 +292,7 @@ class CardViewer extends Component{
 			return;
 		}
 		console.log(cardData);
-		
+
 
 
 		if(display.length > 0){
@@ -341,7 +341,7 @@ class CardViewer extends Component{
 		if(card.myCard)headingText = "Your Card";
 		$("#cardHeading").html(headingText);
 
-	
+
 		if(collapseAll){
 			for(let button of card.getButtons()){
 				//We do not want to save some rando's card when collaping all actions
@@ -382,7 +382,7 @@ class HotCards extends Component{
 }
 
 class Search extends Component{
-	
+
 	constructor(searchText=undefined, type = "none"){
 		super();
 		this.searchText = searchText;
@@ -399,10 +399,10 @@ class Search extends Component{
 
 		let query = $("#search").val();
 		this.showResults(query, query.length)
-		
+
 	}
 
-	
+
 
 
 	showResults(query, dupe = -1){
@@ -412,7 +412,7 @@ class Search extends Component{
 		let request = {textQuery: query, tags:[], isMyCards: this.myCards, pageNumber: 0};
 
 		this.post("search-card", request, (results) => {
-			
+
 			$("#results").fadeOut(500,() => {
 				$("#results").html("");
 
@@ -421,7 +421,7 @@ class Search extends Component{
 					new Card(result, true).render("results");
 
 				}
-			
+
 
 				$("#results").fadeIn(500);
 			});
@@ -438,7 +438,7 @@ class Search extends Component{
 		//Searh Heading
 		if(!this.myCards || this.searchText==undefined)content.append($("<h2/>", {text: this.searchText}));
 
-		//Search textbox 
+		//Search textbox
 		content.append($("<input>", {
 			"class": "textbox",
 			type: "text",
@@ -482,7 +482,7 @@ class CardStats extends Component{
 		//add heading
 		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${page.user.public.firstName}'s</span> Stats`));
 
-		//add stats 
+		//add stats
 		for(var key in this.stats){
 			if (this.stats.hasOwnProperty(key)) {
 				let value = this.stats[key];
@@ -492,7 +492,7 @@ class CardStats extends Component{
 			}
 		}
 
-		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out 
+		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out
 		content = $("<div/>").html([content, "<br>"]);
 		return content;
 	}
@@ -517,13 +517,13 @@ class CardDetails extends Component{
 		//add heading
 		content.append('<b>Tags: </b>');
 
-		//add tags 
+		//add tags
 		console.log(this.tags);
 		for(var tag of this.tags){
 			content.append($("<input/>", {"class": "tag", type:"button", value: tag}))
 		}
 
-		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out 
+		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out
 		content = $("<div/>").html([content, "<br>"]);
 		return content;
 	}
@@ -548,12 +548,12 @@ class CardSocial extends Component{
 		//add heading
 		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${this.firstName}'s</span> Social`));
 
-		//add stats 
+		//add stats
 		for(var link of this.links){
 			content.append(["<hr>", $("<a/>", {text: link, href: link, target: "_blank"}), "<br>"]);
 		}
 
-		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out 
+		//wrap content in div to ensure there is a linebreak when details/social/stats are swapped in and out
 		content = $("<div/>").html([content, "<br>"]);
 		return content;
 	}
@@ -578,7 +578,7 @@ class CardSettings extends Component{
 		if(page.user.currentAccountStatus==1){
 			alert("You cannot change your account visibility until your email is verified!")
 			this.onRender();
-			
+
 		}else{
 			let result = await this.awaitPost("set-card", {published: ($("#publish").val()=="Published")});
 			//console.log(result);
@@ -631,7 +631,7 @@ class CardSettings extends Component{
 			$("<option/>").attr("id","pub").text("Published"),
 			$("<option/>").attr("id","pub").text("UnPublished")//.attr("selected","false"),
 		])).on("change", (e)=>{this.change(e)});
-		
+
 		content.append("<hr>");
 		content.append("<b>Danger Zone: </b>");
 		content.append($("<a/>").text("Delete Card").css({"fontWeight":"bold", "color":"red"}).click(()=>{this.deleteCard()}));
@@ -651,7 +651,7 @@ class NavBar extends Component{
 
 	async logout(){
 		//alert("");
-		await this.awaitPost("logout", {}); 
+		await this.awaitPost("logout", {});
 		window.location.replace("/");
 	}
 
@@ -659,16 +659,16 @@ class NavBar extends Component{
 		let content = $("<div/>").css("width", "100%");
 		let buttons = [
 
-			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left").css("marginLeft",35),		
+			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left").css("marginLeft",35),
 			$("<a/>", {click:()=> this.logout(), text: "Logout"}).css("float", "right"),
 			$("<a/>", {click:()=> page.navigate("/search"), text: "Search"}).css("float", "right"),
 		];
 		if(page.user==false){
 			buttons = [
 				$("<a/>", {click:()=> window.location.replace("/register"), text: "Register For Passport"}).css("float", "left").css("marginLeft",35),
-				$("<a/>", {click:()=> page.navigate("/"), text: "Home"}).css("float", "right"),		
-				$("<a/>", {click:()=> window.location.replace("/faq"), text: "FAQ"}).css("float", "right"),
-				$("<a/>", {click:()=>  window.location.replace("/aboutus"), text: "About Us"}).css("float", "right"),
+				$("<a/>", {click:()=> page.navigate("/"), text: "Home"}).css("float", "right"),
+				$("<a/>", {click:()=> page.navigate("/faq"), text: "FAQ"}).css("float", "right"),
+				$("<a/>", {click:()=>  page.navigate("/aboutus"), text: "About Us"}).css("float", "right"),
 			];
 		}
 		let innerDiv = $("<div/>").html(buttons).css({"width": "100%", postion:"fixed"});
@@ -691,16 +691,16 @@ class Card extends Component{
 	constructor(card, light = false){
 		super();
 		this.card = card;
-		
+
 		this.user = this.card.ownerInfo;
 		this.light = light;
-		
+
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
 		this.waitingForSave = false;
 		this.waitingForFavorite = false;
-		
+
 		this.favorited = page.getFavorite(this.card.cardID);
 
 		this.actions = {
@@ -711,11 +711,11 @@ class Card extends Component{
 			"View": (target)=>{this.viewCard()},
 			"Save": (target)=>{this.toggleSaveCard(target)},
 			"UnSave": (target)=>{this.toggleSaveCard(target)}
-		} 
-		
+		}
+
 	}
 
-	
+
 	getButtons(){
 		//details : Tags
 		//Social : social media links
@@ -773,7 +773,7 @@ class Card extends Component{
 			alert("Login or Sign up to save cards!");
 			return;
 		}
-		
+
 		this.waitingForSave = true;
 		let saveWord = target.text();
 
@@ -792,8 +792,8 @@ class Card extends Component{
 				target.text(this.toggleSaveWord(saveWord));
 				alert("An error occoured when attempting to save this card: "+saveResult.error);
 			}else{
-				//refresh feed if successful 
-				
+				//refresh feed if successful
+
 				if(target.text()=="UnSave"){
 					let cardVal = {cardID: this.card.cardID, favorited: "false", memo:""};
 					page.user.savedCards.push(cardVal);
@@ -842,12 +842,12 @@ class Card extends Component{
 
 	async toggleFavorite(){
 		if(this.waitingForFavorite)return;
-		this.waitingForFavorite = true; 
+		this.waitingForFavorite = true;
 		this.favorited = !this.favorited;
 		$("#"+this.starId).attr("class", "fa fa-star").show();
-		
 
-		
+
+
 		let results = await this.awaitPost("toggle-favorite", {"cardID": this.card.cardID});
 		for(let card of page.user.savedCards){
 				if(card.cardID == this.card.cardID){
@@ -862,7 +862,7 @@ class Card extends Component{
 			alert("error favoriting: "+results.error);
 			this.favorited = !this.favorited;
 		}else{
-			
+
 			page.updateFavorites(this.card.cardID, this.favorited);
 			let savedCardComponent = page.getComponent("Search");
 			if(savedCardComponent.myCards)savedCardComponent.showResults("");
@@ -881,7 +881,7 @@ class Card extends Component{
 		console.log();
 		//let prfoilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`;
 		let prfoilePicUrl = this.card.ownerInfo.profilePictureURL;
-		//fix 
+		//fix
 		//if(!prfoilePicUrl.includes("&format=png"))prfoilePicUrl+="&format=png&font-size=0.33&rounded=true&size=300&bold=true&color=FFFFF&background=29b6f6"
 
 		content.append($("<div>", {
@@ -894,7 +894,7 @@ class Card extends Component{
 		let nameDiv = $("<div/>", {
 			"class": "name",
 			html: [
-				$(`<${heading}/>`).text(`${this.user.firstName} ${this.user.lastName}`), 
+				$(`<${heading}/>`).text(`${this.user.firstName} ${this.user.lastName}`),
 				$('<i class="far fa-star"/>', {
 				}).css("margin-bottom","5px").css("margin-left","5px").css("color", "#f5da2a").css("cursor","pointer").attr("id", this.starId).mouseenter((e)=>{
 					if(!this.favorited)$(e.target).attr("class", "fa fa-star");
@@ -904,7 +904,7 @@ class Card extends Component{
 					//this.attr("class", "fa fa-star")
 				}).click((e)=>this.toggleFavorite(e)).hide()
 			]
-		}).mouseenter( ()=>$("#"+this.starId).show() ).mouseleave( ()=>{if(!this.favorited)$("#"+this.starId).hide()} );
+		}).mouseenter( ()=>{if(page.user!=false)$("#"+this.starId).show()} ).mouseleave( ()=>{if(!this.favorited)$("#"+this.starId).hide()} );
 		content.append(nameDiv)
 		//this.favorited=true;
 		if(this.favorited){
@@ -929,7 +929,7 @@ class Card extends Component{
 		let memo = page.getMemo(this.card.cardID);
 		let memoText = (memo!=false) ? `"${memo}"` : "";
 		props.append($("<span/>").text(memoText).attr("class", "memo").attr("id", "memo-"+this.card.cardID));
-		
+
 		content.append(props)
 
 		//add card buttons
@@ -941,7 +941,7 @@ class Card extends Component{
 			if(button=="Save")link.attr("id", this.saveId);
 			if(button=="Settings" )buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
 			buttons.append(link);
-			
+
 		}
 
 		content.append(buttons);
@@ -949,7 +949,7 @@ class Card extends Component{
 		//if this is a full/non-light card, wrap it in a div, and add another div to hold the card actions (details, social, etc)
 		if(!this.light)	{
 			let oldContent = content.attr("class", "box card");
-			//TODO: add divs so order stays the same 
+			//TODO: add divs so order stays the same
 			content = $("<div/>").html([oldContent]);
 			content.append($("<br>"));
 			content.append($("<div/>").attr("id", "action-Settings"));

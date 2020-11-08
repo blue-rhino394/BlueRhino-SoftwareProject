@@ -2,26 +2,26 @@ class View {
 
 	async render(){
 
-	
+
 		this.data = await this.getData();
 
 		let view = await this.loadImport(this.getView());
 		page.components = [];
 
 		$("#content").html(view);
-		
 
-		
+
+
 		for (let [key, component] of Object.entries(this.getComponents())) {
 			try{
-				
-				component.render(key); 
+
+				component.render(key);
 			}catch(err){
 				console.error(err);
 				new ErrorComponent(err).render(key);
 			}
 		}
-	
+
 	}
 
 
@@ -29,7 +29,7 @@ class View {
 		return false;
 	}
 
-	
+
 	async loadImport(name){
 		return new Promise(resolve => {
     		$.get(`/templates/${name}.html`, (data)=> resolve(data));
@@ -50,7 +50,7 @@ class HomeView extends View{
 		super();
 		if(slug=="")slug = "/"+page.user.public.customURL;
 		//if(slug=="")slug = "mhewitt836";
-		
+
 		this.slug = slug;
 	}
 
@@ -72,6 +72,49 @@ class HomeView extends View{
 		}
 	}
 
+
+}
+
+
+class FAQView extends View{
+
+	getView(){
+		return "faq";
+	}
+
+	getTitle(){
+		return "FAQ";
+	}
+
+
+	getComponents(){
+
+		return {
+			"navBar" : new NavBar()
+		}
+	}
+
+
+
+}
+
+
+class AboutView extends View{
+
+	getView(){
+		return "aboutus";
+	}
+
+	getTitle(){
+		return "About Us";
+	}
+
+	getComponents(){
+
+		return {
+			"navBar" : new NavBar()
+		}
+	}
 
 }
 
