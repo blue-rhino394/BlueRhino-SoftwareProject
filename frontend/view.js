@@ -11,7 +11,6 @@ class View {
 		$("#content").html(view);
 
 
-
 		for (let [key, component] of Object.entries(this.getComponents())) {
 			try{
 

@@ -83,6 +83,18 @@ class CPigeon {
         }
     }
 
+   updateSaves(id, saveText){
+      let cards = this.components.filter((component) => component.constructor.name=="Card" && component.card.cardID == id);
+      console.log(cards);
+      console.log("DOWN BAD ");
+      for(const card of cards){
+         console.log(card.saveId);
+         console.log(saveText);
+         $("#"+card.saveId).text(saveText);
+      }
+
+   }
+
 
     updateFavorites(id, favorited){
         for(let component of this.components){

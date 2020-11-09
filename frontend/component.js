@@ -13,6 +13,7 @@
     }
 
     async awaitPost(endpoint, json={}){
+		 	console.log(/* @html */`<div></div>`);
 		return new Promise(resolve => {
 			//this is dumb
     		$.ajax({
@@ -801,13 +802,15 @@ class Card extends Component{
 				}else{
 					for(let i =0 ; i<page.user.savedCards.length; i++){
 						if(page.user.savedCards[i].cardID == this.card.cardID){
-							page.user.savedCards.splice(i,1);
+							page.user.savedCards.splice(i, 1);
 							break;
 						}
 					}
 					page.updateFavorites(this.card.cardID, false);
 					page.updateMemos(this.card.cardID, false);
+
 				}
+				page.updateSaves(this.card.cardID, target.text());
 				let savedCardComponent = page.getComponent("Search");
 				if(savedCardComponent!= false && savedCardComponent.myCards){
 					savedCardComponent.showResults("");
@@ -938,7 +941,7 @@ class Card extends Component{
 		for(const button of this.getButtons()){
 			let link = $("<a/>", {text: button, click:(e)=>this.toggleAction(button, false, $(e.target))});
 			if((button=="Settings" && this.light) || (this.myCard && button=="Save")) continue;
-			if(button=="Save")link.attr("id", this.saveId);
+			if(button=="Save" || button=="UnSave")link.attr("id", this.saveId);
 			if(button=="Settings" )buttons.append($("<span/>").text(" |").css({"paddingRight": "12px", "color": "darkgrey"}));
 			buttons.append(link);
 
