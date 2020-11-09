@@ -26,7 +26,7 @@ export function generateRandomUserAccountSchema(): userAccountSchema {
 // sized arrays
 export function generateRandomCardContent(): cardContent {
 
-    const published = Math.random() >= 0.5;
+    const published = true;
     const tagCount = Math.round(Math.random() * 3);
     const socialMediaLinkCount = Math.round(Math.random() * 3);
     const cardPropertyCount = Math.round(Math.random() * 3);
