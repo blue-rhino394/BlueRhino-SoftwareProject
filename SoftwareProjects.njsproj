@@ -128,6 +128,49 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\backendServer.ts" />
+    <TypeScriptCompile Include="src\jest\card\cardConstructor.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardGetters.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardSetters.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardStats.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\card\cardUtilities.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\createCard.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\createUser.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\deleteCard.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\deleteUser.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getCard.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getCardBySlug.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getUser.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getUserByEmail.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\getUserBySlug.test.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\removeCardFromAllSavedCards.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\searchQuery.test.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\jest\databaseWrapper\utilityMethods.ts" />
+    <TypeScriptCompile Include="src\jest\databaseWrapper\verifyConnectedToMongoDB.test.ts" />
+    <TypeScriptCompile Include="src\jest\user\userConstructor.test.ts">
+      <SubType>Code</SubType>
+      <TestFramework>
+      </TestFramework>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\reservedRoutes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -170,13 +213,14 @@
     <Folder Include="src\enum\" />
     <Folder Include="src\interfaces\post\" />
     <Folder Include="src\jest\" />
+    <Folder Include="src\jest\card\" />
+    <Folder Include="src\jest\databaseWrapper\" />
+    <Folder Include="src\jest\user\" />
     <Folder Include="src\test\" />
     <Folder Include="src\test\databaseScripts\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\jest\card.test.ts" />
-    <Compile Include="src\jest\databaseWrapper.test.ts" />
-    <Compile Include="src\jest\user.test.ts" />
+    <Compile Include="src\jest\user\user.test.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

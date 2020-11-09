@@ -142,6 +142,14 @@ export class user {
 
     public async setCardID(newCardID: string): Promise<void> {
 
+        // Check for a falsy input parameter
+        if (newCardID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newCardID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the cardID in memory
         this.cardID = newCardID;
 
@@ -174,6 +182,15 @@ export class user {
     }
 
     public async setAccountStatus(newAccountStatus: accountStatus): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (newAccountStatus === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newAccountStatus === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the account status in memory
         this.currentAccountStatus = newAccountStatus;
 
@@ -206,6 +223,15 @@ export class user {
     }
 
     public async setVerificationCode(newVerificationCode: string): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (newVerificationCode === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (newVerificationCode === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Set the verification code in memory
         this.verificationCode = newVerificationCode;
 
@@ -245,10 +271,30 @@ export class user {
     //
 
     public tryPassword(password: string): boolean {
+
+        // Check for a falsy input parameter
+        if (password === null) {
+            return false;
+        }
+        else if (password === undefined) {
+            return false;;
+        }
+
         return bcrypt.compareSync(password, this.passwordHash);
     }
 
     public async addSavedCard(cardToAddID: string): Promise<savedCard> {
+
+        // Check for a falsy input parameter
+        if (cardToAddID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardToAddID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (cardToAddID === "") {
+            throw new Error("Cannot pass Empty String");
+        }
 
         // Construct savedCard interface
         const newSavedCard: savedCard = {
@@ -294,6 +340,14 @@ export class user {
 
     public async updateSavedCard(cardUpdateForm: savedCard): Promise<boolean> {
 
+        // Check for a falsy input parameter
+        if (cardUpdateForm === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardUpdateForm === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // If we don't have this savedCard...
         if (!this.savedCards.has(cardUpdateForm.cardID)) {
             // ... bounce!
@@ -335,6 +389,14 @@ export class user {
 
     public async removeSavedCard(cardToRemoveID: string): Promise<boolean> {
 
+        // Check for a falsy input parameter
+        if (cardToRemoveID === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (cardToRemoveID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Remove from data structure in memory
         const result = this.savedCards.delete(cardToRemoveID);
 
@@ -371,6 +433,15 @@ export class user {
     }
 
     public async updateAccountSchema(accountSchemaUpdate: userAccountSchema): Promise<void> {
+
+        // Check for a falsy input parameter
+        if (accountSchemaUpdate === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (accountSchemaUpdate === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+
         // Update the account schema in memory
         this.updateInternalAccountSchema(accountSchemaUpdate);
 

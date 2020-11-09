@@ -2,7 +2,7 @@
 
 
 window.onload = function() {
-    page = new CPigeon(); 
+    page = new CPigeon();
 };
 
 
@@ -17,11 +17,11 @@ class CPigeon {
     constructor() {
         //json to hold user data
         this.user = false;
-        //list of components that are rendered by view 
+        //list of components that are rendered by view
         this.components = [];
 
         this.releasePigeon();
-        
+
     }
 
     //method that starts everything
@@ -36,16 +36,16 @@ class CPigeon {
             console.log(postResult.error);
         }
         this.navigate(this.getUrl(), false);
-            
-      
+
+
     }
 
 
-    
+
     hasSaved(cardId) {
 
         for(const card of this.user.savedCards){
-     
+
             if(card.cardID == cardId)return true;
 
         }
@@ -83,6 +83,18 @@ class CPigeon {
         }
     }
 
+   updateSaves(id, saveText){
+      let cards = this.components.filter((component) => component.constructor.name=="Card" && component.card.cardID == id);
+      console.log(cards);
+      console.log("DOWN BAD ");
+      for(const card of cards){
+         console.log(card.saveId);
+         console.log(saveText);
+         $("#"+card.saveId).text(saveText);
+      }
+
+   }
+
 
     updateFavorites(id, favorited){
         for(let component of this.components){
@@ -116,23 +128,23 @@ class CPigeon {
         });
     }
     /*
-        this method navigates to a page by finding the appropreate view in getPageMaps, renders the view 
+        this method navigates to a page by finding the appropreate view in getPageMaps, renders the view
         and deRenders the components in the old view.  Also adds the current page to navigation stack
     */
     navigate(page, pushState=true){
-        
+
         if(pushState)window.history.pushState("", "", page);
 
-       
-       
+
+
         let cardViewer = this.getCardViewer();
         if(cardViewer!=false && (page!="/search" && page!="/")){
             cardViewer.view(page);
         }else{
             $("#content").fadeOut(500, () => {
                 let pageView = this.getPageMaps()[page];
-                
-                //if there is no route avaible for current page, use the '*' route 
+
+                //if there is no route avaible for current page, use the '*' route
                 if(pageView==undefined) pageView = this.getPageMaps()["*"];
 
 
@@ -149,7 +161,7 @@ class CPigeon {
 
             });
         }
-   
+
 
     }
 
@@ -176,11 +188,13 @@ class CPigeon {
         return window.location.pathname;
     }
 
-    //routes 
+    //routes
     getPageMaps(){
         return {
             "/": (this.user != false) ? new HomeView() : new LoginView(),
             "/search":(this.user != false) ? new SearchView() : new LoginView(),
+            "/faq": new FAQView(),
+            "/aboutus": new AboutView(),
             "*": new HomeView(this.getUrl())
         }
     }

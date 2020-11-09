@@ -102,7 +102,38 @@ class databaseWrapperClass {
     // Creates a new user in the database
     public async createUser(newAccountSchema: userAccountSchema): Promise<user> {
 
-        var outputUUID: string = "";
+
+        //  Error checking...
+        //
+        //
+        if (newAccountSchema === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (newAccountSchema === null) {
+            throw new Error("Cannot pass null");
+        }
+        else if (!newAccountSchema.email) {
+            throw new Error("User schema's email paramater can not be falsy");
+        }
+        else if (!newAccountSchema.passwordHash) {
+            throw new Error("User schema's passwordHash paramater can not be falsy");
+        }
+        else if (!newAccountSchema.public) {
+            throw new Error("User schema's public paramater can not be falsy");
+        }
+
+        // If the user is trying to register an account with a reserved slug...
+        if (reservedRoutes.hasRoute(newAccountSchema.public.customURL)) {
+            return null;
+        }
+
+        // If the user is trying to register an account with an existing slug...
+        const existingUser: user = await databaseWrapper.getUserBySlug(newAccountSchema.public.customURL);
+        if (existingUser) {
+            return null;
+        }
+
+
         var outputUserSchema: userSchema;
 
         // Force new email to lowercase
@@ -141,18 +172,20 @@ class databaseWrapperClass {
                     savedCards: []                      // saved cards should be empty (they haven't been able to save any yet!)
                 }
 
-                outputUserSchema = newUser;
+                
 
                 // Add the new user to the database
                 const operationResult = await userCollection.insertOne(newUser);
 
                 // If the user was actually inserted...
                 if (operationResult.insertedCount != 0) {
-                    outputUUID = newUser.uuid;
+                    // Cache the output schema!
+                    outputUserSchema = newUser;
                 }
             }
         });
 
+        // If we never cached the output schema in the above method...
         if (!outputUserSchema) {
             return null;
         }
@@ -168,6 +201,19 @@ class databaseWrapperClass {
 
     // Deletes a user by ID
     public async deleteUser(uuidToDelete: string): Promise<string> {
+
+        //  Error checking...
+        //
+        //
+        if (uuidToDelete === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (uuidToDelete === null) {
+            throw new Error("Cannot pass null");
+        }
+
+
+
 
         var outputError: string = "Unknown Error";
 
@@ -199,6 +245,19 @@ class databaseWrapperClass {
 
     // Finds a user in the database by ID
     public async getUser(userUUID: string): Promise<user> {
+
+        //  Error checking...
+        //
+        //
+        if (userUUID === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userUUID === null) {
+            throw new Error("Cannot pass null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this user exists in the cache manager,
         // return them!!
@@ -252,6 +311,16 @@ class databaseWrapperClass {
 
     // Finds a user in the database by their slug
     public async getUserBySlug(userSlug: string): Promise<user> {
+
+        //  Error checking...
+        //
+        //
+        if (userSlug === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userSlug === null) {
+            throw new Error("Cannot pass null");
+        }
 
         // CHECK THE RESERVED ROTUES FIRST
         // If we're trying to find a user using a RESERVED ROUTE,
@@ -324,6 +393,16 @@ class databaseWrapperClass {
     // Finds a user in the database by their email
     public async getUserByEmail(userEmail: string): Promise<user> {
 
+        //  Error checking...
+        //
+        //
+        if (userEmail === undefined) {
+            throw new Error("Cannot pass undefined");
+        }
+        else if (userEmail === null) {
+            throw new Error("Cannot pass null");
+        }
+
         userEmail = userEmail.toLowerCase();
 
         // CHECK THE CACHE FIRST!
@@ -391,6 +470,52 @@ class databaseWrapperClass {
 
     // Creates a card in the database
     public async createCard(cardOwnerID: string, newContent: cardContent): Promise<card> {
+
+
+        //  Error checking...
+        //
+        //
+        if (cardOwnerID === undefined) {
+            throw new Error("cardOwnerID cannot be undefined");
+        }
+        else if (cardOwnerID === null) {
+            throw new Error("cardOwnerID cannot be null");
+        }
+        else if (cardOwnerID === "") {
+            throw new Error("cardOwnerID cannot be empty");
+        }
+        else if (newContent === undefined) {
+            throw new Error("newContent cannot be undefined");
+        }
+        else if (newContent === null) {
+            throw new Error("newContent cannot be null");
+        }
+        else if (!newContent.tags) {
+            throw new Error("newContent.tags cannot be falsy");
+        }
+        else if (!newContent.socialMediaLinks) {
+            throw new Error("newContent.socialMediaLinks cannot be falsy");
+        }
+        else if (!newContent.cardProperties) {
+            throw new Error("newContent.cardProperties cannot be falsy");
+        }
+        else if (!newContent.layout) {
+            throw new Error("newContent.layout cannot be falsy");
+        }
+        else if (newContent.layout.background === undefined) {
+            throw new Error("newContent.layout.background cannot be undefined");
+        }
+        else if (newContent.layout.background === null) {
+            throw new Error("newContent.layout.background cannot be null");
+        }
+        else if (newContent.layout.fontColor === undefined) {
+            throw new Error("newContent.layout.fontColor cannot be undefined");
+        }
+        else if (newContent.layout.fontColor === null) {
+            throw new Error("newContent.layout.fontColor cannot be null");
+        }
+
+
         var outputCardSchema: cardSchema;
 
         // Get the owner of this card
@@ -490,7 +615,19 @@ class databaseWrapperClass {
     }
 
     // Deletes a card from the database by ID
-    public async deleteCard(cardIDToDelete): Promise<string> {
+    public async deleteCard(cardIDToDelete: string): Promise<string> {
+
+        //  Error checking...
+        //
+        //
+        if (cardIDToDelete === undefined) {
+            throw new Error("cardIDToDelete cannot be undefined");
+        }
+        else if (cardIDToDelete === null) {
+            throw new Error("cardIDToDelete cannot be null");
+        }
+
+
         var outputError: string = "Unknown Error";
 
         // Run the mongoDB operation
@@ -524,7 +661,18 @@ class databaseWrapperClass {
     // Removes a card from every user's savedCards list that has this card
     //
     // Returns the UUID's of each user effected
-    public async removeCardFromAllSavedCards(cardIDToRemove): Promise<string[]> {
+    public async removeCardFromAllSavedCards(cardIDToRemove: string): Promise<string[]> {
+
+        //  Error checking...
+        //
+        //
+        if (cardIDToRemove === undefined) {
+            throw new Error("cardIDToRemove cannot be undefined");
+        }
+        else if (cardIDToRemove === null) {
+            throw new Error("cardIDToRemove cannot be null");
+        }
+
 
         // An array of UUID's to be populated with the
         // database query below.
@@ -589,6 +737,19 @@ class databaseWrapperClass {
 
     // Finds a card in the database by ID
     public async getCard(requestedCardID: string): Promise<card> {
+
+        //  Error checking...
+        //
+        //
+        if (requestedCardID === undefined) {
+            throw new Error("requestedCardID cannot be undefined");
+        }
+        else if (requestedCardID === null) {
+            throw new Error("requestedCardID cannot be null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this card exists in the cache manager,
         // return it!!
@@ -641,6 +802,19 @@ class databaseWrapperClass {
 
     // Finds a card in the database by slug
     public async getCardBySlug(requestedCardSlug: string): Promise<card> {
+
+        //  Error checking...
+        //
+        //
+        if (requestedCardSlug === undefined) {
+            throw new Error("requestedCardSlug cannot be undefined");
+        }
+        else if (requestedCardSlug === null) {
+            throw new Error("requestedCardSlug cannot be null");
+        }
+
+
+
         // CHECK THE CACHE FIRST!
         // If this card exists in the cache manager,
         // return it!!
@@ -706,6 +880,18 @@ class databaseWrapperClass {
 
     // Searches for cards in the database using a query
     public async searchQuery(requestedQuery: searchQuery, currentUser?: user): Promise<string[]> {
+
+        //  Error checking...
+        //
+        //
+        if (requestedQuery === undefined) {
+            throw new Error("requestedQuery cannot be undefined");
+        }
+        else if (requestedQuery === null) {
+            throw new Error("requestedQuery cannot be null");
+        }
+
+
 
         var resultIDs: string[] = [];
         const cardsPerPage: number = this.pageCount;

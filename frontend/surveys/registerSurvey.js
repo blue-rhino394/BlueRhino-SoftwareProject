@@ -5,11 +5,11 @@ class RegisterSurvey extends Survey{
 		super();
 
 		//console.log(this.getAllFuncs());
-		
+
 
 	}
 
-	validEmail(email) 
+	validEmail(email)
 	{
 		let mailformat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 		return email.match(mailformat);
@@ -18,12 +18,12 @@ class RegisterSurvey extends Survey{
 
 	getRandomArrayItem(list) {
   		return list[Math.floor((Math.random()*list.length))];
-	} 
+	}
 
 
 	onFinished(){
 		console.log(document.cookie);
-		if(this.getAnswer("businessOrPersonal")=="Personal"){
+		if(this.getAnswer("businessOrPersonal")=="Procrastinate"){
 			window.location.href = "/";
 		}else{
 			let cardSurvey = new CardSurvey();
@@ -38,7 +38,7 @@ class RegisterSurvey extends Survey{
 			this.pageIndex =-1;
 			this.nextPage();
 		}
-		
+
 	}
 
 
@@ -46,19 +46,19 @@ class RegisterSurvey extends Survey{
 	//Register user !!!
 	async onCompleted(){
 		let surveyResults = this.getSurveyResults();
-		
+
 		let nameQuery = `${this.getAnswer("public.firstName")}+${this.getAnswer("public.lastName")}`;
 		let color = this.getRandomArrayItem(["29b6f6", "9575CD", "FFAB91", "009688", "8C9EFF", "F06292"]);
 		let profilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`
 		surveyResults.public.profilePictureURL = profilePicUrl;
-	
 
-	
+
+
 		console.log("registering...");
 		console.log(surveyResults);
-	
+
 		let postResults = await this.post("register", surveyResults);
-		
+
 		if(postResults.error!=""){
 			$("#finalMessage").text("Something went wrong when creating your account :'(  "+postResults.error);
 			console.log("An error occoured when registering: "+postResults.error);
@@ -83,14 +83,14 @@ class RegisterSurvey extends Survey{
 		}
 	}
 
-	
+
 
 	getCompletedMessage(){
 		return `Calm down ${this.nameify(this.getAnswer("public.firstName"))}, we're making your account look pretty`;
 	}
 
 	hasSpecialChars(str){
-		return /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(str);
+		return /[ !@#$%^&~`*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(str);
 	}
 
 	getPages(){
@@ -108,12 +108,13 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				nameify: true,
 				key: "public.firstName",
-				color:"#9575CD",
-				
+				color: "#7E57C2",
+
 				validate: async (answer) => {
-					
-					if(answer.length < 3){
-						return "Your first name must be at least 3 characters!";
+					if(answer.includes(" "))return "Your first name cannot contain spaces!"
+					if(this.hasSpecialChars(answer)) return "Your first name cannot contain any special characters!";
+					if(answer.length < 2){
+						return "Your first name must be at least 2 characters!";
 					}
 					return true;
 				}
@@ -125,8 +126,10 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				key: "public.lastName",
 				nameify: true,
-				color:"#9575CD",
-				validate: async (answer) => { 
+				color: "#7E57C2",
+				validate: async (answer) => {
+					if(answer.includes(" "))return "Your last name cannot contain spaces!"
+					if(this.hasSpecialChars(answer)) return "Your last name cannot contain any special characters!";
 					if(answer.length < 2){
 						return "Your last name must be at least 2 characters!";
 					}
@@ -156,7 +159,7 @@ class RegisterSurvey extends Survey{
 				color:"#009688",
 				validate: async (answer) => {
 					if(answer.length < 5)return "Your password must be at least 5 characters!";
-					
+
 					return true;
 				}
 			},
@@ -180,23 +183,24 @@ class RegisterSurvey extends Survey{
 				color: "#8C9EFF",
 				validate: async (answer) => {
 					if(answer.length<4)return "This URL is too short!"
-					if(this.hasSpecialChars(answer))return "Your URL can only contain letters!";
+
+					if(this.hasSpecialChars(answer))return "Your URL can only contain letters and numbers!";
 					let request = await this.post("slug-exists", {slug: answer});
 					if(request.result)return "This URL is taken!";
 					return true;
 				}
 			},
 			{
-				question: "Is this account for business or personal use?",
+				question: "Do you want to make your card now or later?",
 				answer: "",
 				color: "#F06292",
 				key: "businessOrPersonal",
 				ignoreQuestion: true,
 				type: ["option", "option"],
-				data: [{attr: {"value": "Business"}}, {attr: {"value":"Personal"}}],
+				data: [{attr: {"value": "Right Now!!!"}}, {attr: {"value":"Procrastinate"}}],
 				validate: async (answer) => true
 			},
-		
+
 
 		]
 	}
