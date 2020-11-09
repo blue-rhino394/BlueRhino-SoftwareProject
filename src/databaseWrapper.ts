@@ -992,7 +992,7 @@ class databaseWrapperClass {
                 }
 
                 // Match cards that are published
-                //matchAggregation["content.published"] = true;
+                matchAggregation["content.published"] = true;
 
                 // If we have tags - Require that matched cards
                 // have all of our requested tags.
