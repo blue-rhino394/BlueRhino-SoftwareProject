@@ -4,10 +4,13 @@ import { user } from "../../user";
 import { v4 } from "uuid";
 import { savedCard } from "../../interfaces/savedCard";
 
+
+//Testing the get methods for User by comparing it to User Schema
 describe("Get Testing Constructor Input Schema", () => {
 
     var testU: user = undefined;
 
+    //User Schema used to create a new user
     const newSchema: userSchema = {
         uuid: "465116165",
         currentAccountStatus: accountStatus.Active,
@@ -30,6 +33,7 @@ describe("Get Testing Constructor Input Schema", () => {
         }
     }
 
+    // before all tests are run a new user, a test User is created with values from User Schema
     beforeAll(async () => {
         testU = new user(newSchema);
     });
