@@ -108,7 +108,7 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				nameify: true,
 				key: "public.firstName",
-				color:"#9575CD",
+				color: "#7E57C2",
 
 				validate: async (answer) => {
 					if(answer.includes(" "))return "Your first name cannot contain spaces!"
@@ -126,7 +126,7 @@ class RegisterSurvey extends Survey{
 				type: "question",
 				key: "public.lastName",
 				nameify: true,
-				color:"#9575CD",
+				color: "#7E57C2",
 				validate: async (answer) => {
 					if(answer.includes(" "))return "Your last name cannot contain spaces!"
 					if(this.hasSpecialChars(answer)) return "Your last name cannot contain any special characters!";

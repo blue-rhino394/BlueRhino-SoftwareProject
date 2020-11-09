@@ -436,7 +436,7 @@ class CardSurvey extends Survey{
 				answer: [],
 				type: "cardBuilder",
 				data: [{start:()=>{
-					$("#finished").prop("disabled", true);
+					if(this.currentPage.answer.length < 1)$("#finished").prop("disabled", true);
 				}}],
 				key: "cardProperties",
 				validate: async (answer) => {

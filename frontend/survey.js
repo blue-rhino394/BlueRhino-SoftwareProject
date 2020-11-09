@@ -4,7 +4,7 @@ class Survey {
 
 	constructor(){
 		this.pages = this.getPages();
-		this.pageIndex = 1;
+		this.pageIndex = 0;
 		this.currentPage = this.pages[this.pageIndex];
 		this.animating = false;
 		this.pageStop = 0;
@@ -101,24 +101,27 @@ class Survey {
 		let color = this.currentPage?.color;
 		if(color==undefined) color = "#29b6f6";
 
-		let backdrop = $("<div/>", {
-			css:{
-				backgroundColor: color,
-				position: "absolute",
-				top: 0,
-				left: -window.screen.width,
-				width:"100%",
-				height:"100%",
-				zIndex: -10
-			}
-		});
-		$("#body").append(backdrop);
+
 
 
 		let content = $("#contentHolder");
 		this.animating = true;
 		content.animate({ "left": "+="+((window.screen.width)) }, 1000, "easeInCubic", () => {
 			this.setContent();
+
+			let backdrop = $("<div/>", {
+				css:{
+					backgroundColor: color,
+					position: "absolute",
+					top: 0,
+					left: `-${content.width()*2}px`,
+					width:"100%",
+					height:"100%",
+					zIndex: -10
+				}
+			});
+			$("#body").append(backdrop);
+
 
 			content.css("left", `-${content.width()*2}px`);
 			backdrop.animate({ "left": "0px" }, 1000, "easeOutCubic");
@@ -146,23 +149,25 @@ class Survey {
 		let color = this.currentPage.color;
 		if(color==undefined) color = "#29b6f6";
 
-		let backdrop = $("<div/>", {
-			css:{
-				backgroundColor: color,
-				position: "absolute",
-				top: 0,
-				left: window.screen.width,
-				width:"100%",
-				height:"100%",
-				zIndex: -10
-			}
-		});
-		$("#body").append(backdrop);
+
 
 		let content = $("#contentHolder");
 		this.animating = true;
 		content.animate({ "left": "-="+((content.width())) }, 1000, "easeInCubic", () => {
 			this.setContent(false);
+
+			let backdrop = $("<div/>", {
+				css:{
+					backgroundColor: color,
+					position: "absolute",
+					top: 0,
+					left: `${content.width()*2}px`,
+					width:"100%",
+					height:"100%",
+					zIndex: -10
+				}
+			});
+			$("#body").append(backdrop);
 
 			content.css("left", `${content.width()*2}px`);
 			backdrop.animate({ "left": "0px" }, 1000, "easeOutCubic");
@@ -250,7 +255,11 @@ class Survey {
 					},
 					//prevent div from ever losing focus so enter can always be pressed
 					focusout:(e) => {
-						$(e.target).focus();
+						console.log("fijewfjiwe");
+						setTimeout(()=>{
+							$(e.target).focus();
+						},15)
+
 					},
 
 				},
@@ -313,15 +322,22 @@ class Survey {
 
 	setContent(pushState=true){
 		if(this.pageIndex!=this.pages.length){
-			if(pushState)window.history.pushState("", "", "");
+		//	if(pushState)window.history.pushState("", "", "");
 
 			let inputs = this.getInput(this.currentPage.type);
 
 
 			let elements = [
-				$("<h1/>").html(this.currentPage.question),
-				$("<span/>").attr("id", "error").css("color", "red").css("opacity", "0.8"),
+				$("<h1/>").html([
+					this.currentPage.question,
+					$("<div/>").attr("class", "surveyError").attr("id", "error")
+				]),
+
+				//$("<span/>").attr("id", "error").css("color", "red").css("opacity", "1"),
 			];
+			if(this.pageIndex>0){
+				elements.push($("<i/>", {"class":"fas fa-arrow-left backButton"}).click(()=>{if(!this.animating)this.lastPage()}));
+			}
 
 			elements = elements.concat(inputs);
 
@@ -335,7 +351,7 @@ class Survey {
 
 			//this dynamically calls the items in the data array
 			if(!(this.currentPage.data==undefined)){
-				let index = 2;
+				let index = (this.pageIndex==0)? 1 : 2;
 				for(let dataItem of this.currentPage.data){
 					for(var key in dataItem){
 						if (dataItem.hasOwnProperty(key)) {
@@ -360,7 +376,8 @@ class Survey {
 		}else{
 			$("#content").html([
 				$("<h1/>").attr("id", "finalMessage").text(this.getCompletedMessage()),
-				$("<span/>").attr("id", "waitBubble").css("color","white").css("opacity", 0.5)
+				$("<span/>").attr("id", "waitBubble").css("color","white").css("opacity", 0.5),
+
 			]);
 			this.onCompleted();
 		}
@@ -411,11 +428,16 @@ class Survey {
 
 
 window.onpopstate = function () {
-	if(survey.pageIndex == survey.pageStop){
+
+		if(confirm("Are you sure you want to go back? Your progress will not be saved!")){
+		//	alert(window.history.length)
+		//	window.history.go(-(window.history.length))
 		window.history.back();
-		return;
-	}
-    survey.lastPage();
+			//return;
+		}
+
+
+    //survey.lastPage();
 }
 
 //lock scrollbar into place since tabindex:0 don't know how to act right
