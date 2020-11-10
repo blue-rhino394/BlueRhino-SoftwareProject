@@ -178,6 +178,7 @@ describe("databaseWrapper.createCard()", () => {
             expect(anotherNewCard).toBe(null);
 
             // clean up
+            await databaseWrapper.deleteCard(newCard.getID());
             await databaseWrapper.deleteUser(newUser.getUUID());
         });
     });

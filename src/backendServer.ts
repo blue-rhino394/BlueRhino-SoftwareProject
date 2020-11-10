@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import { createServer, Server as HTTPServer } from "http";
 import { defineUserREST } from "./userREST";
 import { defineCardREST } from "./cardREST";
-import { databaseWrapper } from "./databaseWrapper";
 import { defineExpressRoutes } from "./expressRoutes";
 import { defineExpressSessions } from "./expressSessions";
 

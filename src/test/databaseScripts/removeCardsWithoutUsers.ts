@@ -107,7 +107,7 @@ async function removeCardsWithoutUsers(): Promise<void> {
 //
 //
 //var iKnowWhatImDoing = "No I don't.";
-var iKnowWhatImDoing = "Yes!!!";
+var iKnowWhatImDoing = "No I don't.";
 
 
 if (iKnowWhatImDoing == "Yes!!!") {
