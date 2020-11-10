@@ -1,5 +1,9 @@
-	class Component {
 
+//the Component class
+//the metaphorical glue that holds our colective GPA together
+class Component {
+
+	//this function sends a post request to an api endpoint and calls a callback
 	post(endpoint, json={}, callback){
         $.ajax({
               url: `/api/${endpoint}`,
@@ -12,8 +16,8 @@
         });
     }
 
+	 //does the same thing as the above function accept it's awaitable
     async awaitPost(endpoint, json={}){
-		 	console.log(/* @html */`<div></div>`);
 		return new Promise(resolve => {
 			//this is dumb
     		$.ajax({
@@ -29,6 +33,9 @@
   		});
 	}
 
+	//this function's purpose is to render any component on the page given a locationId (ID of element where you want it to be rendered)
+	//the fadeIn parameter makes the compnent fade in when it's created
+	//also adds component to page's list of components
 	render(locationId, fadeIn=false){
 		let content =  undefined;
 
@@ -52,10 +59,10 @@
 
 				location.hide();
 				this.render(locationId);
-				//console.log("here");
 				location.fadeIn(500);
 			}
 		}catch(err){
+			//render error component if something goes wrong
 			console.error(err);
 			new ErrorComponent(err).render(locationId);
 		}
@@ -63,11 +70,13 @@
 		return content;
 	}
 
-
+	//this function is overridden with "true" if you dont want to append the component to the element and instead replace the contents of said container
 	replaceContainer(){
 		return false;
 	}
 
+	//this function removes a component from the page, animate makes it fade out when its removed
+	//also removes component from page's list of components
 	async deRender(animate=false){
 		page.components.splice(page.components.indexOf(this), 1);
 		if(!animate){
@@ -82,9 +91,15 @@
 
 		}
 	}
-
+	//this function is overridden by other child components
+	//it returns the JQuery / HTML element that is to be displayed on the page
 	getContent(){}
+
+	//this function is overridden by other child components
+	//it is called after the child component is rendered
 	onRender(){}
+
+	//this function returns a JSON of the css styles that should be applied to the component
 	getStyle(){
 		return {
 
@@ -94,7 +109,7 @@
 
 
 
-
+//this component allows the user to log in
 class Login extends Component{
 
 	constructor(card){
@@ -109,6 +124,7 @@ class Login extends Component{
 		$("#SavedText").text("Sign in to Save Cards");
 	}
 
+	//this function logs the user in
 	async login(){
 
 		let loginData = {email: $("#email").val(), password: $("#password").val()}
@@ -135,6 +151,7 @@ class Login extends Component{
 
 	}
 
+	//this function takes the user to the Registration page if they click register
 	signUp(){
 		window.location.href = "/register";
 	}
@@ -181,7 +198,8 @@ class Login extends Component{
 	}
 }
 
-//if the error component has an error, the website will crash- no one fuck with the error component
+//the component that renders in the event of some unforseable error
+//if the error component has an error, the website will crash- no one touch with the error component
 class ErrorComponent extends Component{
 
 	constructor(error){
@@ -190,15 +208,18 @@ class ErrorComponent extends Component{
 	}
 
 	getContent(){
+		//create div
 		let content = $("<div/>").attr("class", "box");
-		content.append($("<h1/>").html("<span style='color: #29b6f6'>Oopsie</span> Woopsie Uwu we made a fucky wucky!!!"));
+
+		//add objectively funny error message to said div
+		content.append($("<h1/>").html("<span style='color: #29b6f6'>Oopsie</span> Woopsie Uwu we made a V_V !!!"));
 		content.append($("<h2/>").text(this.error));
 		return content;
 	}
 
 }
 
-
+//this component's purpose is to render a message anywhere I need to for whatever reason
 class MessageComponent extends Component{
 
 	constructor(title, message=""){
@@ -208,7 +229,10 @@ class MessageComponent extends Component{
 	}
 
 	getContent(){
+		//create div
 		let content = $("<div/>").attr("class", "box");
+
+		//add title
 		content.append($("<h2/>").html(this.title).css("margin", "0px").css("marginBottom", "10px"));
 		let span = $("<span/>");
 		if(this.message instanceof Array){
@@ -226,6 +250,7 @@ class MessageComponent extends Component{
 
 }
 
+//this is the component that displays a full card. The main event. Show time.
 class CardViewer extends Component{
 
 	constructor(slug){
@@ -234,6 +259,8 @@ class CardViewer extends Component{
 		this.sendingEmail = false;
 	}
 
+	//if the user is on the search page render a message component that explains that that is where your viewed cards will be displayed
+	//otherwise just view the card
 	onRender(){
 		if(this.slug=="search"){
 			$("#cardHeading").html("Search Results");
@@ -243,6 +270,7 @@ class CardViewer extends Component{
 		this.view(this.slug);
 	}
 
+	//render the text above the card that either says "your card" or the card owner's name
 	getContent(){
 		let content = $("<div/>");
 		let heading = "Your Card";
@@ -251,6 +279,8 @@ class CardViewer extends Component{
 		return content;
 	}
 
+	//this function returns a card data JSON object based on a supplied URL
+	//if theres an empty URL and you're logged in display your card
 	async getCardData(cardUrl){
 		if(cardUrl=="/")cardUrl = "/"+page.user.public.customURL;
 		cardUrl = cardUrl.substring(1);
@@ -268,6 +298,9 @@ class CardViewer extends Component{
   		});
 	}
 
+	//this function swaps the card in and out with a ~pretty~ animation given a slug
+	//this function is responsable for actually calling getCardData
+	//this function is also responsable for displaying an error message assuming the card doesn't exist
 	async view(slug){
 
 		let display = $("#cardDisplay");
@@ -311,6 +344,9 @@ class CardViewer extends Component{
 
 	}
 
+	//this function sends the verify email
+	//it's weird to have this here, but I didn't want to attach the verify email to the card itself,
+	//because I didn't want to further complicate the cards alreadly convoluted getContent() function
 	async verifyEmail(){
 		if(this.sendingEmail){
 			alert("We'll get there when we get there! Wait!");
@@ -326,6 +362,7 @@ class CardViewer extends Component{
 		this.sendingEmail = false;
 	}
 
+	//this function is responible for rendering the full card component given a cardData JSON object
 	showCard(cardData, collapseAll=true){
 		let card = new Card(cardData)
 		if(!card.myCard)document.title = `${card.user.firstName} ${card.user.lastName}'s Card`
@@ -345,7 +382,7 @@ class CardViewer extends Component{
 
 		if(collapseAll){
 			for(let button of card.getButtons()){
-				//We do not want to save some rando's card when collaping all actions
+				//We do not want to accidentally save some rando's card when collaping all actions
 				if(button!="Save" && button!="UnSave" && button!="Settings")card.toggleAction(button, true);
 			}
 		}
@@ -382,8 +419,10 @@ class HotCards extends Component{
 	}
 }
 
+//The component that allows the user to search the entire site / through their saved cards
 class Search extends Component{
 
+	//type is whether or not the search is thru favorited cards or thru the whole site
 	constructor(searchText=undefined, type = "none"){
 		super();
 		this.searchText = searchText;
@@ -392,10 +431,12 @@ class Search extends Component{
 
 	}
 
+	//when the component is rendered show some blank cards
 	onRender(){
 		if(this.myCards)this.showResults("", 6);
 	}
 
+	//triggers show results based on inputted query
 	typed(){
 
 		let query = $("#search").val();
@@ -405,7 +446,7 @@ class Search extends Component{
 
 
 
-
+	//render card components based on query
 	showResults(query, dupe = -1){
 		if(dupe==-1)dupe = query.length;
 		dupe = 1;
@@ -464,7 +505,7 @@ class Search extends Component{
 
 }
 
-
+//The component that displays the stats of your card
 class CardStats extends Component{
 
 	constructor(stats){
@@ -479,7 +520,6 @@ class CardStats extends Component{
 			"class": "box"
 		});
 
-		//connect.sid
 		//add heading
 		content.append($("<h1/>").html(`<span style='color: #29b6f6'>${page.user.public.firstName}'s</span> Stats`));
 
@@ -500,6 +540,7 @@ class CardStats extends Component{
 
 }
 
+//component that displays details of the card
 class CardDetails extends Component{
 
 	constructor(tags){
@@ -531,6 +572,7 @@ class CardDetails extends Component{
 
 }
 
+//component that displays the social media links of any card
 class CardSocial extends Component{
 
 	constructor(firstName, links){
@@ -561,7 +603,7 @@ class CardSocial extends Component{
 
 }
 
-
+//component that holds the settings of your card
 class CardSettings extends Component{
 
 	constructor(published){
@@ -570,6 +612,7 @@ class CardSettings extends Component{
 		this.published = published;
 	}
 
+	//function swaps the card visibility
 	async change(e){
 		if(this.waiting){
 			$("#publish").val(this.ogValue);
@@ -591,10 +634,12 @@ class CardSettings extends Component{
 		this.waiting = false;
 	}
 
+	//sets origonal value of the publish button
 	focus(){
 		this.ogValue = $("#publish").val();
 	}
 
+	//when the component is created display either UnPublished or published
 	onRender(){
 		if(page.user.currentAccountStatus==1)$("#publish").val("UnPublished");
 		else {
@@ -603,6 +648,7 @@ class CardSettings extends Component{
 		this.ogValue = $("#publish").val();
 	}
 
+	//deletes your card
 	async deleteCard(){
 		if(window.confirm("Are you sure you want to delete your card?")){
 			if(window.confirm("Ok, but like, for real for real?")){
@@ -633,6 +679,7 @@ class CardSettings extends Component{
 			$("<option/>").attr("id","pub").text("UnPublished")//.attr("selected","false"),
 		])).on("change", (e)=>{this.change(e)});
 
+		//add delete card button
 		content.append("<hr>");
 		content.append("<b>Danger Zone: </b>");
 		content.append($("<a/>").text("Delete Card").css({"fontWeight":"bold", "color":"red"}).click(()=>{this.deleteCard()}));
@@ -643,21 +690,23 @@ class CardSettings extends Component{
 
 }
 
-
+//display navbar
 class NavBar extends Component{
 	constructor(){
 		super();
 
 	}
 
+	//logs the user out
 	async logout(){
-		//alert("");
 		await this.awaitPost("logout", {});
 		window.location.replace("/");
 	}
 
+	//renders navabar
 	getContent(){
 		let content = $("<div/>").css("width", "100%");
+		//render buttons based on whether or not the user is logged in
 		let buttons = [
 
 			$("<a/>", {click:()=> page.navigate("/"), text: "Passport"}).css("float", "left").css("marginLeft",35),
@@ -686,7 +735,8 @@ class NavBar extends Component{
 
 
 
-
+//This component represents any card, if it's "light" it's small if it's regular it displays the full card
+//light is used for searches & hotcards
 class Card extends Component{
 
 	constructor(card, light = false){
@@ -699,11 +749,14 @@ class Card extends Component{
 
 		this.myCard = this.card.ownerID == page.user.uuid;
 
+		//these variables are here to ensure you can't favorite / save while you're still waiting for the server response
+		//from the first save
 		this.waitingForSave = false;
 		this.waitingForFavorite = false;
 
 		this.favorited = page.getFavorite(this.card.cardID);
 
+		//the actions (buttons at the bottom of card ) and what functions they map to
 		this.actions = {
 			"Details": new CardDetails(this.card.content.tags),
 			"Social": new CardSocial(this.card.ownerInfo.firstName, this.card.content.socialMediaLinks),
@@ -716,29 +769,25 @@ class Card extends Component{
 
 	}
 
-
+	//this returns a list of the button text that goes on the card (this varies based on if the card is light or not)
 	getButtons(){
-		//details : Tags
-		//Social : social media links
-		//Stats: card stats
 		let toSave = (page.user == false || !page.hasSaved(this.card.cardID)) ? "Save" : "UnSave";
 		let buttons = (!this.light) ? ["Details", "Social", (this.myCard) ? "Stats" : toSave] : ["View", toSave];
 		if(this.myCard)buttons.push("Settings");
 		return buttons;
 	}
 
+	//this navigates the CardViewer on the page to this card.  This is only used if it is a light card
 	viewCard(){
-		//page.getCardViewer().view(this.card);
-		//this.card.customURL="gfreezy";
-		console.log(this.card);
 		page.navigate("/"+this.card.ownerInfo.customURL);
 	}
 
+	//Util function: Given the word Save or Unsave it returns the reverse of it.
 	toggleSaveWord(word){
 		return (word=="Save") ? "UnSave" : "Save";
 	}
 
-	//when stuff is typed in the memo box
+	//this is called when a memo is typed in the memo box
 	async typed(event){
 		if(event.key=="Enter"){
 			if($("#memoBox").val()==""){
@@ -767,9 +816,12 @@ class Card extends Component{
 		}
 	}
 
+	//this saves / unsaves a card.
+	// the backend parameter is there for when you just want to swap the text (like when you favorite a card, bedcause favoriting automagically saves it)
 	async toggleSaveCard(target, backend=true){
 		if(this.waitingForSave)return;
 
+		//if user isn't logged in, guilt them into signing up
 		if(page.user == false){
 			alert("Login or Sign up to save cards!");
 			return;
@@ -778,6 +830,7 @@ class Card extends Component{
 		this.waitingForSave = true;
 		let saveWord = target.text();
 
+		//create memo text box if they have just saved a card
 		$("#memoBox").remove();
 		if(saveWord=="Save"){
 			let memoText = "Type a memo and hit enter or leave it blank";
@@ -786,9 +839,12 @@ class Card extends Component{
 		}
 
 		target.text(this.toggleSaveWord(saveWord));
+
+		//if it's backend=true send what we did to the backend
 		if(backend){
 			let saveResult = await this.awaitPost("toggle-save", {cardID: this.card.cardID});
 			if(saveResult.error!=""){
+				//if the save fails alert error and reverse saveword
 				let saveWord = target.text();
 				target.text(this.toggleSaveWord(saveWord));
 				alert("An error occoured when attempting to save this card: "+saveResult.error);
@@ -796,23 +852,28 @@ class Card extends Component{
 				//refresh feed if successful
 
 				if(target.text()=="UnSave"){
+					//add to cached saved cards if they've saved
 					let cardVal = {cardID: this.card.cardID, favorited: "false", memo:""};
 					page.user.savedCards.push(cardVal);
 
 				}else{
+					//remove from cached saved cards if they've unsaved
 					for(let i =0 ; i<page.user.savedCards.length; i++){
 						if(page.user.savedCards[i].cardID == this.card.cardID){
 							page.user.savedCards.splice(i, 1);
 							break;
 						}
 					}
+					//update the text of any cards that are on the screen that have been effected by this function
 					page.updateFavorites(this.card.cardID, false);
 					page.updateMemos(this.card.cardID, false);
 
 				}
+					//update the text of any cards that are on the screen that have been effected by this function
 				page.updateSaves(this.card.cardID, target.text());
 				let savedCardComponent = page.getComponent("Search");
 				if(savedCardComponent!= false && savedCardComponent.myCards){
+
 					savedCardComponent.showResults("");
 				}
 
@@ -824,6 +885,8 @@ class Card extends Component{
 		this.waitingForSave = false;
 	}
 
+	//if they've clicked on an action that is tied to a component (eg: social, details, etc) render/derender the corrosponding component
+	//forceRender ensures that it's not toggled and renders it regaurdless of if the component is on the page or not
 	toggleAction(actionName, forceRender=false, clicked = undefined){
 
 		let action = this.actions[actionName];
@@ -839,17 +902,19 @@ class Card extends Component{
 		}
 	}
 
+	//Util: gets random integer
 	getRandomInt(max) {
   		return Math.floor(Math.random() * Math.floor(max));
 	}
 
+
+	//this function favorites / unfavorites any card
 	async toggleFavorite(){
+		//return if we haven't recieved a result from the last attempt to favorite
 		if(this.waitingForFavorite)return;
 		this.waitingForFavorite = true;
 		this.favorited = !this.favorited;
 		$("#"+this.starId).attr("class", "fa fa-star").show();
-
-
 
 		let results = await this.awaitPost("toggle-favorite", {"cardID": this.card.cardID});
 		for(let card of page.user.savedCards){
@@ -873,6 +938,7 @@ class Card extends Component{
 		this.waitingForFavorite = false;
 	}
 
+	//this function returns the actual card html
 	getContent(){
 		//create content div
 		let content = $("<div/>").attr("class", "card");
@@ -881,7 +947,6 @@ class Card extends Component{
 		//add profile pic to card
 		let color = "29b6f6";
 		let nameQuery = `${this.user.firstName}+${this.user.lastName}`;
-		console.log();
 		//let prfoilePicUrl =`https://ui-avatars.com/api/?font-size=0.33&format=png&rounded=true&name=${nameQuery}&size=300&background=${color}&bold=true&color=FFFFF`;
 		let prfoilePicUrl = this.card.ownerInfo.profilePictureURL;
 		//fix
