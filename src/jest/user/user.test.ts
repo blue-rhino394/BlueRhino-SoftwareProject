@@ -71,7 +71,7 @@ afterAll(async () => {
 });
 
 
-
+//Testing all the get methods for User
 describe("Testing User Getters", () => {
 
 
@@ -202,7 +202,7 @@ describe("Testing User Getters", () => {
 
 });
 
-
+//Testing all the set methods for User
 describe("Testing User Setters", () => {
 
     describe("Test setCardID()", () => {
@@ -614,14 +614,16 @@ describe("Testing updateAccountSchema()", () => {
 
 });
 
+//Testing the tryPassword methdo for User
 describe("Test tryPassword()", () => {
 
     var testUser1;
+    //Creating a User before each test for tryPassword()
     beforeEach(async () => {
 
         const phash = bcrypt.hashSync("blablabla", 1);
 
-        // The user schema used to create the test user
+        // The user schema used to create the a new user
         const newUser: userAccountSchema = {
             email: v4(),
             passwordHash: phash,
@@ -635,6 +637,7 @@ describe("Test tryPassword()", () => {
         testUser1 = await databaseWrapper.createUser(newUser);
     });
 
+    //Deleting the User after each test for tryPassword()
     afterEach(async () => {
 
         if (testUser1.getCardID()) {

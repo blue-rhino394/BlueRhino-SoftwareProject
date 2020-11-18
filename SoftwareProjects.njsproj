@@ -177,6 +177,9 @@
     <TypeScriptCompile Include="src\test\databaseScripts\removeCardsWithoutUsers.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\test\databaseScripts\removeUsersBySlugs.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\test\databaseScripts\resizeProfilePictureURLs.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
